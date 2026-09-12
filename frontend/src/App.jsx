@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import Character from './pages/Character';
 import CharacterCreation from './pages/CharacterCreation';
 import Inventory from './pages/Inventory';
+import Routine from './pages/Routine';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="/quests" element={<Quests />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/routine" element={<Routine />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 

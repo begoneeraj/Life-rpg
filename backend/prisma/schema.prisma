@@ -17,6 +17,7 @@ model User {
   createdAt    DateTime   @default(now())
   character    Character?
   quests       Quest[]
+  weeklyTasks  WeeklyTask[]
   refreshTokens RefreshToken[]
 }
 
@@ -109,6 +110,35 @@ model Quest {
   createdAt   DateTime  @default(now())
 
   @@index([userId])
+}
+
+// A recurring weekly schedule slot ("do X every Monday") - separate from the
+// one-off AI-classified Quest system. dayOfWeek follows the IST calendar
+// (0=Sunday..6=Saturday, see xpEngine.toDayOfWeek) so "today" always means
+// the same day regardless of server timezone. Editable any time (title or
+// day can change); completion is tracked per specific calendar occurrence
+// via WeeklyTaskCompletion, not on the slot itself, so "did I do Monday's
+// task this week" resets automatically next Monday.
+model WeeklyTask {
+  id          String                 @id @default(uuid())
+  userId      String
+  user        User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  dayOfWeek   Int // 0=Sunday, 1=Monday, ... 6=Saturday
+  createdAt   DateTime               @default(now())
+  completions WeeklyTaskCompletion[]
+
+  @@index([userId])
+}
+
+model WeeklyTaskCompletion {
+  id           String     @id @default(uuid())
+  weeklyTaskId String
+  weeklyTask   WeeklyTask @relation(fields: [weeklyTaskId], references: [id], onDelete: Cascade)
+  dateKey      String // YYYY-MM-DD (Asia/Kolkata) - the specific occurrence this completion is for
+  completedAt  DateTime   @default(now())
+
+  @@unique([weeklyTaskId, dateKey])
 }
 
 // Refresh tokens are persisted so they can be revoked on logout / rotated safely.

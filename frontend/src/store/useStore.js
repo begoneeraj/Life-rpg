@@ -5,6 +5,7 @@ import * as questsApi from '../api/quests';
 import * as shopApi from '../api/shop';
 import * as characterApi from '../api/character';
 import * as inventoryApi from '../api/inventory';
+import * as weeklyTasksApi from '../api/weeklyTasks';
 import { setOnAuthExpired } from '../api/axios';
 
 // Local visual-review mode. Enabled only through the ignored frontend/.env,
@@ -43,6 +44,11 @@ const useStore = create((set, get) => ({
   // --- inventory ---
   inventoryItems: [],
   inventoryStatus: 'idle',
+
+  // --- weekly routine ---
+  weeklyTasks: [],
+  weeklyTasksStatus: 'idle',
+  weeklyTasksTodayDayOfWeek: null, // 0=Sunday..6=Saturday, from the server's IST clock
 
   // --- level-up celebration ---
   levelUpInfo: null, // { fromLevel, toLevel } | null
@@ -262,6 +268,59 @@ const useStore = create((set, get) => ({
   async unequipItem(itemId) {
     await inventoryApi.unequipItem(itemId);
     await Promise.all([get().loadCharacter(), get().loadInventory()]);
+  },
+
+  // ---------------------------------------------------------------------
+  // Weekly routine - recurring day-of-week tasks, separate from Quests.
+  // ---------------------------------------------------------------------
+  async loadWeeklyTasks() {
+    set({ weeklyTasksStatus: 'loading' });
+    try {
+      const { data } = await weeklyTasksApi.fetchWeeklyTasks();
+      set({
+        weeklyTasks: data.tasks,
+        weeklyTasksTodayDayOfWeek: data.todayDayOfWeek,
+        weeklyTasksStatus: 'ready',
+      });
+    } catch {
+      set({ weeklyTasksStatus: 'error' });
+    }
+  },
+
+  async addWeeklyTask(title, dayOfWeek) {
+    const { data } = await weeklyTasksApi.createWeeklyTask(title, dayOfWeek);
+    set((state) => ({ weeklyTasks: [...state.weeklyTasks, data.task] }));
+  },
+
+  async editWeeklyTask(id, updates) {
+    const { data } = await weeklyTasksApi.updateWeeklyTask(id, updates);
+    set((state) => ({
+      weeklyTasks: state.weeklyTasks.map((t) => (t.id === id ? { ...t, ...data.task } : t)),
+    }));
+  },
+
+  async removeWeeklyTask(id) {
+    const previous = get().weeklyTasks;
+    set((state) => ({ weeklyTasks: state.weeklyTasks.filter((t) => t.id !== id) }));
+    try {
+      await weeklyTasksApi.deleteWeeklyTask(id);
+    } catch {
+      set({ weeklyTasks: previous });
+      toast.error('Could not delete that task. Try again.');
+    }
+  },
+
+  async toggleWeeklyTaskToday(id) {
+    const previous = get().weeklyTasks;
+    set((state) => ({
+      weeklyTasks: state.weeklyTasks.map((t) => (t.id === id ? { ...t, completedToday: !t.completedToday } : t)),
+    }));
+    try {
+      await weeklyTasksApi.toggleWeeklyTaskToday(id);
+    } catch {
+      set({ weeklyTasks: previous });
+      toast.error('Could not update that task. Try again.');
+    }
   },
 }));
 

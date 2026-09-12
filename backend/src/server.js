@@ -14,6 +14,7 @@ const inventoryRoutes = require('./routes/inventory');
 const questAnalysisRoutes = require('./routes/questAnalysis');
 const questAssessmentRoutes = require('./routes/questAssessment');
 const adminAuthRoutes = require('./routes/adminAuth');
+const weeklyTaskRoutes = require('./routes/weeklyTasks');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -43,6 +44,7 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/analyze-quest', questAnalysisRoutes);
 app.use('/api/quest-assessment', questAssessmentRoutes);
 app.use('/api/admin', adminAuthRoutes);
+app.use('/api/weekly-tasks', weeklyTaskRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

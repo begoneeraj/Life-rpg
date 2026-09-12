@@ -206,6 +206,14 @@ const PATHS = {
   attr_energy: (
     <path d="M13 3L5 13h5l-1 8 8-10h-5z" />
   ),
+  routine: (
+    // Weekly grid calendar
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+      <path d="M7 14h2M11 14h2M15 14h2M7 17.5h2M11 17.5h2" />
+    </>
+  ),
 };
 
 export default function Icon({ name, className = 'h-4 w-4', label }) {

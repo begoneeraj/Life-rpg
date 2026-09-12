@@ -14,6 +14,7 @@ const NAV_SECTIONS = [
       { to: '/guild', label: 'Guild', icon: 'guild' },
       { to: '/character', label: 'Character', icon: 'character' },
       { to: '/quests', label: 'Quests', icon: 'quests' },
+      { to: '/routine', label: 'Routine', icon: 'routine' },
     ],
   },
   {
@@ -138,16 +139,6 @@ export default function AppShell() {
 
   const themeToggle = <ThemeToggle theme={theme} onChange={setTheme} />;
 
-  const exitButton = (
-    <button
-      type="button"
-      onClick={handleLogout}
-      className="hidden rounded-md border border-ember-600/40 bg-dungeon-900/80 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-ember-400/90 transition-all duration-150 hover:border-ember-500 hover:bg-ember-600/10 hover:text-ember-300 active:translate-y-px lg:inline-flex"
-    >
-      Exit Game
-    </button>
-  );
-
   /* ---------- sidebar ---------- */
 
   const sidebarNav = (
@@ -243,7 +234,6 @@ export default function AppShell() {
             {goldBadge}
             {playerBlock}
             {themeToggle}
-            {exitButton}
           </div>
         </div>
       </header>

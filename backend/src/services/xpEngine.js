@@ -108,6 +108,19 @@ function toDateKey(date) {
   }).format(date);
 }
 
+const WEEKDAY_INDEX = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+/**
+ * Returns 0 (Sunday) through 6 (Saturday) for the given instant, rendered in
+ * the Asia/Kolkata timezone - same rationale as toDateKey: a weekly-recurring
+ * task's "today" must mean the same calendar day for every user regardless
+ * of server timezone.
+ */
+function toDayOfWeek(date) {
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone: TIMEZONE, weekday: 'short' }).format(date);
+  return WEEKDAY_INDEX[weekday];
+}
+
 function dateKeyToUTCDate(dateKey) {
   const [year, month, day] = dateKey.split('-').map(Number);
   return Date.UTC(year, month - 1, day);
@@ -227,6 +240,7 @@ module.exports = {
   attributeForCategory,
   applyXp,
   toDateKey,
+  toDayOfWeek,
   computeStreak,
   resolveQuestCompletion,
 };
