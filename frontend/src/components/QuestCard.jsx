@@ -147,17 +147,16 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
           )}
         </AnimatePresence>
 
-        {!isDone && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="quest-delete"
-            aria-label={`Delete quest "${quest.title}"`}
-          >
-            ✕
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="quest-delete"
+          aria-label={isDone ? `Remove quest "${quest.title}"` : `Delete quest "${quest.title}"`}
+          title={isDone ? 'Remove from quest log' : 'Delete quest'}
+        >
+          ✕
+        </button>
       </div>
     </motion.li>
   );

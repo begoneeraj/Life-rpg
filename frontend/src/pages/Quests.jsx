@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
@@ -46,6 +47,12 @@ export default function Quests() {
   const levelUpInfo = useStore((s) => s.levelUpInfo);
   const clearLevelUp = useStore((s) => s.clearLevelUp);
 
+  const weeklyTasks = useStore((s) => s.weeklyTasks);
+  const weeklyTasksStatus = useStore((s) => s.weeklyTasksStatus);
+  const todayDayOfWeek = useStore((s) => s.weeklyTasksTodayDayOfWeek);
+  const loadWeeklyTasks = useStore((s) => s.loadWeeklyTasks);
+  const toggleWeeklyTaskToday = useStore((s) => s.toggleWeeklyTaskToday);
+
   const [title, setTitle] = useState('');
   const [titleError, setTitleError] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'pending' | 'completed'
@@ -53,7 +60,10 @@ export default function Quests() {
 
   useEffect(() => {
     loadQuests();
-  }, [loadQuests]);
+    loadWeeklyTasks();
+  }, [loadQuests, loadWeeklyTasks]);
+
+  const todaysRoutineTasks = weeklyTasks.filter((t) => t.dayOfWeek === todayDayOfWeek);
 
   async function handleStartAssessment(e) {
     e.preventDefault();
@@ -111,6 +121,58 @@ export default function Quests() {
           Quest Log
           <span className="sr-only"> — your current adventures</span>
         </h1>
+      </div>
+
+      {/* ---------------- Today's routine (linked from Weekly Routine) ---------------- */}
+      <div className="quest-console hud-frame space-y-2.5 p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-widest text-parchment-300/70">
+            <Icon name="routine" className="h-4 w-4 text-mystic-400/80" aria-hidden="true" />
+            Today&apos;s Routine
+          </h2>
+          <Link
+            to="/routine"
+            className="text-[11px] font-semibold uppercase tracking-widest text-mystic-400 hover:text-mystic-300"
+          >
+            Manage routine →
+          </Link>
+        </div>
+
+        {weeklyTasksStatus === 'loading' && (
+          <p className="text-sm text-parchment-300/50">Loading today&apos;s routine…</p>
+        )}
+
+        {weeklyTasksStatus === 'ready' && todaysRoutineTasks.length === 0 && (
+          <p className="text-sm text-parchment-300/50">
+            Nothing scheduled for today. <Link to="/routine" className="underline hover:text-mystic-300">Add a routine task</Link>.
+          </p>
+        )}
+
+        {weeklyTasksStatus === 'ready' && todaysRoutineTasks.length > 0 && (
+          <ul className="space-y-1.5">
+            {todaysRoutineTasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-center gap-2.5 rounded-md border border-dungeon-700 bg-dungeon-900/60 px-3 py-2"
+              >
+                <input
+                  type="checkbox"
+                  checked={Boolean(task.completedToday)}
+                  onChange={() => toggleWeeklyTaskToday(task.id)}
+                  className="h-4 w-4 shrink-0 accent-gold-500"
+                  aria-label={`Mark "${task.title}" done for today`}
+                />
+                <span
+                  className={`min-w-0 flex-1 truncate text-sm text-parchment-100 ${
+                    task.completedToday ? 'line-through decoration-xp-500 text-parchment-300/50' : ''
+                  }`}
+                >
+                  {task.title}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* ---------------- Accept a new quest ---------------- */}
