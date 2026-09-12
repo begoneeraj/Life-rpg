@@ -70,6 +70,10 @@ export default function CharacterAvatar({
   rotation = 0,
   className = '',
   idle = true,
+  // Optional crop of the model's fixed 200x320 stage (e.g. the Forge's
+  // face thumbnails use "58 20 84 84" to frame the head). Default shows
+  // the full figure, exactly as before.
+  viewBox = '0 0 200 320',
 }) {
   const skinHex = SKIN_TONE_HEX[skinTone] || SKIN_TONE_HEX.medium;
   const isElite = level >= ELITE_LEVEL;
@@ -92,7 +96,7 @@ export default function CharacterAvatar({
     <div className={className} style={{ perspective: 500 }}>
       <div className="h-full w-full" style={{ transform: `rotateY(${rotation}deg)` }}>
         <motion.svg
-          viewBox="0 0 200 320"
+          viewBox={viewBox}
           className="h-full w-full"
           role="img"
           aria-label="Your character"
