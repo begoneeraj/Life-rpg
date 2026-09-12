@@ -44,7 +44,7 @@ export default function Character() {
 
   if (!character) {
     return (
-      <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
+      <div className="page-container space-y-6">
         <Skeleton className="h-96 w-full" />
       </div>
     );
@@ -64,7 +64,7 @@ export default function Character() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
+    <div className="page-container space-y-6">
       <h1 className="text-center font-display text-2xl font-bold text-gold-400 sm:text-3xl">
         CHARACTER
       </h1>

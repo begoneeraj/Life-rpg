@@ -43,7 +43,7 @@ export default function Guild() {
 
   if (!character) {
     return (
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+      <div className="page-container space-y-6">
         <Skeleton className="h-28 w-full" />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -55,7 +55,7 @@ export default function Guild() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+    <div className="page-container space-y-6">
       {/* App-wide level-up celebration: fires here too if a quest was completed on another surface. */}
       <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
 

@@ -39,7 +39,7 @@ export default function Shop() {
     shopCategory === 'all' ? shopItems : shopItems.filter((item) => item.category === shopCategory);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+    <div className="page-container space-y-6">
       <div className="flex flex-col gap-1 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
         <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">THE ARMORY</h1>
         {character && (

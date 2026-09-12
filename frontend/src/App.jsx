@@ -5,7 +5,7 @@ import useStore from './store/useStore';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import AmbientBackdrop from './components/ui/AmbientBackdrop';
 import ProtectedRoute from './components/ProtectedRoute';
-import Navbar from './components/Navbar';
+import AppShell from './components/AppShell';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Guild from './pages/Guild';
@@ -17,14 +17,7 @@ import CharacterCreation from './pages/CharacterCreation';
 import Inventory from './pages/Inventory';
 
 function AppLayout() {
-  return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main>
-        <Outlet />
-      </main>
-    </div>
-  );
+  return <AppShell />;
 }
 
 export default function App() {

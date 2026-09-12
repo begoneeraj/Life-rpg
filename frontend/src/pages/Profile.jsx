@@ -20,7 +20,7 @@ export default function Profile() {
 
   if (!character) {
     return (
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <div className="page-container space-y-6">
         <Skeleton className="h-40 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -30,7 +30,7 @@ export default function Profile() {
   const earnedBadges = BADGES.filter((b) => character.longestStreak >= b.threshold);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <div className="page-container space-y-6">
       <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">
         Character Profile
       </h1>

@@ -96,7 +96,7 @@ export default function Quests() {
   const visibleQuests = quests.filter((q) => filter === 'all' || q.status === filter);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <div className="page-container space-y-6">
       <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
 
       <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">Quest Log</h1>
