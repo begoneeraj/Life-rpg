@@ -42,6 +42,15 @@ export default function Face({ faceType, skinToneHex, eyeColor = 'espresso_brown
 
   return (
     <g>
+      {/* ears: small skin ovals at the head's horizontal extremes, shaded
+          toward the back so they read as wrapping the skull */}
+      <g>
+        <ellipse cx="67.5" cy="67" rx="3.4" ry="6" fill={skinToneHex} />
+        <ellipse cx="68.5" cy="67" rx="1.4" ry="3.4" fill="rgba(0,0,0,0.10)" />
+        <ellipse cx="132.5" cy="67" rx="3.4" ry="6" fill={skinToneHex} />
+        <ellipse cx="133.5" cy="67" rx="1.4" ry="3.4" fill="rgba(0,0,0,0.10)" />
+      </g>
+
       <path d={preset.jaw} fill={jawShade} />
 
       {/* eyebrows */}
@@ -51,12 +60,22 @@ export default function Face({ faceType, skinToneHex, eyeColor = 'espresso_brown
       <Eye cx={88} eyeColor={iris} glow={eyesGlow} />
       <Eye cx={112} eyeColor={iris} glow={eyesGlow} />
 
-      {/* nose */}
-      <path d="M99,66 Q97,74 99,76 L103,76" stroke={skinToneHex} strokeOpacity="0.5" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* nose: bridge shading + lit tip over the existing side profile */}
       <path d="M99,66 Q97,74 99,76 L103,76" stroke="rgba(0,0,0,0.18)" strokeWidth="1" fill="none" strokeLinecap="round" />
+      <path d="M98.4,68 Q97.4,73 98.8,75.6" stroke="rgba(0,0,0,0.14)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <ellipse cx="101.5" cy="74.5" rx="1.6" ry="1.1" fill="#ffffff" opacity="0.14" />
+
+      {/* cheek structure: soft plane shadow under the cheekbones + a hint of
+          warmth so the face reads dimensional, not pasted-on-flat */}
+      <ellipse cx="79" cy="76" rx="5" ry="2.6" fill="rgba(0,0,0,0.05)" transform="rotate(-12 79 76)" />
+      <ellipse cx="121" cy="76" rx="5" ry="2.6" fill="rgba(0,0,0,0.05)" transform="rotate(12 121 76)" />
+      <ellipse cx="82" cy="79" rx="4.2" ry="2" fill="#c46a55" opacity="0.10" />
+      <ellipse cx="118" cy="79" rx="4.2" ry="2" fill="#c46a55" opacity="0.10" />
 
       {/* mouth */}
       <path d={preset.mouth} stroke="#7a3b32" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* lower-lip light: catches the key light under the mouth line */}
+      <path d="M94,90.5 Q100,92.5 106,90.5" stroke="rgba(255,255,255,0.16)" strokeWidth="1.4" fill="none" strokeLinecap="round" />
     </g>
   );
 }
