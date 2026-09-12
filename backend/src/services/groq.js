@@ -14,10 +14,12 @@ const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
 // ---------------------------------------------------------------------------
 // Multi-key round-robin with retry
 // ---------------------------------------------------------------------------
-// GROQ_API_KEYS is a comma-separated list (preferred, one env var to manage
-// on Render); GROQ_API_KEY (singular) still works for a single key. Rotating
-// across keys and retrying on 429/5xx means one key hitting Groq's free-tier
-// rate limit doesn't take the whole feature down.
+// Three ways to configure keys, checked in order: GROQ_API_KEYS (a single
+// comma-separated env var), GROQ_API_KEY1/GROQ_API_KEY2/... (separate
+// numbered env vars, handy if your host's UI makes one long comma-separated
+// value awkward to edit), or GROQ_API_KEY (singular, one key). Rotating
+// across whichever set is found and retrying on 429/5xx means one key
+// hitting Groq's free-tier rate limit doesn't take the whole feature down.
 function getApiKeys() {
   const multi = process.env.GROQ_API_KEYS;
   if (multi && multi.trim()) {
@@ -26,6 +28,15 @@ function getApiKeys() {
       .map((k) => k.trim())
       .filter(Boolean);
   }
+
+  const numbered = [];
+  for (let i = 1; process.env[`GROQ_API_KEY${i}`]; i++) {
+    numbered.push(process.env[`GROQ_API_KEY${i}`].trim());
+  }
+  if (numbered.length > 0) {
+    return numbered;
+  }
+
   const single = process.env.GROQ_API_KEY;
   return single ? [single] : [];
 }
