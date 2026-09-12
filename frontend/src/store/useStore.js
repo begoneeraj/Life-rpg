@@ -7,6 +7,24 @@ import * as characterApi from '../api/character';
 import * as inventoryApi from '../api/inventory';
 import { setOnAuthExpired } from '../api/axios';
 
+// Local visual-review mode. Enabled only through the ignored frontend/.env,
+// so it never ships unless someone deliberately sets this flag.
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+const DEMO_USER = { id: 'local-demo', email: 'nitinji@liferpg.local' };
+const DEMO_CHARACTER = {
+  id: 'local-demo-character', createdCharacter: true, level: 4, currentXP: 178, gold: 317,
+  currentStreak: 5, longestStreak: 9, intellect: 42, strength: 28, discipline: 36, focus: 48, energy: 31,
+  gender: 'male', physique: 'athletic', skinTone: 'brown', faceType: 'friendly', eyeColor: 'hazel_amber',
+  hairStyle: 'short_textured', hairColor: '#20150f', facialHair: 'none', skinDetail: 'none',
+  topPrimaryColor: '#29445b', topAccentColor: '#d9b856', bottomPrimaryColor: '#253247',
+  bottomAccentColor: '#6b89a5', shoesPrimaryColor: '#3e2d25', shoesAccentColor: '#ba9851', equippedItems: {},
+};
+const DEMO_QUESTS = [
+  { id: 'demo-1', title: 'Learn Hash Tables', category: 'study', difficulty: 'medium', estimatedMinutes: 45, status: 'pending' },
+  { id: 'demo-2', title: 'Foster Connection', category: 'healthy_habits', difficulty: 'easy', estimatedMinutes: 20, status: 'pending' },
+  { id: 'demo-3', title: 'Master Data Structures', category: 'coding', difficulty: 'hard', estimatedMinutes: 90, status: 'pending' },
+];
+
 const useStore = create((set, get) => ({
   // --- auth/session ---
   user: null,
@@ -33,6 +51,10 @@ const useStore = create((set, get) => ({
   // Auth
   // ---------------------------------------------------------------------
   async bootstrap() {
+    if (DEMO_MODE) {
+      set({ user: DEMO_USER, character: DEMO_CHARACTER, quests: DEMO_QUESTS, questsStatus: 'ready', authStatus: 'authed' });
+      return;
+    }
     try {
       const { data } = await authApi.fetchMe();
       set({ user: data.user, character: data.character, authStatus: 'authed' });
@@ -63,6 +85,7 @@ const useStore = create((set, get) => ({
    * after every action that can change appearance/equipment/inventory.
    */
   async loadCharacter() {
+    if (DEMO_MODE) return;
     try {
       const { data } = await characterApi.fetchCharacter();
       set({ character: data.character });
@@ -83,6 +106,7 @@ const useStore = create((set, get) => ({
   },
 
   async logout() {
+    if (DEMO_MODE) return;
     try {
       await authApi.logout();
     } finally {
@@ -104,6 +128,10 @@ const useStore = create((set, get) => ({
   // Quests
   // ---------------------------------------------------------------------
   async loadQuests() {
+    if (DEMO_MODE) {
+      set({ questsStatus: 'ready' });
+      return;
+    }
     set({ questsStatus: 'loading' });
     try {
       const { data } = await questsApi.fetchQuests();
@@ -114,6 +142,10 @@ const useStore = create((set, get) => ({
   },
 
   async addQuest(title, category, difficulty, estimatedMinutes) {
+    if (DEMO_MODE) {
+      set((state) => ({ quests: [{ id: `demo-${Date.now()}`, title, category, difficulty, estimatedMinutes, status: 'pending' }, ...state.quests] }));
+      return;
+    }
     const { data } = await questsApi.createQuest(title, category, difficulty, estimatedMinutes);
     set((state) => ({ quests: [data.quest, ...state.quests] }));
   },
@@ -124,6 +156,10 @@ const useStore = create((set, get) => ({
    * pending and surface an error toast so the user can retry.
    */
   async completeQuest(id) {
+    if (DEMO_MODE) {
+      set((state) => ({ quests: state.quests.map((q) => q.id === id ? { ...q, status: 'completed', completedAt: new Date().toISOString() } : q) }));
+      return;
+    }
     const previousQuests = get().quests;
     set((state) => ({
       quests: state.quests.map((q) =>
@@ -167,6 +203,10 @@ const useStore = create((set, get) => ({
   },
 
   async removeQuest(id) {
+    if (DEMO_MODE) {
+      set((state) => ({ quests: state.quests.filter((q) => q.id !== id) }));
+      return;
+    }
     const previousQuests = get().quests;
     set((state) => ({ quests: state.quests.filter((q) => q.id !== id) }));
     try {

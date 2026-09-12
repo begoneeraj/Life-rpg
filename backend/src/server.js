@@ -13,6 +13,7 @@ const shopRoutes = require('./routes/shop');
 const inventoryRoutes = require('./routes/inventory');
 const questAnalysisRoutes = require('./routes/questAnalysis');
 const questAssessmentRoutes = require('./routes/questAssessment');
+const adminAuthRoutes = require('./routes/adminAuth');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/shop', shopRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/analyze-quest', questAnalysisRoutes);
 app.use('/api/quest-assessment', questAssessmentRoutes);
+app.use('/api/admin', adminAuthRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

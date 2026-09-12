@@ -34,7 +34,8 @@ api.interceptors.response.use(
     const isAuthRoute =
       config?.url?.includes('/auth/login') ||
       config?.url?.includes('/auth/signup') ||
-      config?.url?.includes('/auth/refresh');
+      config?.url?.includes('/auth/refresh') ||
+      config?.url?.includes('/admin/'); // separate admin session - never triggers the user-session silent refresh
 
     if (response?.status !== 401 || isAuthRoute || config._retried) {
       return Promise.reject(error);

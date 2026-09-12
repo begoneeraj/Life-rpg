@@ -89,7 +89,7 @@ export default function Quests() {
   const visibleQuests = quests.filter((q) => filter === 'all' || q.status === filter);
 
   return (
-    <div className="page-container space-y-6">
+    <div className="page-container quest-log space-y-5">
       <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
       <QuestAssessmentModal
         assessment={assessment}
@@ -97,12 +97,16 @@ export default function Quests() {
         onCancel={assessment.reset}
       />
 
-      <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">Quest Log</h1>
+      <div className="quest-log-heading">
+        <span aria-hidden="true" />
+        <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">Quest Log</h1>
+        <span aria-hidden="true" />
+      </div>
 
-      <form onSubmit={handleStartAssessment} noValidate className="parchment-card space-y-4 p-6">
+      <form onSubmit={handleStartAssessment} noValidate className="quest-console hud-frame space-y-3 p-4 sm:p-5">
         <div>
           <label htmlFor="title" className="label-text">
-            New Quest Topic
+            Input New Quest Topic
           </label>
           <input
             id="title"
@@ -127,22 +131,24 @@ export default function Quests() {
           </p>
         </div>
 
-        <button type="submit" className="btn-primary w-full">
-          Start Assessment
-        </button>
+        <div className="quest-console-action">
+          <span aria-hidden="true" />
+          <button type="submit" className="btn-primary quest-assessment-button">
+            Start Assessment
+          </button>
+          <span aria-hidden="true" />
+        </div>
       </form>
 
-      <div className="flex gap-2">
+      <div className="quest-tabs" role="tablist" aria-label="Quest status">
         {['all', 'pending', 'completed'].map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
-            className={`rounded-full px-3 py-1 text-xs font-semibold capitalize transition-colors ${
-              filter === f
-                ? 'bg-dungeon-700 text-gold-400'
-                : 'bg-dungeon-800 text-parchment-300/60 hover:text-parchment-100'
-            }`}
+            role="tab"
+            aria-selected={filter === f}
+            className={`quest-tab ${filter === f ? 'quest-tab-active' : ''}`}
           >
             {f}
           </button>
@@ -172,7 +178,7 @@ export default function Quests() {
       )}
 
       {questsStatus === 'ready' && visibleQuests.length > 0 && (
-        <ul className="space-y-3">
+        <ul className="quest-list space-y-2.5">
           <AnimatePresence initial={false}>
             {visibleQuests.map((quest) => (
               <QuestCard

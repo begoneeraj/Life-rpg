@@ -15,6 +15,8 @@ import Profile from './pages/Profile';
 import Character from './pages/Character';
 import CharacterCreation from './pages/CharacterCreation';
 import Inventory from './pages/Inventory';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 
 function AppLayout() {
   return <AppShell />;
@@ -41,6 +43,10 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        {/* Hidden admin gate - not linked from any nav, separate auth system. */}
+        <Route path="/nitinji" element={<AdminLogin />} />
+        <Route path="/nitinji/dashboard" element={<AdminDashboard />} />
 
         <Route
           path="/character/create"

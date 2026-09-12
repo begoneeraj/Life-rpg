@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 // card shows the AI's difficulty label + time estimate, not a promised XP
 // amount. The actual reward is only known (and shown) at completion time.
 const DIFFICULTY_META = {
-  easy: { label: 'Easy', color: 'text-xp-400 border-xp-600/40' },
-  medium: { label: 'Medium', color: 'text-gold-400 border-gold-600/40' },
-  hard: { label: 'Hard', color: 'text-ember-400 border-ember-600/40' },
+  easy: { label: 'Easy', color: 'quest-difficulty-easy' },
+  medium: { label: 'Medium', color: 'quest-difficulty-medium' },
+  hard: { label: 'Hard', color: 'quest-difficulty-hard' },
 };
 
 const CATEGORY_ICON = {
@@ -56,20 +56,25 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
       animate={{ opacity: isDeleting ? 0 : 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
-      className={`card-interactive parchment-card flex items-center justify-between gap-4 p-4 transition-opacity ${
+      className={`quest-row card-interactive flex items-center justify-between gap-3 p-3 transition-opacity sm:gap-4 sm:p-4 ${
         isDone ? 'border-xp-600/30 bg-xp-500/[0.04] opacity-70' : ''
       }`}
     >
+      <div className="quest-icon" aria-hidden="true">
+        <span>{CATEGORY_ICON[quest.category] || '📜'}</span>
+      </div>
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate font-semibold text-parchment-100 ${
+          className={`truncate font-display text-lg font-semibold text-parchment-100 sm:text-xl ${
             isDone ? 'line-through decoration-xp-500' : ''
           }`}
         >
           <span aria-hidden="true">{CATEGORY_ICON[quest.category] || '📜'}</span> {quest.title}
         </p>
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-widest text-parchment-300/60">
-          <span className="capitalize">{quest.category.replace(/_/g, ' ')}</span>
+          <span className="tag-pill border-dungeon-600/70 bg-dungeon-900/70 font-semibold text-parchment-300/80">
+            {quest.category.replace(/_/g, ' ')}
+          </span>
           <span
             className={`tag-pill font-semibold ${difficulty.color}`}
           >
@@ -83,7 +88,8 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="quest-row-actions flex shrink-0 items-center gap-2">
+        <span className={`quest-difficulty ${difficulty.color}`}>{difficulty.label}</span>
         <AnimatePresence mode="wait" initial={false}>
           {isDone ? (
             <motion.span
@@ -102,7 +108,7 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
               type="button"
               onClick={handleComplete}
               disabled={isCompleting}
-              className="btn-primary px-3.5 py-2 text-xs"
+              className="btn-game px-3 py-2 text-[10px] sm:px-3.5"
               aria-label={`Mark quest "${quest.title}" as complete`}
             >
               {isCompleting ? 'Completing…' : 'Complete'}
@@ -115,7 +121,7 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="btn-danger"
+            className="quest-delete"
             aria-label={`Delete quest "${quest.title}"`}
           >
             ✕
