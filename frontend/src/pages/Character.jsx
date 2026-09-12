@@ -1,27 +1,36 @@
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
-import CharacterAvatar from '../components/character/CharacterAvatar';
 import XPBar from '../components/XPBar';
 import AttributeMiniBar from '../components/AttributeMiniBar';
+import LevelUpModal from '../components/LevelUpModal';
 import { Skeleton } from '../components/Skeleton';
+import ItemArtwork from '../components/items/ItemArtwork';
+import CharacterStage from '../components/character/CharacterStage';
+import SlotIcon from '../components/character/characterIcons';
+import { GlassPanel, LevelPlate, PixelCorners, SectionTitle } from '../components/character/characterUI';
 import { GARMENT_COLORS } from '../components/character/constants';
 
-const SLOTS = [
-  { key: 'hair', label: 'Hair', icon: '💇' },
-  { key: 'top', label: 'Top', icon: '👕' },
-  { key: 'bottom', label: 'Bottom', icon: '👖' },
-  { key: 'shoes', label: 'Shoes', icon: '👟' },
-  { key: 'accessory', label: 'Accessory', icon: '💍' },
+const EQUIPMENT_SLOTS = [
+  { key: 'head', label: 'Head', icon: 'head', identity: true },
+  { key: 'top', label: 'Body', icon: 'top' },
+  { key: 'bottom', label: 'Legs', icon: 'legs' },
+  { key: 'shoes', label: 'Shoes', icon: 'shoes' },
+  { key: 'accessory', label: 'Accessory', icon: 'accessory' },
+  { key: 'special', label: 'Weapon', icon: 'special' },
 ];
 
 const DYE_SLOTS = [
-  { key: 'top', label: 'Top', primaryField: 'topPrimaryColor', accentField: 'topAccentColor' },
-  { key: 'bottom', label: 'Bottom', primaryField: 'bottomPrimaryColor', accentField: 'bottomAccentColor' },
+  { key: 'top', label: 'Body', primaryField: 'topPrimaryColor', accentField: 'topAccentColor' },
+  { key: 'bottom', label: 'Legs', primaryField: 'bottomPrimaryColor', accentField: 'bottomAccentColor' },
   { key: 'shoes', label: 'Shoes', primaryField: 'shoesPrimaryColor', accentField: 'shoesAccentColor' },
 ];
 
-function ColorSwatch({ selected, onClick, hex, label }) {
+function xpRequiredForLevel(level) {
+  return Math.round(100 * Math.pow(level, 1.5));
+}
+
+function DyeSwatch({ selected, onClick, hex, label }) {
   return (
     <button
       type="button"
@@ -29,31 +38,79 @@ function ColorSwatch({ selected, onClick, hex, label }) {
       title={label}
       aria-pressed={selected}
       aria-label={label}
-      className={`h-6 w-6 shrink-0 rounded-full border-2 transition-transform hover:scale-110 ${
-        selected ? 'border-gold-400 shadow-glow' : 'border-dungeon-600'
+      className={`relative h-7 w-7 shrink-0 rounded-sm border transition-all duration-150 hover:-translate-y-0.5 ${
+        selected
+          ? 'border-gold-400 shadow-glow ring-1 ring-gold-300/70 ring-offset-1 ring-offset-dungeon-900'
+          : 'border-dungeon-600 hover:border-parchment-300/50'
       }`}
       style={{ background: hex }}
-    />
+    >
+      {selected && <PixelCorners size={6} color="rgb(var(--c-gold-300) / 0.95)" />}
+    </button>
+  );
+}
+
+function EquipmentSlot({ slot, item, character }) {
+  const status = slot.identity ? 'Identity' : item ? 'Equipped' : 'Empty';
+  const itemName = slot.identity
+    ? character.hairStyle?.replace(/_/g, ' ')
+    : item?.name || 'No item equipped';
+
+  return (
+    <Link
+      to="/inventory"
+      className={`group relative flex min-h-28 flex-col rounded-md border p-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-card-lg ${
+        item || slot.identity
+          ? 'border-dungeon-600/70 bg-dungeon-900/50 hover:border-gold-500/60'
+          : 'border-dungeon-700/60 bg-dungeon-900/30 hover:border-dungeon-500'
+      }`}
+      aria-label={`Open inventory to manage ${slot.label.toLowerCase()} equipment`}
+    >
+      <span className="absolute right-2 top-2 text-[9px] font-hud uppercase tracking-[0.14em] text-parchment-300/45">
+        {status}
+      </span>
+      <div className="mb-2 flex h-10 items-center justify-between">
+        <span className="flex h-7 w-7 items-center justify-center rounded border border-dungeon-600 bg-dungeon-850 text-parchment-300/70 group-hover:border-gold-500/60 group-hover:text-gold-400">
+          <SlotIcon name={slot.icon} className="h-4 w-4" />
+        </span>
+        {item && (
+          <ItemArtwork
+            category={item.category}
+            svgKey={item.svgKey}
+            gender={character.gender}
+            physique={character.physique}
+            className="h-10 w-14 opacity-90 transition-transform duration-150 group-hover:scale-110"
+          />
+        )}
+      </div>
+      <span className="font-hud text-[10px] uppercase tracking-[0.18em] text-parchment-300/55">{slot.label}</span>
+      <span className="mt-1 truncate text-xs font-semibold capitalize text-parchment-100">{itemName || '—'}</span>
+      <span className="mt-auto pt-1 text-[10px] uppercase tracking-widest text-gold-500/0 transition-colors group-hover:text-gold-400/80">
+        Manage
+      </span>
+    </Link>
   );
 }
 
 export default function Character() {
   const character = useStore((s) => s.character);
   const updateGarmentColors = useStore((s) => s.updateGarmentColors);
-  const xpRequired = Math.round(100 * Math.pow(character?.level || 1, 1.5));
+  const levelUpInfo = useStore((s) => s.levelUpInfo);
+  const clearLevelUp = useStore((s) => s.clearLevelUp);
 
   if (!character) {
     return (
       <div className="page-container space-y-6">
-        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-[560px] w-full" />
       </div>
     );
   }
 
   const equipped = character.equippedItems || {};
+  const xpRequired = xpRequiredForLevel(character.level);
 
   async function handleDye(slot, channel, colorValue) {
-    const dye = DYE_SLOTS.find((d) => d.key === slot);
+    const dye = DYE_SLOTS.find((entry) => entry.key === slot);
     const nextPrimary = channel === 'primary' ? colorValue : character[dye.primaryField] || null;
     const nextAccent = channel === 'accent' ? colorValue : character[dye.accentField] || null;
     try {
@@ -65,126 +122,109 @@ export default function Character() {
 
   return (
     <div className="page-container space-y-6">
-      <h1 className="text-center font-display text-2xl font-bold text-gold-400 sm:text-3xl">
-        CHARACTER
-      </h1>
+      <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
 
-      <div className="parchment-card flex flex-col items-center gap-4 p-6">
-        <CharacterAvatar
-          gender={character.gender}
-          physique={character.physique}
-          skinTone={character.skinTone}
-          faceType={character.faceType}
-          eyeColor={character.eyeColor}
-          hairStyle={character.hairStyle}
-          hairColor={character.hairColor}
-          facialHair={character.facialHair}
-          skinDetail={character.skinDetail}
-          equippedTop={equipped.top}
-          equippedBottom={equipped.bottom}
-          equippedShoes={equipped.shoes}
-          equippedAccessory={equipped.accessory}
-          equippedSpecial={equipped.special}
-          topPrimaryColor={character.topPrimaryColor}
-          topAccentColor={character.topAccentColor}
-          bottomPrimaryColor={character.bottomPrimaryColor}
-          bottomAccentColor={character.bottomAccentColor}
-          shoesPrimaryColor={character.shoesPrimaryColor}
-          shoesAccentColor={character.shoesAccentColor}
+      <header className="page-header">
+        <div>
+          <p className="font-hud text-[10px] uppercase tracking-[0.3em] text-gold-500/80">Player loadout</p>
+          <h1 className="page-title mt-1">Character</h1>
+          <p className="page-subtitle">Your appearance, equipment, and progression in one place.</p>
+        </div>
+        <LevelPlate level={character.level} className="min-w-[220px]" />
+      </header>
+
+      <section className="grid items-stretch gap-6 xl:grid-cols-[minmax(0,1.22fr)_minmax(360px,0.78fr)]">
+        <CharacterStage
+          character={character}
+          equipped={equipped}
           level={character.level}
-          className="h-80 w-auto drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+          className="h-[500px] min-h-[420px] sm:h-[560px]"
         />
 
-        <div className="w-full max-w-xs">
-          <XPBar level={character.level} current={character.currentXP} required={xpRequired} size="lg" />
-        </div>
+        <div className="flex min-w-0 flex-col gap-4">
+          <GlassPanel className="p-5" blur={16}>
+            <PixelCorners size={11} />
+            <SectionTitle icon="special">Adventurer progress</SectionTitle>
+            <div className="relative space-y-4">
+              <XPBar level={character.level} current={character.currentXP} required={xpRequired} size="lg" />
+              <div className="grid grid-cols-2 gap-2 border-t border-dungeon-600/40 pt-4 text-center">
+                <div>
+                  <p className="font-hud text-lg text-gold-400">{character.gold.toLocaleString()}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-parchment-300/50">Gold</p>
+                </div>
+                <div>
+                  <p className="font-hud text-lg text-ember-400">{character.currentStreak}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-parchment-300/50">Day streak</p>
+                </div>
+              </div>
+            </div>
+          </GlassPanel>
 
-        <div className="grid w-full max-w-xs grid-cols-2 gap-x-6 gap-y-3">
-          <AttributeMiniBar attribute="intellect" value={character.intellect} />
-          <AttributeMiniBar attribute="strength" value={character.strength} />
-          <AttributeMiniBar attribute="focus" value={character.focus} />
-          <AttributeMiniBar attribute="discipline" value={character.discipline} />
-          <AttributeMiniBar attribute="energy" value={character.energy} />
+          <GlassPanel className="flex-1 p-5" blur={14}>
+            <SectionTitle icon="head">Attribute matrix</SectionTitle>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+              <AttributeMiniBar attribute="intellect" value={character.intellect} />
+              <AttributeMiniBar attribute="strength" value={character.strength} />
+              <AttributeMiniBar attribute="discipline" value={character.discipline} />
+              <AttributeMiniBar attribute="focus" value={character.focus} />
+              <AttributeMiniBar attribute="energy" value={character.energy} />
+            </div>
+          </GlassPanel>
         </div>
-      </div>
+      </section>
 
-      <div className="parchment-card p-6">
-        <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
-          Equipment
-        </h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {SLOTS.map((slot) => {
-            const item = slot.key === 'hair' ? null : equipped[slot.key];
-            const label = slot.key === 'hair' ? character.hairStyle?.replace(/_/g, ' ') : item?.name;
-            return (
-              <Link
-                key={slot.key}
-                to="/inventory"
-                className="flex flex-col items-center gap-1 rounded-md border border-dungeon-600 bg-dungeon-900/60 px-2 py-3 text-center transition-colors hover:border-mystic-500"
-              >
-                <span className="text-xl" aria-hidden="true">
-                  {slot.icon}
-                </span>
-                <span className="text-[10px] uppercase tracking-widest text-parchment-300/50">
-                  {slot.label}
-                </span>
-                <span className="truncate text-[11px] font-semibold text-parchment-100">
-                  {label || '—'}
-                </span>
-              </Link>
-            );
-          })}
+      <GlassPanel className="p-5 sm:p-6" blur={14}>
+        <PixelCorners size={10} />
+        <SectionTitle icon="top" right={<Link to="/inventory" className="relative text-xs font-semibold text-gold-400 hover:underline">Open inventory →</Link>}>
+          Equipped loadout
+        </SectionTitle>
+        <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {EQUIPMENT_SLOTS.map((slot) => (
+            <EquipmentSlot
+              key={slot.key}
+              slot={slot}
+              item={slot.identity ? null : equipped[slot.key]}
+              character={character}
+            />
+          ))}
         </div>
-      </div>
+      </GlassPanel>
 
-      <div className="parchment-card p-6">
-        <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
-          Dye Garments
-        </h2>
-        <div className="space-y-4">
+      <GlassPanel className="p-5 sm:p-6" blur={14}>
+        <PixelCorners size={10} />
+        <SectionTitle icon="dye">Garment dye bench</SectionTitle>
+        <div className="relative space-y-5">
           {DYE_SLOTS.filter((dye) => equipped[dye.key]).map((dye) => (
-            <div key={dye.key}>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-parchment-300/60">
-                {dye.label} · {equipped[dye.key]?.name}
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {GARMENT_COLORS.map((c) => {
-                    const selected = character[dye.primaryField] === c.value;
-                    return (
-                      <ColorSwatch
-                        key={c.value}
-                        selected={selected}
-                        hex={c.hex}
-                        label={`Primary: ${c.label}`}
-                        onClick={() => handleDye(dye.key, 'primary', selected ? null : c.value)}
-                      />
-                    );
+            <div key={dye.key} className="grid gap-3 border-b border-dungeon-600/35 pb-5 last:border-0 last:pb-0 md:grid-cols-[150px_1fr_1fr] md:items-center">
+              <div>
+                <p className="font-hud text-[11px] uppercase tracking-[0.18em] text-parchment-200">{dye.label}</p>
+                <p className="mt-1 truncate text-xs text-parchment-300/55">{equipped[dye.key]?.name}</p>
+              </div>
+              <div>
+                <p className="mb-2 font-hud text-[10px] uppercase tracking-[0.16em] text-gold-500/75">Primary</p>
+                <div className="flex flex-wrap gap-2">
+                  {GARMENT_COLORS.map((color) => {
+                    const selected = character[dye.primaryField] === color.value;
+                    return <DyeSwatch key={color.value} selected={selected} hex={color.hex} label={`Primary: ${color.label}`} onClick={() => handleDye(dye.key, 'primary', selected ? null : color.value)} />;
                   })}
                 </div>
-                <span className="text-[10px] uppercase tracking-widest text-parchment-300/40">Accent</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {GARMENT_COLORS.map((c) => {
-                    const selected = character[dye.accentField] === c.value;
-                    return (
-                      <ColorSwatch
-                        key={c.value}
-                        selected={selected}
-                        hex={c.hex}
-                        label={`Accent: ${c.label}`}
-                        onClick={() => handleDye(dye.key, 'accent', selected ? null : c.value)}
-                      />
-                    );
+              </div>
+              <div>
+                <p className="mb-2 font-hud text-[10px] uppercase tracking-[0.16em] text-mystic-400/80">Accent</p>
+                <div className="flex flex-wrap gap-2">
+                  {GARMENT_COLORS.map((color) => {
+                    const selected = character[dye.accentField] === color.value;
+                    return <DyeSwatch key={color.value} selected={selected} hex={color.hex} label={`Accent: ${color.label}`} onClick={() => handleDye(dye.key, 'accent', selected ? null : color.value)} />;
                   })}
                 </div>
               </div>
             </div>
           ))}
           {DYE_SLOTS.every((dye) => !equipped[dye.key]) && (
-            <p className="text-sm text-parchment-300/60">Equip a top, bottom, or shoes to dye them.</p>
+            <p className="relative py-4 text-sm text-parchment-300/60">Equip body, leg, or shoe gear from your inventory to use the dye bench.</p>
           )}
         </div>
-      </div>
+      </GlassPanel>
     </div>
   );
 }
