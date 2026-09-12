@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import Icon from './icons';
 
 /**
  * F0.1 — Global React Error Boundary.
@@ -51,15 +52,16 @@ export default class ErrorBoundary extends Component {
           aria-live="assertive"
         >
           <div className="parchment-card w-full max-w-md p-8 text-center">
-            <div className="mb-6">
-              <span aria-hidden="true" className="text-3xl">
-                ⚔️
-              </span>
-              <h1 className="mt-2 font-display text-2xl font-bold text-gold-400">Life RPG</h1>
+            <div className="mb-6 flex items-center justify-center gap-2">
+              <Icon name="sword" className="h-6 w-6 text-gold-400" />
+              <h1 className="font-display text-2xl font-bold text-gold-400">Life RPG</h1>
             </div>
 
-            <span aria-hidden="true" className="text-4xl">
-              🛡️
+            <span
+              aria-hidden="true"
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-dungeon-500 bg-dungeon-900 text-parchment-300/80"
+            >
+              <Icon name="armory" className="h-8 w-8" />
             </span>
             <h2 className="mt-3 font-display text-xl font-bold text-parchment-100">
               Something went wrong
