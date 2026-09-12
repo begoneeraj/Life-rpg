@@ -18,6 +18,19 @@
     />
   </head>
   <body>
+    <script>
+      // Theme bootstrap: apply the persisted theme BEFORE first paint so
+      // there is never a light/dark flash on load. Mirrors useTheme.js.
+      (function () {
+        try {
+          var t = localStorage.getItem('liferpg-theme');
+          if (t !== 'light' && t !== 'dark') t = 'dark';
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          /* storage unavailable — default dark stays */
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

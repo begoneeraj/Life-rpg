@@ -3,91 +3,126 @@
 @tailwind utilities;
 
 /* =========================================================================
-   LIFE RPG — R1 THEME ARCHITECTURE
+   LIFE RPG — R2 THEME SYSTEM (two designed worlds, one game)
    -------------------------------------------------------------------------
-   Every palette color is a CSS-variable channel triplet ("R G B") consumed
-   by tailwind.config.js with <alpha-value>. Two themes:
+   Layer 1 — channel tokens ("R G B" triplets) consumed by tailwind.config.js
+             with alpha-value support, so every dungeon / parchment / gold
+             utility re-themes automatically. Renamed per theme via :root and
+             html[data-theme='light'].
 
-   :root                      → DARK  "Dungeon" (the established world)
-   html[data-theme='light']   → LIGHT "Adventurer's Compendium" (parchment,
-                                ink, bronze — a fantasy manuscript, not a
-                                white SaaS dashboard)
+   Layer 2 — semantic tokens (--color-*) for future pages and custom CSS.
+             Components should prefer tokens over raw channel values.
 
-   Components only ever use the token classes (bg-dungeon-850, text-parchment-100…)
-   so they re-theme automatically. No literals inside components.
+   DARK  "Nightfall"  — charcoal + midnight, bronze/antique-gold light,
+                        violet demoted to an occasional accent.
+   LIGHT "Guild Journal" — warm parchment, ink, aged bronze framing.
+
+   Login/Signup are scoped dark by AuthShell (html stays dark outside the
+   shell), so the game entrance keeps its exact original look.
    ========================================================================= */
 
 @layer base {
   :root {
     color-scheme: dark;
 
-    /* --- structure surfaces (page → panel → elevated → borders) --- */
-    --c-dungeon-950: 10 7 20;   /* page background            #0a0714 */
-    --c-dungeon-900: 15 10 30;  /* recessed surfaces          #0f0a1e */
-    --c-dungeon-850: 21 16 39;  /* panels                     #151027 */
-    --c-dungeon-800: 28 21 51;  /* elevated / hover surfaces  #1c1533 */
-    --c-dungeon-700: 42 33 73;  /* strong borders             #2a2149 */
-    --c-dungeon-600: 59 46 102; /* default borders            #3b2e66 */
-    --c-dungeon-500: 79 63 133; /* highlighted borders        #4f3f85 */
+    /* ---------- structure channels: page → recessed → panel → elevated → borders ---------- */
+    --c-dungeon-950: 11 12 16;  /* page background    #0b0c10 charcoal night */
+    --c-dungeon-900: 17 18 24;  /* recessed surfaces  #111218 */
+    --c-dungeon-850: 23 25 33;  /* panels             #171921 */
+    --c-dungeon-800: 32 34 44;  /* elevated / hover   #20222c */
+    --c-dungeon-700: 46 49 62;  /* strong borders     #2e313e */
+    --c-dungeon-600: 63 67 84;  /* default borders    #3f4354 steel */
+    --c-dungeon-500: 84 89 109; /* highlight borders  #54596d */
 
-    /* --- text ramp --- */
-    --c-parchment-100: 245 236 215; /* primary   #f5ecd7 */
-    --c-parchment-200: 233 219 184; /* secondary #e9dbb8 */
-    --c-parchment-300: 220 198 153; /* muted     #dcc699 */
+    /* ---------- text channels ---------- */
+    --c-parchment-100: 237 232 221; /* primary   #ede8dd warm ivory */
+    --c-parchment-200: 213 208 197; /* secondary #d5d0c5 */
+    --c-parchment-300: 158 154 145; /* muted     #9e9a91 warm gray */
 
-    /* --- accents --- */
-    --c-gold-300: 243 217 138;
-    --c-gold-400: 232 200 116;
-    --c-gold-500: 212 175 55;
-    --c-gold-600: 184 145 42;
-    --c-ember-400: 255 138 92;
-    --c-ember-500: 255 107 61;
-    --c-ember-600: 224 80 31;
-    --c-mystic-400: 167 139 250;
-    --c-mystic-500: 139 92 246;
-    --c-mystic-600: 124 58 237;
+    /* ---------- accents (violet = accent only) ---------- */
+    --c-gold-300: 234 212 144;
+    --c-gold-400: 222 191 111;  /* antique gold #debf6f */
+    --c-gold-500: 198 161 70;
+    --c-gold-600: 164 130 52;   /* bronze */
+    --c-ember-400: 255 145 106;
+    --c-ember-500: 244 111 65;
+    --c-ember-600: 212 81 33;
+    --c-mystic-400: 172 155 242;
+    --c-mystic-500: 139 118 229;
+    --c-mystic-600: 118 95 207;
     --c-azure-400: 56 189 248;
     --c-azure-500: 14 165 233;
     --c-xp-400: 74 222 128;
     --c-xp-500: 34 197 94;
     --c-xp-600: 22 163 74;
 
-    /* --- glow channels (shadows resolve through these) --- */
-    --c-glow-gold: 232 200 116;
-    --c-glow-mystic: 139 92 246;
+    /* ---------- glow channels (shadow/glow utilities resolve through these) ---------- */
+    --c-glow-gold: 222 191 111;
+    --c-glow-mystic: 139 118 229;
     --c-glow-xp: 34 197 94;
 
-    /* --- environment --- */
-    --c-grid-dot: 255 255 255;
-    --c-ambient-a: 245 236 215;
-    --c-ambient-b: 139 92 246;
+    /* ---------- environment channels ---------- */
+    --c-grid-dot: 210 205 195;   /* texture dots (low alpha) */
+    --c-ambient-a: 210 200 185;  /* backdrop dust, warm */
+    --c-ambient-b: 139 118 229;  /* backdrop dust, violet whisper */
+    --c-hudline: 222 191 111;    /* pixel frame marks */
 
-    /* --- elevation --- */
-    --shadow-panel: 0 4px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    --shadow-panel-lg: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(232, 200, 116, 0.08);
-    --focus-ring: #e8c874;
+    /* ---------- semantic tokens (prefer these in components) ---------- */
+    --color-bg: var(--c-dungeon-950);
+    --color-bg-secondary: var(--c-dungeon-900);
+    --color-surface: var(--c-dungeon-850);
+    --color-surface-elevated: var(--c-dungeon-800);
+    --color-surface-hover: 40 43 55;
+
+    --color-text-primary: var(--c-parchment-100);
+    --color-text-secondary: var(--c-parchment-200);
+    --color-text-muted: var(--c-parchment-300);
+
+    --color-border: var(--c-dungeon-600);
+    --color-border-strong: var(--c-dungeon-500);
+
+    --color-accent: 154 138 235;
+    --color-accent-hover: 178 164 244;
+
+    --color-gold: var(--c-gold-500);
+    --color-gold-bright: var(--c-gold-300);
+    --color-bronze: var(--c-gold-600);
+
+    --color-success: var(--c-xp-500);
+    --color-warning: 217 160 62;
+    --color-danger: var(--c-ember-500);
+    --color-info: var(--c-azure-400);
+    --color-xp: var(--c-xp-400);
+
+    --color-overlay: 8 9 12;
+
+    /* ---------- depth ---------- */
+    --shadow-panel: 0 4px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --shadow-panel-lg: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(222, 191, 111, 0.10);
+    --focus-ring: #debe6f;
   }
 
   /* ---------------------------------------------------------------------
-     LIGHT — "Adventurer's Compendium": warm parchment, stone, ink, bronze.
+     LIGHT — "Guild Journal": warm parchment, ink, aged bronze. A fantasy
+     guild ledger, not a white SaaS dashboard.
      --------------------------------------------------------------------- */
   html[data-theme='light'] {
     color-scheme: light;
 
-    --c-dungeon-950: 237 228 209; /* page background  #ede4d1 parchment */
-    --c-dungeon-900: 231 220 197; /* recessed         #e7dcc5 */
-    --c-dungeon-850: 245 239 226; /* panels (lifted)  #f5efe2 */
-    --c-dungeon-800: 235 226 205; /* elevated/hover   #ebe2cd */
-    --c-dungeon-700: 213 199 168; /* strong borders   #d5c7a8 */
-    --c-dungeon-600: 195 178 142; /* default borders  #c3b28e */
-    --c-dungeon-500: 166 146 106; /* highlight border #a6926a */
+    --c-dungeon-950: 236 227 207; /* page background  #ece3cf parchment */
+    --c-dungeon-900: 228 217 193; /* recessed         #e4d9c1 */
+    --c-dungeon-850: 246 240 227; /* panels (lifted)  #f6f0e3 */
+    --c-dungeon-800: 235 226 204; /* elevated/hover   #ebe2cc */
+    --c-dungeon-700: 211 196 164; /* strong borders   #d3c4a4 */
+    --c-dungeon-600: 192 174 137; /* default borders  #c0ae89 */
+    --c-dungeon-500: 162 141 99;  /* highlight border #a28d63 */
 
-    --c-parchment-100: 43 36 20;  /* primary ink  #2b2414 */
-    --c-parchment-200: 74 63 40;  /* secondary    #4a3f28 */
-    --c-parchment-300: 122 108 78; /* muted       #7a6c4e */
+    --c-parchment-100: 42 35 19;  /* primary ink  #2a2313 */
+    --c-parchment-200: 84 72 47;  /* secondary    #54482f */
+    --c-parchment-300: 124 109 79; /* muted       #7c6d4f */
 
-    --c-gold-300: 185 138 42;
-    --c-gold-400: 154 111 22;   /* bronze — readable on parchment */
+    --c-gold-300: 176 128 32;
+    --c-gold-400: 154 111 22;   /* antique gold reads as bronze on parchment */
     --c-gold-500: 138 96 18;
     --c-gold-600: 120 82 14;
     --c-ember-400: 194 65 12;
@@ -106,9 +141,38 @@
     --c-glow-mystic: 124 58 237;
     --c-glow-xp: 21 128 61;
 
-    --c-grid-dot: 90 70 30;
-    --c-ambient-a: 120 90 40;
+    --c-grid-dot: 120 95 45;
+    --c-ambient-a: 130 100 45;
     --c-ambient-b: 124 58 237;
+    --c-hudline: 138 96 18;
+
+    --color-bg: var(--c-dungeon-950);
+    --color-bg-secondary: var(--c-dungeon-900);
+    --color-surface: var(--c-dungeon-850);
+    --color-surface-elevated: 248 243 231;
+    --color-surface-hover: 228 218 196;
+
+    --color-text-primary: var(--c-parchment-100);
+    --color-text-secondary: var(--c-parchment-200);
+    --color-text-muted: var(--c-parchment-300);
+
+    --color-border: var(--c-dungeon-600);
+    --color-border-strong: var(--c-dungeon-500);
+
+    --color-accent: 109 40 217;
+    --color-accent-hover: 91 33 182;
+
+    --color-gold: var(--c-gold-500);
+    --color-gold-bright: var(--c-gold-300);
+    --color-bronze: var(--c-gold-600);
+
+    --color-success: 21 128 61;
+    --color-warning: 180 130 25;
+    --color-danger: var(--c-ember-500);
+    --color-info: var(--c-azure-500);
+    --color-xp: var(--c-xp-500);
+
+    --color-overlay: 58 44 18;
 
     --shadow-panel: 0 1px 2px rgba(84, 62, 24, 0.08), 0 4px 16px rgba(84, 62, 24, 0.10),
       inset 0 1px 0 rgba(255, 255, 255, 0.65);
@@ -117,29 +181,34 @@
     --focus-ring: #8a6012;
   }
 
+  /* Opaque pre-paint background: prevents any flash while fonts/CSS arrive
+     and keeps overscroll gutters theme-colored (set pre-paint by index.html). */
   html {
     color-scheme: dark;
+    background: rgb(var(--c-dungeon-950));
   }
 
   body {
     @apply bg-dungeon-950 text-parchment-100 font-body antialiased;
-    /* Dungeon environment: torch-glow from above, faint mystic corner haze,
-       vignette so panels read as "lit", and a whisper of dot texture.
+    /* Nightfall environment: a bronze "brazier" breath upper-left, a faint
+       violet whisper up top (accent, not dominance), a bronze underglow at
+       the far corner, a cinematic vignette, and a whisper of texture.
        Pure CSS — no image assets. */
     background-image:
-      radial-gradient(1200px 600px at 50% -10%, rgb(var(--c-mystic-500) / 0.10), transparent 60%),
-      radial-gradient(900px 500px at 100% 100%, rgb(var(--c-gold-500) / 0.05), transparent 55%),
-      radial-gradient(1400px 900px at 50% 40%, transparent 55%, rgba(5, 3, 10, 0.55) 100%),
-      radial-gradient(circle at 1px 1px, rgb(var(--c-grid-dot) / 0.045) 1px, transparent 0);
+      radial-gradient(1100px 480px at 16% -8%, rgb(var(--c-gold-500) / 0.07), transparent 55%),
+      radial-gradient(1300px 620px at 50% -14%, rgb(var(--c-mystic-500) / 0.05), transparent 60%),
+      radial-gradient(1000px 560px at 108% 108%, rgb(var(--c-gold-600) / 0.05), transparent 55%),
+      radial-gradient(1400px 900px at 50% 42%, transparent 55%, rgba(4, 4, 6, 0.62) 100%),
+      radial-gradient(circle at 1px 1px, rgb(var(--c-grid-dot) / 0.035) 1px, transparent 0);
     background-attachment: fixed;
-    background-size: auto, auto, auto, 22px 22px;
+    background-size: auto, auto, auto, auto, 22px 22px;
   }
 
-  /* Light environment: warm manuscript paper — soft top light, bronze corner
-     warmth, gentle edge shading, faint ink fibre texture. */
+  /* Guild Journal environment: soft morning light, warm bronze corner,
+     gentle edge shading, faint fibre texture. */
   html[data-theme='light'] body {
     background-image:
-      radial-gradient(1100px 550px at 50% -8%, rgba(255, 252, 243, 0.9), transparent 60%),
+      radial-gradient(1100px 550px at 50% -8%, rgba(255, 252, 243, 0.92), transparent 60%),
       radial-gradient(900px 500px at 100% 100%, rgb(var(--c-gold-500) / 0.08), transparent 55%),
       radial-gradient(1400px 900px at 50% 40%, transparent 60%, rgba(96, 74, 34, 0.14) 100%),
       radial-gradient(circle at 1px 1px, rgb(var(--c-grid-dot) / 0.05) 1px, transparent 0);
@@ -182,6 +251,33 @@
   ::selection {
     background: rgb(var(--c-mystic-500) / 0.4);
   }
+
+  /* Theme-aware scrollbars: slim, quiet, bronze on hover. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-border-strong) / 0.8) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-border-strong) / 0.65);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--c-gold-500) / 0.55);
+    background-clip: padding-box;
+  }
 }
 
 @layer components {
@@ -190,9 +286,7 @@
   }
 
   /* ---------------------------------------------------------------------
-     GAME PANEL SYSTEM — "RPG UI window" surfaces. Layered on top of the
-     same geometry as parchment-card so existing pages can adopt them one
-     class at a time without layout shifts.
+     GAME PANEL SYSTEM — "RPG UI window" surfaces, token-driven.
      --------------------------------------------------------------------- */
 
   .game-panel {
@@ -238,16 +332,17 @@
   }
 
   /* Pixel-style corner ornaments + inner hairline. Subtle by design: reads
-     as an RPG window frame, not an 8-bit box. Pair with .game-panel. */
+     as an RPG window frame, not an 8-bit box. Pair with .game-panel.
+     Dark: slightly luminous marks. Light: engraved bronze marks. */
   .hud-frame {
     background-image:
-      radial-gradient(circle, rgb(var(--c-gold-400) / 0.55) 1px, transparent 1.5px);
+      radial-gradient(circle, rgb(var(--c-hudline) / 0.55) 1px, transparent 1.5px);
     background-position: 6px 6px, calc(100% - 6px) 6px, 6px calc(100% - 6px),
       calc(100% - 6px) calc(100% - 6px);
     background-size: 3px 3px;
     background-repeat: no-repeat;
     box-shadow:
-      inset 0 0 0 1px rgb(var(--c-gold-400) / 0.07),
+      inset 0 0 0 1px rgb(var(--c-hudline) / 0.07),
       inset 0 1px 0 rgb(var(--c-parchment-100) / 0.06);
   }
 
@@ -282,6 +377,11 @@
     @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-lg hover:border-dungeon-500/80;
   }
 
+  /* ---------------------------------------------------------------------
+     BUTTON SYSTEM — theme-aware hierarchy: primary / game / secondary /
+     ghost / danger. Gold is reserved for the primary game action.
+     --------------------------------------------------------------------- */
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-md border border-gold-500/60 bg-gradient-to-b from-gold-400 to-gold-600 px-4 py-2 font-display text-sm font-semibold text-dungeon-950 shadow-glow transition-transform duration-150 hover:scale-[1.03] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100;
     /* Bevel: light top edge, dark bottom edge — reads as a physical game key. */
@@ -305,6 +405,11 @@
     @apply inline-flex items-center justify-center gap-2 rounded-md border border-dungeon-500 bg-dungeon-800 px-4 py-2 font-display text-sm font-semibold text-parchment-200 transition-colors duration-150 hover:border-mystic-500 hover:text-mystic-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
   }
 
+  /* Low-emphasis action: quiet until hovered (row/tool actions). */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-1.5 text-xs font-semibold text-parchment-300 transition-colors duration-150 hover:bg-dungeon-800/80 hover:text-parchment-100 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 rounded-md border border-ember-600/60 bg-dungeon-800 px-3 py-1.5 text-xs font-semibold text-ember-400 transition-colors duration-150 hover:bg-ember-600/20 disabled:cursor-not-allowed disabled:opacity-40;
   }
@@ -323,7 +428,17 @@
   }
 
   /* ---------------------------------------------------------------------
-     R1 APPLICATION SHELL — desktop-first game application frame.
+     SEMANTIC HELPERS — for future pages (R3+) and custom CSS.
+     Usage:  className="bg-surface" / style={{ color: 'rgb(var(--color-text-muted))' }}
+     --------------------------------------------------------------------- */
+
+  .bg-overlay {
+    background-color: rgb(var(--color-overlay) / 0.85);
+  }
+
+  /* ---------------------------------------------------------------------
+     R1 APPLICATION SHELL — desktop-first game application frame (unchanged
+     from R1; resolves through the R2 palette automatically).
      --------------------------------------------------------------------- */
 
   /* Scrollable main column next to the sidebar (sidebar itself is fixed). */
@@ -403,6 +518,18 @@
     @apply inline-flex h-8 w-8 items-center justify-center rounded-md border border-dungeon-600/80 bg-dungeon-900/80 text-parchment-200/80 transition-all duration-150 hover:border-gold-500/70 hover:text-gold-400 active:translate-y-px;
   }
 
+  /* Segmented dark/light switch (ThemeToggle.jsx). */
+  .theme-toggle-option {
+    @apply inline-flex h-7 w-7 items-center justify-center rounded text-parchment-300/60 transition-all duration-150 hover:text-parchment-100;
+  }
+
+  .theme-toggle-option-active {
+    @apply bg-dungeon-700/90 text-gold-400;
+    box-shadow:
+      inset 0 1px 0 rgb(var(--c-parchment-100) / 0.08),
+      0 0 10px rgb(var(--c-glow-gold) / 0.15);
+  }
+
   /* Hide scrollbars on horizontal chip rails while keeping scrollability. */
   .no-scrollbar {
     scrollbar-width: none;
@@ -412,12 +539,52 @@
     display: none;
   }
 
-  /* Light-theme corrections for pieces that hardcode dark-theme contrast. */
+  /* ---------------------------------------------------------------------
+     THEME COMPATIBILITY PATCHES
+     --------------------------------------------------------------------- */
+
+  /* Auth screens: the game entrance keeps its night look regardless of the
+     in-game theme (belt & braces — useTheme also resets <html> on unmount). */
+  .auth-force-dark {
+    color-scheme: dark;
+  }
+
+  /* Light-theme corrections for pieces that assume dark contrast. */
   html[data-theme='light'] .btn-primary {
     /* Gold key keeps dark engraved text in light mode (dungeon-950 flips to
        a light parchment, which would erase the label). */
     color: #3a2a08;
   }
+
+  html[data-theme='light'] .btn-game,
+  html[data-theme='light'] .btn-danger {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      inset 0 -2px 0 rgba(96, 74, 34, 0.18);
+  }
+
+  /* Recharts radar chart: theme the chart through CSS (SVG presentation
+     attributes can't use var()); scoped to the .radar-theme wrapper. */
+  .radar-theme .recharts-polar-grid path {
+    stroke: rgb(var(--color-border)) !important;
+  }
+
+  .radar-theme .recharts-text {
+    fill: rgb(var(--color-text-muted)) !important;
+  }
+
+  .radar-theme .recharts-radar-polygon path {
+    stroke: rgb(var(--color-accent)) !important;
+  }
+}
+
+/* Theme-aware toasts (react-hot-toast, className wiring in App.jsx). */
+.liferpg-toast {
+  background: rgb(var(--color-surface-elevated)) !important;
+  color: rgb(var(--color-text-primary)) !important;
+  border: 1px solid rgb(var(--color-border)) !important;
+  box-shadow: var(--shadow-panel-lg) !important;
+  backdrop-filter: blur(6px);
 }
 
 /* Respect users who prefer reduced motion: kill decorative loops, keep
