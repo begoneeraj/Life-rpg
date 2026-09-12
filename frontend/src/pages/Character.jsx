@@ -9,7 +9,7 @@ import ItemArtwork from '../components/items/ItemArtwork';
 import CharacterStage from '../components/character/CharacterStage';
 import SlotIcon from '../components/character/characterIcons';
 import { GlassPanel, LevelPlate, PixelCorners, SectionTitle } from '../components/character/characterUI';
-import { GARMENT_COLORS } from '../components/character/constants';
+import { GARMENT_COLORS, RARITY_STYLES } from '../components/character/constants';
 
 const EQUIPMENT_SLOTS = [
   { key: 'head', label: 'Head', icon: 'head', identity: true },
@@ -55,22 +55,24 @@ function EquipmentSlot({ slot, item, character }) {
   const itemName = slot.identity
     ? character.hairStyle?.replace(/_/g, ' ')
     : item?.name || 'No item equipped';
+  const rarity = item ? RARITY_STYLES[item.rarity] || RARITY_STYLES.common : null;
 
   return (
     <Link
       to="/inventory"
       className={`group relative flex min-h-28 flex-col rounded-md border p-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-card-lg ${
         item || slot.identity
-          ? 'border-dungeon-600/70 bg-dungeon-900/50 hover:border-gold-500/60'
+          ? `border-dungeon-600/70 bg-dungeon-900/50 hover:border-gold-500/60 ${rarity ? rarity.border : ''}`
           : 'border-dungeon-700/60 bg-dungeon-900/30 hover:border-dungeon-500'
       }`}
+      style={item && rarity?.glow ? { boxShadow: '0 0 14px rgb(var(--c-glow-gold) / 0.16)' } : undefined}
       aria-label={`Open inventory to manage ${slot.label.toLowerCase()} equipment`}
     >
-      <span className="absolute right-2 top-2 text-[9px] font-hud uppercase tracking-[0.14em] text-parchment-300/45">
+      <span className="absolute right-3 top-2 text-[9px] font-hud uppercase tracking-[0.14em] text-parchment-300/45">
         {status}
       </span>
-      <div className="mb-2 flex h-10 items-center justify-between">
-        <span className="flex h-7 w-7 items-center justify-center rounded border border-dungeon-600 bg-dungeon-850 text-parchment-300/70 group-hover:border-gold-500/60 group-hover:text-gold-400">
+      <div className="mb-2 mt-4 flex h-10 items-center justify-between">
+        <span className={`flex h-7 w-7 items-center justify-center rounded border border-dungeon-600 bg-dungeon-850 group-hover:border-gold-500/60 group-hover:text-gold-400 ${item ? rarity.text : 'text-parchment-300/70'}`}>
           <SlotIcon name={slot.icon} className="h-4 w-4" />
         </span>
         {item && (
@@ -85,7 +87,10 @@ function EquipmentSlot({ slot, item, character }) {
       </div>
       <span className="font-hud text-[10px] uppercase tracking-[0.18em] text-parchment-300/55">{slot.label}</span>
       <span className="mt-1 truncate text-xs font-semibold capitalize text-parchment-100">{itemName || '—'}</span>
-      <span className="mt-auto pt-1 text-[10px] uppercase tracking-widest text-gold-500/0 transition-colors group-hover:text-gold-400/80">
+      <span className={`mt-auto pt-1 text-[10px] font-bold uppercase tracking-widest ${item ? rarity.text : 'text-transparent'}`}>
+        {item ? rarity.label : '·'}
+      </span>
+      <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-widest text-gold-500/0 transition-colors group-hover:text-gold-400/80">
         Manage
       </span>
     </Link>
@@ -126,7 +131,13 @@ export default function Character() {
 
       <header className="page-header">
         <div>
-          <p className="font-hud text-[10px] uppercase tracking-[0.3em] text-gold-500/80">Player loadout</p>
+          <p className="flex items-center gap-2 font-hud text-[10px] uppercase tracking-[0.3em] text-gold-500/80">
+            <span aria-hidden="true" className="flex flex-col gap-[2px]">
+              <span className="h-[3px] w-[3px] bg-gold-400/80" />
+              <span className="h-[3px] w-[3px] bg-gold-400/40" />
+            </span>
+            Player loadout
+          </p>
           <h1 className="page-title mt-1">Character</h1>
           <p className="page-subtitle">Your appearance, equipment, and progression in one place.</p>
         </div>
