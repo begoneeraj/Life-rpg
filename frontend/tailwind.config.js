@@ -38,6 +38,11 @@ export default {
           500: '#8b5cf6',
           600: '#7c3aed',
         },
+        // Rare-tier azure (RARITY_STYLES previously reused mystic for "rare").
+        azure: {
+          400: '#38bdf8',
+          500: '#0ea5e9',
+        },
         xp: {
           400: '#4ade80',
           500: '#22c55e',
@@ -74,11 +79,19 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.75' },
         },
+        // Ambient backdrop: slow diagonal drift of the star field.
+        ambientDrift: {
+          '0%': { backgroundPosition: '0 0, 0 0' },
+          '100%': { backgroundPosition: '240px 120px, -180px -90px' },
+        },
       },
       animation: {
         shimmer: 'shimmer 2s linear infinite',
         floatUp: 'floatUp 1.2s ease-out forwards',
         flicker: 'flicker 2.4s ease-in-out infinite',
+        // Slow enough to be atmosphere, not distraction; paused entirely under
+        // prefers-reduced-motion via index.css.
+        ambientDrift: 'ambientDrift 90s linear infinite',
       },
     },
   },

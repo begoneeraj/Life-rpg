@@ -108,7 +108,8 @@ export const FACIAL_HAIR_OPTIONS = [
 export const RARITY_STYLES = {
   common: { label: 'Common', text: 'text-parchment-300', border: 'border-parchment-300/40', glow: '' },
   uncommon: { label: 'Uncommon', text: 'text-xp-400', border: 'border-xp-500/50', glow: '' },
-  rare: { label: 'Rare', text: 'text-mystic-400', border: 'border-mystic-500/60', glow: 'shadow-glow-mystic' },
+  // Rare = azure now (was mystic violet) so rare/epic/mythic each read distinctly.
+  rare: { label: 'Rare', text: 'text-azure-400', border: 'border-azure-500/60', glow: '' },
   epic: { label: 'Epic', text: 'text-fuchsia-400', border: 'border-fuchsia-500/60', glow: 'shadow-glow-mystic' },
   legendary: { label: 'Legendary', text: 'text-gold-400', border: 'border-gold-500/70', glow: 'shadow-glow' },
   mythic: { label: 'Mythic', text: 'text-ember-400', border: 'border-ember-500/70', glow: 'shadow-glow' },

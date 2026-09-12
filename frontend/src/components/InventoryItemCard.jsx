@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RARITY_STYLES } from './character/constants';
 import ItemArtwork from './items/ItemArtwork';
+import StatusBadge from './ui/StatusBadge';
 
 export default function InventoryItemCard({ item, gender, physique, onEquip, onUnequip }) {
   const [isBusy, setIsBusy] = useState(false);
@@ -38,12 +39,14 @@ export default function InventoryItemCard({ item, gender, physique, onEquip, onU
         type="button"
         onClick={handleClick}
         disabled={isBusy}
-        className={item.equipped ? 'btn-danger w-full text-xs' : 'btn-primary w-full text-xs'}
+        className={item.equipped ? 'btn-danger w-full text-xs' : 'btn-game w-full'}
       >
         {isBusy ? 'Updating…' : item.equipped ? 'UNEQUIP' : 'EQUIP'}
       </button>
       {item.equipped && (
-        <p className="text-center text-[11px] font-semibold text-xp-400">✓ Equipped</p>
+        <p className="text-center">
+          <StatusBadge variant="equipped" size="sm" />
+        </p>
       )}
     </div>
   );

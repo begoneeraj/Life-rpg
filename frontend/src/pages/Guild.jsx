@@ -105,7 +105,7 @@ export default function Guild() {
         </div>
       </motion.div>
 
-      <div className="parchment-card grid gap-6 p-6 sm:grid-cols-[1fr_auto]">
+      <div className="game-panel game-panel-gold hud-frame grid gap-6 p-6 sm:grid-cols-[1fr_auto]">
         <div className="space-y-3">
           <XPBar
             level={character.level}
@@ -114,10 +114,10 @@ export default function Guild() {
             size="lg"
           />
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full border border-gold-600/40 bg-dungeon-800 px-3 py-1 text-xs font-semibold text-gold-400">
-              🪙 {character.gold} Gold
+            <span className="hud-badge border-gold-600/40 bg-dungeon-800 px-3 py-1 font-hud uppercase text-gold-400">
+              🪙 {character.gold.toLocaleString()} Gold
             </span>
-            <span className="rounded-full border border-mystic-600/40 bg-dungeon-800 px-3 py-1 text-xs font-semibold text-mystic-400">
+            <span className="hud-badge border-mystic-600/40 bg-dungeon-800 px-3 py-1 font-hud uppercase text-mystic-400">
               {completedToday} quest{completedToday === 1 ? '' : 's'} completed
             </span>
           </div>
@@ -128,7 +128,7 @@ export default function Guild() {
         />
       </div>
 
-      <div className="parchment-card p-6">
+      <div className="game-panel p-6">
         <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
           Attributes
         </h2>
@@ -141,7 +141,7 @@ export default function Guild() {
         </div>
       </div>
 
-      <div className="parchment-card p-6">
+      <div className="game-panel p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
             Active Quests
