@@ -46,11 +46,18 @@ export default function useTheme() {
     } catch {
       /* ignore persistence failures */
     }
+
+    // Scope: reset <html> back to dark when the shell unmounts (logout →
+    // /login) so the auth screens always render their original night look.
+    // The stored preference is kept and re-applied when the shell remounts.
+    return () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    };
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
     setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
   }, []);
 
-  return { theme, toggleTheme };
+  return { theme, setTheme, toggleTheme };
 }

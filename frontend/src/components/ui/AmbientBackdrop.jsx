@@ -19,8 +19,8 @@ export default function AmbientBackdrop() {
       className="pointer-events-none fixed inset-0 -z-10 animate-ambientDrift"
       style={{
         backgroundImage:
-          'radial-gradient(circle at 1px 1px, rgba(245, 236, 215, 0.14) 1px, transparent 0),' +
-          'radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.16) 1px, transparent 0)',
+          'radial-gradient(circle at 1px 1px, rgb(var(--c-ambient-a) / 0.14) 1px, transparent 0),' +
+          'radial-gradient(circle at 1px 1px, rgb(var(--c-ambient-b) / 0.16) 1px, transparent 0)',
         backgroundSize: '120px 120px, 200px 200px',
         backgroundPosition: '0 0, 0 0',
         opacity: 0.5,

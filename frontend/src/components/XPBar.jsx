@@ -37,7 +37,7 @@ export default function XPBar({ level, current, required, size = 'md' }) {
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              'repeating-linear-gradient(90deg, transparent 0, transparent 14px, rgba(10, 7, 20, 0.55) 14px, rgba(10, 7, 20, 0.55) 16px)',
+              'repeating-linear-gradient(90deg, transparent 0, transparent 14px, rgb(var(--color-overlay) / 0.5) 14px, rgb(var(--color-overlay) / 0.5) 16px)',
           }}
         />
         {/* Bevel: light top edge inside the trough, dark inner bottom. */}
@@ -45,7 +45,7 @@ export default function XPBar({ level, current, required, size = 'md' }) {
           className="pointer-events-none absolute inset-0 rounded-full"
           style={{
             boxShadow:
-              'inset 0 1px 0 rgba(245, 236, 215, 0.10), inset 0 -2px 3px rgba(0, 0, 0, 0.45)',
+              'inset 0 1px 0 rgb(var(--c-parchment-100) / 0.10), inset 0 -2px 3px rgb(var(--color-overlay) / 0.45)',
           }}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%] animate-shimmer" />

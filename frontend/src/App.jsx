@@ -35,11 +35,7 @@ export default function App() {
       <Toaster
         position="top-center"
         toastOptions={{
-          style: {
-            background: '#151027',
-            color: '#f5ecd7',
-            border: '1px solid #2a2149',
-          },
+          className: 'liferpg-toast',
         }}
       />
       <Routes>

@@ -28,7 +28,7 @@ const panelMotion = { initial: { opacity: 0, y: 18, scale: 0.985 }, animate: { o
 
 export default function AuthShell({ icon, title, subtitle, children, footer }) {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10">
+    <div className="auth-force-dark relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10">
       {/* --- Title screen brand --- */}
       <motion.div
         {...brandMotion}

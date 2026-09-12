@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import useTheme from '../hooks/useTheme';
 import Icon from './ui/icons';
+import ThemeToggle from './ui/ThemeToggle';
 import CharacterAvatar from './character/CharacterAvatar';
 
 const NAV_SECTIONS = [
@@ -51,7 +52,7 @@ export default function AppShell() {
   const logout = useStore((s) => s.logout);
   const character = useStore((s) => s.character);
   const user = useStore((s) => s.user);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Close the drawer whenever the route changes.
@@ -135,19 +136,7 @@ export default function AppShell() {
     </div>
   );
 
-  const themeToggle = (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className="theme-toggle"
-      aria-pressed={theme === 'light'}
-      aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
-      title={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
-    >
-      <Icon name={theme === 'light' ? 'moon' : 'sun'} className="h-4 w-4" />
-      <span className="sr-only">Toggle theme</span>
-    </button>
-  );
+  const themeToggle = <ThemeToggle theme={theme} onChange={setTheme} />;
 
   const exitButton = (
     <button
