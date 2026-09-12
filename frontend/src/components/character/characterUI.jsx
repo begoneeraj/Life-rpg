@@ -133,7 +133,7 @@ export function LevelPlate({ level, className = '' }) {
 /* ------------------------------------------------------------------ */
 export function OptionChip({ selected, onClick, disabled = false, locked = false, unlockLevel, children }) {
   const base =
-    'relative inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold transition-all duration-150';
+    'relative inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:translate-y-px active:opacity-90';
   const state = locked
     ? 'cursor-not-allowed border-dashed border-dungeon-700 bg-dungeon-900/80 text-parchment-300/70'
     : selected
@@ -173,7 +173,7 @@ export function Swatch({ selected, onClick, hex, label }) {
       title={label}
       aria-pressed={selected}
       aria-label={label}
-      className={`relative h-7 w-7 shrink-0 rounded-sm border transition-all duration-150 hover:-translate-y-0.5 ${
+      className={`relative h-7 w-7 shrink-0 rounded-sm border transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
         selected
           ? 'border-gold-400 shadow-glow ring-1 ring-gold-300/70 ring-offset-1 ring-offset-dungeon-900'
           : 'border-dungeon-600 hover:border-parchment-300/50'
