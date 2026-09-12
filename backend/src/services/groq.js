@@ -3,7 +3,10 @@
 const { ApiError } = require('../middleware/errorHandler');
 
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
-const MODEL = 'llama-3.1-8b-instant';
+// llama-3.1-8b-instant requires per-account Meta license acceptance on Groq
+// and 404s ("model_not_found") for accounts that haven't done that. gpt-oss-20b
+// needs no such gating and is Groq's fastest current small model.
+const MODEL = 'openai/gpt-oss-20b';
 
 const SYSTEM_PROMPT = `You are a task analysis engine for a student productivity app. Given a task description, analyze it and respond with ONLY a JSON object - no prose, no markdown, no code fences.
 
