@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import studyQuestImage from '../../images/study/Gemini_Generated_Image_gr3r0tgr3r0tgr3r.png';
+import codingQuestImage from '../../images/coding/Gemini_Generated_Image_n4rh3kn4rh3kn4rh.png';
+import fitnessQuestImage from '../../images/fitness/Gemini_Generated_Image_8oby268oby268oby.png';
+import artisticQuestImage from '../../images/artistic work/Gemini_Generated_Image_8v06q48v06q48v06.png';
 
 // XP is no longer a flat per-difficulty value - it's computed server-side
 // from the AI's estimatedMinutes (see backend xpEngine.xpForMinutes), so the
@@ -22,6 +26,19 @@ const CATEGORY_ICON = {
   chores: '🧹',
   healthy_habits: '❤️',
   other: '📜',
+};
+
+const CATEGORY_IMAGE = {
+  study: studyQuestImage,
+  coding: codingQuestImage,
+  deep_work: codingQuestImage,
+  gym: fitnessQuestImage,
+  fitness: fitnessQuestImage,
+  running: fitnessQuestImage,
+  meditation: artisticQuestImage,
+  chores: artisticQuestImage,
+  healthy_habits: artisticQuestImage,
+  other: artisticQuestImage,
 };
 
 export default function QuestCard({ quest, onComplete, onDelete }) {
@@ -61,6 +78,7 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
       }`}
     >
       <div className="quest-icon" aria-hidden="true">
+        <img src={CATEGORY_IMAGE[quest.category] || artisticQuestImage} alt="" className="quest-icon-art" />
         <span>{CATEGORY_ICON[quest.category] || '📜'}</span>
       </div>
       <div className="min-w-0 flex-1">

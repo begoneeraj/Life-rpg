@@ -638,3 +638,67 @@
 body.drawer-open {
   overflow: hidden;
 }
+
+/* Flat HUD pass: panels communicate hierarchy through borders, framing and
+   contrast only. No vignette, glow, drop-shadow, or elevated card shadows. */
+body,
+html[data-theme='light'] body {
+  background-image: none;
+}
+
+[class*='drop-shadow'],
+.shadow-glow,
+.shadow-glow-xp,
+.shadow-glow-mystic,
+.shadow-card,
+.shadow-card-lg {
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+@layer components {
+  .parchment-card,
+  .game-panel,
+  .game-panel-gold,
+  .game-panel-rare,
+  .game-panel-legendary,
+  .parchment-panel {
+    @apply border-dungeon-500 bg-dungeon-850;
+    box-shadow: inset 0 0 0 2px rgb(var(--c-dungeon-950) / .7) !important;
+  }
+
+  .game-panel-gold { @apply border-gold-600/60; }
+  .game-panel-rare { @apply border-azure-500/60; }
+  .game-panel-legendary { @apply border-gold-500/70; }
+
+  .hud-frame { box-shadow: inset 0 0 0 1px rgb(var(--c-hudline) / .16) !important; }
+  .text-reward { text-shadow: none; }
+  .card-interactive { @apply transition-colors duration-150 hover:border-gold-600/70; transform: none !important; }
+
+  .btn-primary {
+    @apply border-gold-500/80 bg-gold-500 transition-colors hover:bg-gold-400 active:translate-y-px;
+    box-shadow: none !important;
+  }
+  .btn-game,
+  .btn-secondary,
+  .btn-danger,
+  .theme-toggle { box-shadow: none !important; }
+
+  .quest-console { box-shadow: inset 0 0 0 2px rgb(var(--c-dungeon-950) / .9) !important; }
+  .quest-console .input-field,
+  .quest-console-action > span,
+  .quest-tabs,
+  .quest-tab-active,
+  .quest-row,
+  .quest-icon,
+  .quest-difficulty-easy,
+  .quest-difficulty-medium,
+  .quest-difficulty-hard { box-shadow: none !important; }
+  .quest-row { @apply border-dungeon-500 bg-dungeon-850; }
+  .quest-icon { @apply relative overflow-hidden; }
+  .quest-icon span { @apply relative z-10 hidden; }
+  .quest-icon-art { @apply absolute inset-0 h-full w-full object-cover opacity-90; }
+}
+
+.liferpg-toast { box-shadow: none !important; backdrop-filter: none; }

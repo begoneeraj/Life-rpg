@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { Toaster } from 'react-hot-toast';
 import useStore from './store/useStore';
 import ErrorBoundary from './components/ui/ErrorBoundary';
-import AmbientBackdrop from './components/ui/AmbientBackdrop';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppShell from './components/AppShell';
 import Login from './pages/Login';
@@ -31,8 +30,6 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      {/* Ambient dungeon atmosphere behind every screen. */}
-      <AmbientBackdrop />
       <BrowserRouter>
       <Toaster
         position="top-center"
