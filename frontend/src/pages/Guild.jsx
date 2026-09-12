@@ -46,12 +46,24 @@ export default function Guild() {
   const levelUpInfo = useStore((s) => s.levelUpInfo);
   const clearLevelUp = useStore((s) => s.clearLevelUp);
 
+  // Daily Focus = today's real Weekly Routine tasks (same store actions the
+  // Quest log's routine panel uses). Nothing invented: an empty routine
+  // renders an intentional empty state.
+  const weeklyTasks = useStore((s) => s.weeklyTasks);
+  const weeklyTasksStatus = useStore((s) => s.weeklyTasksStatus);
+  const todayDayOfWeek = useStore((s) => s.weeklyTasksTodayDayOfWeek);
+  const loadWeeklyTasks = useStore((s) => s.loadWeeklyTasks);
+  const toggleWeeklyTaskToday = useStore((s) => s.toggleWeeklyTaskToday);
+
   // Transient real-reward flash on the quest that was just completed.
   const [flash, setFlash] = useState(null); // { id, xp, gold }
 
   useEffect(() => {
     loadQuests();
-  }, [loadQuests]);
+    loadWeeklyTasks();
+  }, [loadQuests, loadWeeklyTasks]);
+
+  const todaysRoutineTasks = weeklyTasks.filter((t) => t.dayOfWeek === todayDayOfWeek);
 
   const pendingQuests = quests.filter((q) => q.status === 'pending');
   // Featured "main quest" = the hardest active quest on the board (the one
@@ -226,6 +238,89 @@ export default function Guild() {
             />
           </div>
         </div>
+      </motion.section>
+
+      {/* ---------------- DAILY FOCUS (today's real routine) ---------------- */}
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.06 }}
+        className="game-panel hud-frame p-5 sm:p-6"
+        aria-label="Daily focus"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
+            <Icon name="routine" className="h-4 w-4 text-mystic-400/80" aria-hidden="true" /> Daily
+            Focus
+          </h2>
+          <Link
+            to="/routine"
+            className="text-[11px] font-semibold uppercase tracking-widest text-mystic-400 hover:text-mystic-300"
+          >
+            Manage routine →
+          </Link>
+        </div>
+
+        {weeklyTasksStatus === 'loading' && (
+          <div className="mt-3 space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        )}
+
+        {weeklyTasksStatus === 'ready' && todaysRoutineTasks.length === 0 && (
+          <p className="mt-3 text-sm text-parchment-300/55">
+            Nothing scheduled for today.{' '}
+            <Link to="/routine" className="underline hover:text-mystic-300">
+              Add a routine task
+            </Link>{' '}
+            and it will appear here each morning.
+          </p>
+        )}
+
+        {weeklyTasksStatus === 'ready' && todaysRoutineTasks.length > 0 && (
+          <ul className="mt-3 grid gap-2 md:grid-cols-2">
+            {todaysRoutineTasks.map((task) => (
+              <li
+                key={task.id}
+                className={`flex items-center gap-3 rounded-md border px-3 py-2.5 transition-colors ${
+                  task.completedToday
+                    ? 'border-xp-600/40 bg-xp-500/5'
+                    : 'border-dungeon-700/70 bg-dungeon-900/60 hover:border-dungeon-500'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleWeeklyTaskToday(task.id)}
+                  role="checkbox"
+                  aria-checked={Boolean(task.completedToday)}
+                  aria-label={`Mark "${task.title}" ${task.completedToday ? 'not' : ''}done for today`}
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border transition-all ${
+                    task.completedToday
+                      ? 'border-xp-400 bg-xp-500/20 text-xp-300'
+                      : 'border-dungeon-500 bg-dungeon-950 text-transparent hover:border-gold-400'
+                  }`}
+                >
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                </button>
+                <span
+                  className={`min-w-0 flex-1 truncate text-sm font-semibold ${
+                    task.completedToday ? 'text-parchment-300/50 line-through decoration-xp-500' : 'text-parchment-100'
+                  }`}
+                >
+                  {task.title}
+                </span>
+                <span
+                  className={`shrink-0 font-hud text-[9px] uppercase tracking-[0.18em] ${
+                    task.completedToday ? 'text-xp-400' : 'text-parchment-300/35'
+                  }`}
+                >
+                  {task.completedToday ? 'Done' : 'Today'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </motion.section>
 
       {/* ---------------- MAIN QUEST + SIDE QUESTS ---------------- */}
