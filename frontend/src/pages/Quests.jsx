@@ -7,14 +7,16 @@ import { QuestCardSkeleton } from '../components/Skeleton';
 import LevelUpModal from '../components/LevelUpModal';
 
 const CATEGORIES = [
-  { value: 'coding', label: '💻 Coding' },
-  { value: 'study', label: '📚 Study' },
-  { value: 'gym', label: '🏋️ Gym' },
-  { value: 'fitness', label: '🏋️ Fitness' },
-  { value: 'chores', label: '🧹 Chores' },
-  { value: 'creative', label: '🎨 Creative' },
-  { value: 'art', label: '🎨 Art' },
-  { value: 'other', label: '📜 Other' },
+  { value: 'coding', label: '💻 Coding (Intellect)' },
+  { value: 'study', label: '📚 Study (Intellect)' },
+  { value: 'gym', label: '🏋️ Gym (Strength)' },
+  { value: 'fitness', label: '🏃 Fitness (Strength)' },
+  { value: 'running', label: '🏃 Running (Strength)' },
+  { value: 'meditation', label: '🧘 Meditation (Focus)' },
+  { value: 'deep_work', label: '🎯 Deep Work (Discipline)' },
+  { value: 'chores', label: '🧹 Chores (Discipline)' },
+  { value: 'healthy_habits', label: '❤️ Healthy Habits (Energy)' },
+  { value: 'other', label: '📜 Other (Discipline)' },
 ];
 
 const DIFFICULTIES = [

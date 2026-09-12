@@ -2,6 +2,7 @@ import useStore from '../store/useStore';
 import AttributeRadar from '../components/AttributeRadar';
 import XPBar from '../components/XPBar';
 import { Skeleton } from '../components/Skeleton';
+import CharacterAvatar from '../components/character/CharacterAvatar';
 
 function xpRequiredForLevel(level) {
   return Math.round(100 * Math.pow(level, 1.5));
@@ -37,17 +38,41 @@ export default function Profile() {
       <div className="parchment-card space-y-4 p-6">
         <div className="flex items-center gap-4">
           <div
-            className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-gold-500 bg-dungeon-900 text-3xl"
+            className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border-2 border-gold-500 bg-dungeon-900"
             aria-hidden="true"
           >
-            🧙
+            <CharacterAvatar
+              gender={character.gender}
+              physique={character.physique}
+              skinTone={character.skinTone}
+              faceType={character.faceType}
+              eyeColor={character.eyeColor}
+              hairStyle={character.hairStyle}
+              hairColor={character.hairColor}
+              facialHair={character.facialHair}
+              skinDetail={character.skinDetail}
+              equippedTop={character.equippedItems?.top}
+              equippedBottom={character.equippedItems?.bottom}
+              equippedShoes={character.equippedItems?.shoes}
+              equippedAccessory={character.equippedItems?.accessory}
+              equippedSpecial={character.equippedItems?.special}
+              topPrimaryColor={character.topPrimaryColor}
+              topAccentColor={character.topAccentColor}
+              bottomPrimaryColor={character.bottomPrimaryColor}
+              bottomAccentColor={character.bottomAccentColor}
+              shoesPrimaryColor={character.shoesPrimaryColor}
+              shoesAccentColor={character.shoesAccentColor}
+              level={character.level}
+              idle={false}
+              className="h-full w-full"
+            />
           </div>
           <div className="min-w-0">
             <p className="truncate font-display text-lg font-bold text-parchment-100">
               {user?.email}
             </p>
             <p className="text-xs uppercase tracking-widest text-parchment-300/60">
-              Equipped theme: {character.equippedTheme}
+              Level {character.level} Adventurer
             </p>
           </div>
         </div>
@@ -86,7 +111,7 @@ export default function Profile() {
         <Stat label="Gold" value={character.gold} icon="🪙" />
         <Stat label="Current Streak" value={character.currentStreak} icon="🔥" />
         <Stat label="Longest Streak" value={character.longestStreak} icon="🏅" />
-        <Stat label="Items Owned" value={character.ownedItems.length} icon="🎒" />
+        <Stat label="Items Owned" value={character.inventory?.length ?? 0} icon="🎒" />
       </div>
     </div>
   );

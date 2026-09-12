@@ -35,7 +35,10 @@ test('baseXpForDifficulty / goldForXp map correctly', () => {
 test('attributeForCategory maps known categories and falls back for unknown ones', () => {
   assert.equal(attributeForCategory('coding'), 'intellect');
   assert.equal(attributeForCategory('gym'), 'strength');
-  assert.equal(attributeForCategory('creative'), 'creativity');
+  assert.equal(attributeForCategory('running'), 'strength');
+  assert.equal(attributeForCategory('meditation'), 'focus');
+  assert.equal(attributeForCategory('deep_work'), 'discipline');
+  assert.equal(attributeForCategory('healthy_habits'), 'energy');
   assert.equal(attributeForCategory('mystery-category'), 'discipline');
 });
 

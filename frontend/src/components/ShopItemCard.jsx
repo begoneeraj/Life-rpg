@@ -1,11 +1,21 @@
 import { useState } from 'react';
+import { RARITY_STYLES } from './character/constants';
 
-const TYPE_ICON = { theme: '🎨', badge: '🎖️', avatar: '🧙' };
+const CATEGORY_ICON = {
+  top: '👕',
+  bottom: '👖',
+  shoes: '👟',
+  accessory: '💍',
+  special: '✨',
+  hair: '💇',
+};
 
-export default function ShopItemCard({ item, gold, owned, onBuy }) {
+export default function ShopItemCard({ item, gold, level, onBuy }) {
   const [isBuying, setIsBuying] = useState(false);
-  const canAfford = gold >= item.cost;
-  const disabled = owned || !canAfford || isBuying;
+  const rarity = RARITY_STYLES[item.rarity] || RARITY_STYLES.common;
+  const canAfford = gold >= item.price;
+  const isLocked = level < item.requiredLevel;
+  const disabled = item.owned || !canAfford || isLocked || isBuying;
 
   async function handleBuy() {
     setIsBuying(true);
@@ -17,29 +27,50 @@ export default function ShopItemCard({ item, gold, owned, onBuy }) {
   }
 
   return (
-    <div className={`parchment-card flex flex-col gap-3 p-4 ${owned ? 'opacity-70' : ''}`}>
+    <div
+      className={`parchment-card flex flex-col gap-3 border p-4 ${rarity.border} ${
+        item.owned ? 'opacity-70' : ''
+      } ${!item.owned && !isLocked ? rarity.glow : ''}`}
+    >
       <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900 text-4xl">
-        <span aria-hidden="true">{TYPE_ICON[item.type] || '🎁'}</span>
+        <span aria-hidden="true">{CATEGORY_ICON[item.category] || '🎁'}</span>
       </div>
       <div>
         <p className="font-display text-sm font-bold text-parchment-100">{item.name}</p>
-        <p className="text-[11px] uppercase tracking-widest text-parchment-300/60">{item.type}</p>
+        <p className={`text-[11px] font-bold uppercase tracking-widest ${rarity.text}`}>{rarity.label}</p>
       </div>
-      <button
-        type="button"
-        className="btn-primary w-full text-xs"
-        onClick={handleBuy}
-        disabled={disabled}
-        aria-label={
-          owned
-            ? `${item.name} already owned`
-            : `Buy ${item.name} for ${item.cost} gold`
-        }
-      >
-        {owned ? 'Owned ✓' : isBuying ? 'Purchasing…' : `🪙 ${item.cost}`}
-      </button>
-      {!owned && !canAfford && (
-        <p className="text-center text-[11px] text-ember-400">Not enough gold</p>
+
+      {item.owned ? (
+        <button type="button" className="btn-primary w-full text-xs" disabled>
+          Owned ✓
+        </button>
+      ) : isLocked ? (
+        <div className="space-y-1">
+          <button type="button" className="btn-secondary w-full text-xs" disabled>
+            LOCKED
+          </button>
+          <p className="text-center text-[11px] text-ember-400">Required Level: {item.requiredLevel}</p>
+        </div>
+      ) : (
+        <div className="space-y-1">
+          <button
+            type="button"
+            className="btn-primary w-full text-xs"
+            onClick={handleBuy}
+            disabled={disabled}
+            aria-label={`Buy ${item.name} for ${item.price} gold`}
+          >
+            {isBuying ? 'Purchasing…' : `BUY · 🪙 ${item.price}`}
+          </button>
+          {!canAfford && (
+            <p className="text-center text-[11px] text-ember-400">You have {gold} Gold</p>
+          )}
+          {item.requiredLevel > 1 && (
+            <p className="text-center text-[10px] uppercase tracking-widest text-parchment-300/40">
+              Required Level: {item.requiredLevel}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

@@ -3,9 +3,21 @@
 const prisma = require('../services/prisma');
 const { ApiError } = require('../middleware/errorHandler');
 const { resolveQuestCompletion, BASE_XP_BY_DIFFICULTY } = require('../services/xpEngine');
+const { grantFreeLevelUnlocks } = require('../services/itemGrants');
 
 const VALID_DIFFICULTIES = Object.keys(BASE_XP_BY_DIFFICULTY);
-const VALID_CATEGORIES = ['coding', 'study', 'gym', 'fitness', 'chores', 'creative', 'art', 'other'];
+const VALID_CATEGORIES = [
+  'coding',
+  'study',
+  'gym',
+  'fitness',
+  'running',
+  'meditation',
+  'deep_work',
+  'chores',
+  'healthy_habits',
+  'other',
+];
 
 async function listQuests(req, res) {
   const quests = await prisma.quest.findMany({
@@ -82,18 +94,26 @@ async function completeQuest(req, res) {
 
   const result = resolveQuestCompletion(quest, character, new Date());
 
-  const attributeField = result.attribute; // 'intellect' | 'strength' | 'discipline' | 'creativity'
-  const updatedCharacter = await prisma.character.update({
-    where: { userId: req.userId },
-    data: {
-      level: result.level,
-      currentXP: result.currentXP,
-      gold: result.gold,
-      currentStreak: result.currentStreak,
-      longestStreak: result.longestStreak,
-      lastActiveDate: new Date(),
-      [attributeField]: { increment: result.xpGained },
-    },
+  const attributeField = result.attribute; // 'intellect' | 'strength' | 'discipline' | 'focus' | 'energy'
+  const updatedCharacter = await prisma.$transaction(async (tx) => {
+    const updated = await tx.character.update({
+      where: { userId: req.userId },
+      data: {
+        level: result.level,
+        currentXP: result.currentXP,
+        gold: result.gold,
+        currentStreak: result.currentStreak,
+        longestStreak: result.longestStreak,
+        lastActiveDate: new Date(),
+        [attributeField]: { increment: result.xpGained },
+      },
+    });
+
+    if (result.leveledUp) {
+      await grantFreeLevelUnlocks(tx, req.userId, updated.gender, updated.level);
+    }
+
+    return updated;
   });
 
   res.json({

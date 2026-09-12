@@ -2,7 +2,8 @@ const ATTRIBUTE_STYLES = {
   intellect: { label: 'Intellect', icon: '🧠', bar: 'from-mystic-600 to-mystic-400' },
   strength: { label: 'Strength', icon: '💪', bar: 'from-ember-600 to-ember-400' },
   discipline: { label: 'Discipline', icon: '🛡️', bar: 'from-gold-600 to-gold-400' },
-  creativity: { label: 'Creativity', icon: '🎨', bar: 'from-xp-600 to-xp-400' },
+  focus: { label: 'Focus', icon: '🎯', bar: 'from-xp-600 to-xp-400' },
+  energy: { label: 'Energy', icon: '❤️', bar: 'from-ember-500 to-gold-400' },
 };
 
 /** A compact labeled progress bar for one attribute, scaled against a shared cap so all four are comparable. */

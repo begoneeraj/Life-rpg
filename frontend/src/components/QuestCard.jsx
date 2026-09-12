@@ -11,10 +11,12 @@ const CATEGORY_ICON = {
   coding: '💻',
   study: '📚',
   gym: '🏋️',
-  fitness: '🏋️',
+  fitness: '🏃',
+  running: '🏃',
+  meditation: '🧘',
+  deep_work: '🎯',
   chores: '🧹',
-  creative: '🎨',
-  art: '🎨',
+  healthy_habits: '❤️',
   other: '📜',
 };
 
@@ -63,7 +65,7 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
           <span aria-hidden="true">{CATEGORY_ICON[quest.category] || '📜'}</span> {quest.title}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-widest text-parchment-300/60">
-          <span className="capitalize">{quest.category}</span>
+          <span className="capitalize">{quest.category.replace(/_/g, ' ')}</span>
           <span aria-hidden="true">·</span>
           <span className={`rounded border px-1.5 py-0.5 font-semibold ${difficulty.color}`}>
             {difficulty.label} · {difficulty.xp} XP

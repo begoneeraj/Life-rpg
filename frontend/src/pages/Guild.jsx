@@ -80,7 +80,8 @@ export default function Guild() {
           <AttributeMiniBar attribute="intellect" value={character.intellect} />
           <AttributeMiniBar attribute="strength" value={character.strength} />
           <AttributeMiniBar attribute="discipline" value={character.discipline} />
-          <AttributeMiniBar attribute="creativity" value={character.creativity} />
+          <AttributeMiniBar attribute="focus" value={character.focus} />
+          <AttributeMiniBar attribute="energy" value={character.energy} />
         </div>
       </div>
 
@@ -116,7 +117,7 @@ export default function Guild() {
               >
                 <span className="truncate text-parchment-100">{q.title}</span>
                 <span className="shrink-0 text-[11px] uppercase tracking-widest text-parchment-300/50">
-                  {q.category}
+                  {q.category.replace(/_/g, ' ')}
                 </span>
               </li>
             ))}

@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const questRoutes = require('./routes/quests');
 const characterRoutes = require('./routes/character');
 const shopRoutes = require('./routes/shop');
+const inventoryRoutes = require('./routes/inventory');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/quests', questRoutes);
 app.use('/api/character', characterRoutes);
 app.use('/api/shop', shopRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

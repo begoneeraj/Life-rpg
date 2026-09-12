@@ -10,6 +10,9 @@ import Guild from './pages/Guild';
 import Quests from './pages/Quests';
 import Shop from './pages/Shop';
 import Profile from './pages/Profile';
+import Character from './pages/Character';
+import CharacterCreation from './pages/CharacterCreation';
+import Inventory from './pages/Inventory';
 
 function AppLayout() {
   return (
@@ -46,6 +49,15 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
 
         <Route
+          path="/character/create"
+          element={
+            <ProtectedRoute>
+              <CharacterCreation />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           element={
             <ProtectedRoute>
               <AppLayout />
@@ -53,8 +65,10 @@ export default function App() {
           }
         >
           <Route path="/guild" element={<Guild />} />
+          <Route path="/character" element={<Character />} />
           <Route path="/quests" element={<Quests />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/inventory" element={<Inventory />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 

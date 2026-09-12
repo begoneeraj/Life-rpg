@@ -21,10 +21,12 @@ const CATEGORY_TO_ATTRIBUTE = Object.freeze({
   study: 'intellect',
   gym: 'strength',
   fitness: 'strength',
+  running: 'strength',
+  meditation: 'focus',
+  deep_work: 'discipline',
   chores: 'discipline',
   discipline: 'discipline',
-  creative: 'creativity',
-  art: 'creativity',
+  healthy_habits: 'energy',
 });
 
 const DEFAULT_ATTRIBUTE = 'discipline';

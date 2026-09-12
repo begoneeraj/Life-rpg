@@ -1,9 +1,14 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store/useStore';
 
-/** Gates a route behind auth. Shows nothing while the initial /auth/me check is in flight. */
+/**
+ * Gates a route behind auth, and behind character creation: a signed-in
+ * user whose character hasn't been created yet is bounced to
+ * /character/create before they can reach anything else in the app.
+ */
 export default function ProtectedRoute({ children }) {
   const authStatus = useStore((s) => s.authStatus);
+  const character = useStore((s) => s.character);
   const location = useLocation();
 
   if (authStatus === 'loading') {
@@ -20,6 +25,10 @@ export default function ProtectedRoute({ children }) {
 
   if (authStatus === 'guest') {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (character && !character.createdCharacter && location.pathname !== '/character/create') {
+    return <Navigate to="/character/create" replace />;
   }
 
   return children;

@@ -3,8 +3,10 @@ import useStore from '../store/useStore';
 
 const links = [
   { to: '/guild', label: 'Guild' },
+  { to: '/character', label: 'Character' },
   { to: '/quests', label: 'Quests' },
-  { to: '/shop', label: 'Shop' },
+  { to: '/shop', label: 'Armory' },
+  { to: '/inventory', label: 'Inventory' },
   { to: '/profile', label: 'Profile' },
 ];
 

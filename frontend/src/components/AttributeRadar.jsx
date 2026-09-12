@@ -4,7 +4,8 @@ const ATTRIBUTE_META = [
   { key: 'intellect', label: 'Intellect' },
   { key: 'strength', label: 'Strength' },
   { key: 'discipline', label: 'Discipline' },
-  { key: 'creativity', label: 'Creativity' },
+  { key: 'focus', label: 'Focus' },
+  { key: 'energy', label: 'Energy' },
 ];
 
 export default function AttributeRadar({ character }) {
@@ -19,7 +20,7 @@ export default function AttributeRadar({ character }) {
       <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
         Attribute Sheet
       </h3>
-      <div className="h-64 w-full" role="img" aria-label="Radar chart of Intellect, Strength, Discipline, and Creativity attribute scores">
+      <div className="h-64 w-full" role="img" aria-label="Radar chart of Intellect, Strength, Discipline, Focus, and Energy attribute scores">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data} outerRadius="75%">
             <PolarGrid stroke="#2a2149" />

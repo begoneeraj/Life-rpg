@@ -9,5 +9,7 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/', asyncHandler(characterController.getCharacter));
+router.post('/create', asyncHandler(characterController.createCharacter));
+router.patch('/colors', asyncHandler(characterController.updateGarmentColors));
 
 module.exports = router;
