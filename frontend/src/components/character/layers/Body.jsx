@@ -77,18 +77,22 @@ export default function Body({ gender, skinTone, physique = 'athletic' }) {
           }
           fill={`url(#${gradId})`}
         />
-        {/* subtle pectoral/ab seam */}
+        {/* subtle pectoral/ab seam + neck cast-shadow (head occludes light) */}
         <path d="M100,120 L100,168" stroke="rgba(0,0,0,0.08)" strokeWidth="1.5" fill="none" />
+        <path d="M84,98 Q100,112 116,98 L114,110 Q100,120 86,110 Z" fill="rgba(0,0,0,0.12)" />
 
-        {/* relaxed, slightly bent arms (not a rigid 90 degree T-pose) */}
+        {/* relaxed, slightly bent arms (not a rigid 90 degree T-pose) with
+            a soft inner-shadow stroke so they read as cylinders in space */}
         <path
           d="M60,118 Q46,128 44,158 Q42,182 48,206 L58,208 Q54,182 56,158 Q58,136 68,120 Z"
           fill={skin}
         />
+        <path d="M60,118 Q46,128 44,158 Q42,182 48,206" stroke="rgba(0,0,0,0.14)" strokeWidth="2" fill="none" strokeLinecap="round" />
         <path
           d="M140,118 Q154,128 156,158 Q158,182 152,206 L142,208 Q146,182 144,158 Q142,136 132,120 Z"
           fill={skin}
         />
+        <path d="M140,118 Q154,128 156,158 Q158,182 152,206" stroke="rgba(0,0,0,0.14)" strokeWidth="2" fill="none" strokeLinecap="round" />
         {/* hands with a hint of finger separation instead of plain orbs */}
         <g transform="translate(48,208)">
           <circle r="8.5" fill={skin} />

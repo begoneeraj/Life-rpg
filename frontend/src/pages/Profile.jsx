@@ -3,9 +3,10 @@ import useStore from '../store/useStore';
 import AttributeRadar from '../components/AttributeRadar';
 import XPBar from '../components/XPBar';
 import { Skeleton } from '../components/Skeleton';
-import CharacterAvatar from '../components/character/CharacterAvatar';
+import PortraitAvatar from '../components/character/PortraitAvatar';
 import { PixelCorners } from '../components/character/characterUI';
 import Icon from '../components/ui/icons';
+import displayName from '../utils/displayName';
 
 function xpRequiredForLevel(level) {
   return Math.round(100 * Math.pow(level, 1.5));
@@ -67,12 +68,15 @@ export default function Profile() {
         <section className="game-panel game-panel-gold hud-frame p-6">
           <PixelCorners size={11} />
           <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+            {/* Head portrait with a gold pixel-corner frame — the player icon,
+                not the full-body figure (spec). Links to the full character. */}
             <Link
               to="/character"
               aria-label="View your character"
-              className="mx-auto h-40 w-32 shrink-0 overflow-hidden rounded-lg border-2 border-gold-500/60 bg-dungeon-900 shadow-glow transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-400 sm:mx-0"
+              className="mx-auto block h-36 w-36 shrink-0 sm:mx-0"
             >
-              <CharacterAvatar
+              <PortraitAvatar
+                frame="shield"
                 gender={character.gender}
                 physique={character.physique}
                 skinTone={character.skinTone}
@@ -94,7 +98,6 @@ export default function Profile() {
                 shoesPrimaryColor={character.shoesPrimaryColor}
                 shoesAccentColor={character.shoesAccentColor}
                 level={character.level}
-                idle={false}
                 className="h-full w-full"
               />
             </Link>
@@ -104,7 +107,10 @@ export default function Profile() {
                 Level {character.level} Adventurer
               </p>
               <p className="mt-0.5 truncate font-display text-xl font-bold text-parchment-100">
-                {user?.email || 'Adventurer'}
+                {displayName(user)}
+              </p>
+              <p className="truncate font-hud text-[10px] uppercase tracking-[0.18em] text-parchment-300/45">
+                {user?.email}
               </p>
               <div className="mt-3">
                 <XPBar

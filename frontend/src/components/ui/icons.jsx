@@ -130,7 +130,7 @@ const PATHS = {
     </>
   ),
 
-  // --- quest categories (Track B) ---
+  // --- quest categories ---
   cat_coding: (
     <>
       <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13 5l-2 14" />
@@ -171,11 +171,24 @@ const PATHS = {
     </>
   ),
   cat_healthy: (
-    <path
-      fill="currentColor"
-      stroke="none"
-      d="M12 20s-7-4.3-9-8.5C1.5 8 3.5 5 6.5 5c2 0 3.5 1 4.5 2.7 1-1.7 2.5-2.7 4.5-2.7 3 0 5 3 3.5 6.5-2 4.2-9 8.5-9 8.5z"
-    />
+    <>
+      <path d="M12 20s-7-4.3-9-8.5C1.5 8 3.5 5 6.5 5c2 0 3.5 1 4.5 2.7 1-1.7 2.5-2.7 4.5-2.7 3 0 5 3 3.5 6.5-2 4.2-9 8.5-9 8.5z" />
+    </>
+  ),
+  cat_water: (
+    // Droplet
+    <path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z" />
+  ),
+  cat_sleep: (
+    // Crescent moon
+    <path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" />
+  ),
+  cat_finance: (
+    // Ascending chart line
+    <>
+      <path d="M4 19h16" />
+      <path d="M5 15l4-4 3 3 6-7" />
+    </>
   ),
 
   // --- attributes (Track B) ---
@@ -214,6 +227,31 @@ const PATHS = {
       <path d="M7 14h2M11 14h2M15 14h2M7 17.5h2M11 17.5h2" />
     </>
   ),
+};
+
+/**
+ * Deterministic quest-category → icon mapping (spec: the same category must
+ * always produce the same professional glyph — no random/AI-generated icons).
+ * One shared source of truth used by QuestCard, the featured spotlight in
+ * Quests.jsx, and anywhere else quest categories render.
+ */
+export const CATEGORY_ICON = {
+  coding: 'cat_coding',
+  deep_work: 'cat_deep_work',
+  study: 'cat_study',
+  reading: 'cat_study',
+  gym: 'cat_gym',
+  fitness: 'cat_gym',
+  running: 'cat_running',
+  meditation: 'cat_meditation',
+  work: 'cat_finance',
+  finance: 'cat_finance',
+  chores: 'cat_chores',
+  healthy_habits: 'cat_healthy',
+  water: 'cat_water',
+  sleep: 'cat_sleep',
+  journal: 'cat_study',
+  other: 'quests',
 };
 
 export default function Icon({ name, className = 'h-4 w-4', label }) {
