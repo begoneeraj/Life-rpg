@@ -25,7 +25,17 @@ export default function Guild() {
   }, [loadQuests]);
 
   const pendingQuests = quests.filter((q) => q.status === 'pending');
-  const completedToday = quests.filter((q) => q.status === 'completed').length;
+  // "Completed today" = completed quests whose `completedAt` timestamp (set
+  // by the server on completion, see questController.completeQuest) falls on
+  // the user's current local calendar day. Older completions, and completed
+  // quests with a missing timestamp, must not count.
+  const todayKey = new Date().toDateString();
+  const completedToday = quests.filter(
+    (q) =>
+      q.status === 'completed' &&
+      q.completedAt &&
+      new Date(q.completedAt).toDateString() === todayKey
+  ).length;
 
   if (!character) {
     return (
