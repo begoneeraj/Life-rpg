@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
-import CharacterAvatar from '../components/character/CharacterAvatar';
+import CharacterStage from '../components/character/CharacterStage';
+import SlotIcon from '../components/character/characterIcons';
 import {
   GENDERS,
   PHYSIQUE_BY_GENDER,
@@ -15,46 +16,33 @@ import {
   FACIAL_HAIR_OPTIONS,
   SKIN_DETAILS,
 } from '../components/character/constants';
+import {
+  OptionChip,
+  Swatch,
+  SectionTitle,
+  PixelCorners,
+  GlassPanel,
+} from '../components/character/characterUI';
 
-function OptionSwatch({ selected, onClick, style, label }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={label}
-      aria-pressed={selected}
-      aria-label={label}
-      className={`h-9 w-9 shrink-0 rounded-full border-2 transition-transform hover:scale-110 ${
-        selected ? 'border-gold-400 shadow-glow' : 'border-dungeon-600'
-      }`}
-      style={{ background: style }}
-    />
-  );
-}
-
-function OptionPill({ selected, onClick, children, locked }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={locked}
-      aria-pressed={selected}
-      className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-        selected
-          ? 'border-gold-500 bg-gold-500/10 text-gold-400'
-          : 'border-dungeon-600 bg-dungeon-800 text-parchment-200/80 hover:border-mystic-500 hover:text-mystic-400'
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
+/**
+ * Life RPG — Character Forge.
+ *
+ * Same data contract as before (createCharacter with the validated enums,
+ * rotation state, one-time submit) — only the presentation changed.
+ * Tabs read as game customization categories; selected options get gold +
+ * pixel corners + glow; level-locked hairstyles show their real unlock
+ * level (creation-time level is 1, so locked chips are informative, not
+ * dead ends — they unlock later in the Armory / level flow).
+ */
 
 const TABS = [
-  { id: 'identity', label: 'Identity' },
-  { id: 'face', label: 'Head & Face' },
-  { id: 'hair', label: 'Hair' },
+  { id: 'identity', label: 'Identity', icon: 'profile' },
+  { id: 'face', label: 'Head & Face', icon: 'character' },
+  { id: 'hair', label: 'Hair', icon: 'spark' },
 ];
+
+// The shared ui icon set is nav-oriented; map tab icons to SlotIcon fallbacks.
+const TAB_ICONS = { identity: 'head', face: 'head', hair: 'spark' };
 
 export default function CharacterCreation() {
   const createCharacter = useStore((s) => s.createCharacter);
@@ -75,10 +63,29 @@ export default function CharacterCreation() {
 
   const faceOptions = FACE_TYPES_BY_GENDER[gender];
   const physiqueOptions = PHYSIQUE_BY_GENDER[gender];
-  const hairOptions = useMemo(
-    () => HAIR_STYLES_BY_GENDER[gender].filter((h) => !h.unlockLevel),
-    [gender]
-  );
+  // All hairstyles stay visible so the locked ones read as future unlocks;
+  // creation happens at level 1, so only unlockLevel-free ones are active.
+  const hairOptions = useMemo(() => HAIR_STYLES_BY_GENDER[gender], [gender]);
+
+  // Preview draft object shaped like the saved character so CharacterStage
+  // can present it with starter garments (visual only — nothing persisted).
+  const previewCharacter = {
+    gender,
+    physique,
+    skinTone,
+    faceType,
+    eyeColor,
+    hairStyle,
+    hairColor,
+    facialHair: gender === 'male' ? facialHair : 'clean_shaven',
+    skinDetail,
+    level: 1,
+  };
+  const equipped = {
+    top: { svgKey: 'top_basic_tee' },
+    bottom: { svgKey: 'bottom_basic_pants' },
+    shoes: { svgKey: 'shoes_basic' },
+  };
 
   function handleGenderChange(next) {
     setGender(next);
@@ -109,220 +116,230 @@ export default function CharacterCreation() {
     }
   }
 
+  const stepMeta = TABS.findIndex((t) => t.id === tab);
+
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col items-center justify-center gap-8 px-4 py-10 lg:flex-row lg:items-stretch">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-xs shrink-0 text-center"
-      >
-        <div className="parchment-card flex h-full flex-col items-center justify-center gap-4 p-6">
-          <CharacterAvatar
-            gender={gender}
-            physique={physique}
-            skinTone={skinTone}
-            faceType={faceType}
-            eyeColor={eyeColor}
-            hairStyle={hairStyle}
-            hairColor={hairColor}
-            facialHair={facialHair}
-            skinDetail={skinDetail}
-            equippedTop={{ svgKey: 'top_basic_tee' }}
-            equippedBottom={{ svgKey: 'bottom_basic_pants' }}
-            equippedShoes={{ svgKey: 'shoes_basic' }}
-            rotation={rotation}
-            className="h-72 w-auto"
-          />
-          <div className="flex items-center gap-3">
+    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-[1440px] flex-col gap-5 px-4 py-6 sm:px-6 lg:grid lg:grid-cols-12 lg:items-stretch">
+      {/* -------- the forge stage -------- */}
+      <div className="relative min-h-[420px] lg:col-span-5">
+        <CharacterStage
+          character={previewCharacter}
+          equipped={equipped}
+          level={1}
+          rotation={rotation}
+          blur={12}
+          className="absolute inset-0"
+        >
+          {/* rotate controls — ◀ ROTATE ▶ */}
+          <div className="relative z-10 flex items-center justify-center gap-3 border-t border-dungeon-600/40 bg-dungeon-950/45 px-4 py-2.5 backdrop-blur-sm">
             <button
               type="button"
-              aria-label="Rotate left"
               onClick={() => setRotation((r) => Math.max(-45, r - 15))}
-              className="flex h-7 w-7 items-center justify-center rounded-full border border-dungeon-600 text-parchment-300 transition-colors hover:border-gold-500 hover:text-gold-400"
+              aria-label="Rotate left"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-dungeon-500 bg-dungeon-900 text-gold-400 transition-all hover:border-gold-400 hover:shadow-glow active:translate-y-px"
             >
-              ‹
+              <SlotIcon name="chevronLeft" className="h-4 w-4" />
             </button>
-            <p className="text-xs uppercase tracking-widest text-parchment-300/60">
-              Everyone starts from zero.
-            </p>
+            <span className="font-hud text-[10px] uppercase tracking-[0.3em] text-parchment-300/60">
+              Rotate
+            </span>
             <button
               type="button"
-              aria-label="Rotate right"
               onClick={() => setRotation((r) => Math.min(45, r + 15))}
-              className="flex h-7 w-7 items-center justify-center rounded-full border border-dungeon-600 text-parchment-300 transition-colors hover:border-gold-500 hover:text-gold-400"
+              aria-label="Rotate right"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-dungeon-500 bg-dungeon-900 text-gold-400 transition-all hover:border-gold-400 hover:shadow-glow active:translate-y-px"
             >
-              ›
+              <SlotIcon name="chevronRight" className="h-4 w-4" />
             </button>
           </div>
-        </div>
-      </motion.div>
+        </CharacterStage>
+      </div>
 
+      {/* -------- customization console -------- */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="parchment-card w-full flex-1 space-y-6 p-6 sm:p-8"
+        transition={{ duration: 0.45, delay: 0.1 }}
+        className="lg:col-span-7"
       >
-        <div className="text-center lg:text-left">
-          <h1 className="font-display text-3xl font-extrabold text-gold-400 sm:text-4xl">
-            CREATE YOUR CHARACTER
-          </h1>
-          <p className="mt-1 text-sm text-parchment-300/70">Your journey begins here.</p>
-        </div>
-
-        <div className="flex gap-1 border-b border-dungeon-700 pb-px">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className={`-mb-px border-b-2 px-3 py-2 text-xs font-semibold uppercase tracking-widest transition-colors ${
-                tab === t.id
-                  ? 'border-gold-500 text-gold-400'
-                  : 'border-transparent text-parchment-300/50 hover:text-parchment-200'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {tab === 'identity' && (
-          <div className="space-y-6">
-            <section>
-              <p className="label-text">Gender</p>
-              <div className="flex gap-2">
-                {GENDERS.map((g) => (
-                  <OptionPill key={g.value} selected={gender === g.value} onClick={() => handleGenderChange(g.value)}>
-                    {g.label}
-                  </OptionPill>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <p className="label-text">Physique</p>
-              <div className="flex flex-wrap gap-2">
-                {physiqueOptions.map((p) => (
-                  <OptionPill key={p.value} selected={physique === p.value} onClick={() => setPhysique(p.value)}>
-                    {p.label}
-                  </OptionPill>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <p className="label-text">Skin Tone</p>
-              <div className="flex flex-wrap gap-2">
-                {SKIN_TONES.map((tone) => (
-                  <OptionSwatch
-                    key={tone.value}
-                    selected={skinTone === tone.value}
-                    onClick={() => setSkinTone(tone.value)}
-                    style={tone.hex}
-                    label={tone.label}
-                  />
-                ))}
-              </div>
-            </section>
+        <GlassPanel className="flex h-full flex-col gap-5 p-5 sm:p-7">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="font-hud text-[10px] uppercase tracking-[0.32em] text-mystic-300/80">
+                Character Forge
+              </p>
+              <h1 className="font-display text-3xl font-extrabold tracking-wide text-gold-400 sm:text-4xl">
+                CREATE YOUR HERO
+              </h1>
+              <p className="mt-1 text-sm text-parchment-300/70">
+                This face stays with you for the whole journey. Choose wisely.
+              </p>
+            </div>
+            {/* forge step pips */}
+            <span className="flex items-center gap-1.5" aria-hidden="true">
+              {TABS.map((t, i) => (
+                <span
+                  key={t.id}
+                  className={`h-2 w-2 ${i <= stepMeta ? 'bg-gold-400' : 'bg-dungeon-600'}`}
+                  style={i <= stepMeta ? { boxShadow: '0 0 6px rgb(var(--c-glow-gold) / 0.6)' } : undefined}
+                />
+              ))}
+            </span>
           </div>
-        )}
 
-        {tab === 'face' && (
-          <div className="space-y-6">
-            <section>
-              <p className="label-text">Face</p>
-              <div className="flex flex-wrap gap-2">
-                {faceOptions.map((f) => (
-                  <OptionPill key={f.value} selected={faceType === f.value} onClick={() => setFaceType(f.value)}>
-                    {f.label}
-                  </OptionPill>
-                ))}
-              </div>
-            </section>
+          {/* category tabs */}
+          <div role="tablist" aria-label="Customization categories" className="grid grid-cols-3 gap-2">
+            {TABS.map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t.id)}
+                  className={`relative flex items-center justify-center gap-2 rounded-md border px-3 py-2.5 font-hud text-[11px] uppercase tracking-[0.18em] transition-all duration-150 ${
+                    active
+                      ? 'border-gold-500 bg-gold-500/10 text-gold-300 shadow-glow'
+                      : 'border-dungeon-600 bg-dungeon-900/70 text-parchment-300/60 hover:border-mystic-500/70 hover:text-parchment-200'
+                  }`}
+                >
+                  {active && <PixelCorners size={7} />}
+                  <SlotIcon name={TAB_ICONS[t.id]} className="h-4 w-4" />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
 
-            <section>
-              <p className="label-text">Eye Color</p>
-              <div className="flex flex-wrap gap-2">
-                {EYE_COLORS.map((c) => (
-                  <OptionSwatch
-                    key={c.value}
-                    selected={eyeColor === c.value}
-                    onClick={() => setEyeColor(c.value)}
-                    style={c.hex}
-                    label={c.label}
-                  />
-                ))}
-              </div>
-            </section>
+          {/* panels */}
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+            {tab === 'identity' && (
+              <motion.div key="identity" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-6">
+                <section>
+                  <SectionTitle>Gender</SectionTitle>
+                  <div className="flex gap-2">
+                    {GENDERS.map((g) => (
+                      <OptionChip key={g.value} selected={gender === g.value} onClick={() => handleGenderChange(g.value)}>
+                        {g.label}
+                      </OptionChip>
+                    ))}
+                  </div>
+                </section>
 
-            {gender === 'male' && (
-              <section>
-                <p className="label-text">Facial Hair</p>
-                <div className="flex flex-wrap gap-2">
-                  {FACIAL_HAIR_OPTIONS.map((f) => (
-                    <OptionPill
-                      key={f.value}
-                      selected={facialHair === f.value}
-                      onClick={() => setFacialHair(f.value)}
-                    >
-                      {f.label}
-                    </OptionPill>
-                  ))}
-                </div>
-              </section>
+                <section>
+                  <SectionTitle>Physique</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {physiqueOptions.map((p) => (
+                      <OptionChip key={p.value} selected={physique === p.value} onClick={() => setPhysique(p.value)}>
+                        {p.label}
+                      </OptionChip>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <SectionTitle>Skin Tone</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {SKIN_TONES.map((tone) => (
+                      <Swatch key={tone.value} selected={skinTone === tone.value} onClick={() => setSkinTone(tone.value)} hex={tone.hex} label={tone.label} />
+                    ))}
+                  </div>
+                </section>
+              </motion.div>
             )}
 
-            <section>
-              <p className="label-text">Skin Details</p>
-              <div className="flex flex-wrap gap-2">
-                {SKIN_DETAILS.map((d) => (
-                  <OptionPill key={d.value} selected={skinDetail === d.value} onClick={() => setSkinDetail(d.value)}>
-                    {d.label}
-                  </OptionPill>
-                ))}
-              </div>
-            </section>
+            {tab === 'face' && (
+              <motion.div key="face" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-6">
+                <section>
+                  <SectionTitle>Face</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {faceOptions.map((f) => (
+                      <OptionChip key={f.value} selected={faceType === f.value} onClick={() => setFaceType(f.value)}>
+                        {f.label}
+                      </OptionChip>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <SectionTitle>Eye Color</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {EYE_COLORS.map((c) => (
+                      <Swatch key={c.value} selected={eyeColor === c.value} onClick={() => setEyeColor(c.value)} hex={c.hex} label={c.label} />
+                    ))}
+                  </div>
+                </section>
+
+                {gender === 'male' && (
+                  <section>
+                    <SectionTitle>Facial Hair</SectionTitle>
+                    <div className="flex flex-wrap gap-2">
+                      {FACIAL_HAIR_OPTIONS.map((f) => (
+                        <OptionChip key={f.value} selected={facialHair === f.value} onClick={() => setFacialHair(f.value)}>
+                          {f.label}
+                        </OptionChip>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section>
+                  <SectionTitle>Skin Details</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {SKIN_DETAILS.map((d) => (
+                      <OptionChip key={d.value} selected={skinDetail === d.value} onClick={() => setSkinDetail(d.value)}>
+                        {d.label}
+                      </OptionChip>
+                    ))}
+                  </div>
+                </section>
+              </motion.div>
+            )}
+
+            {tab === 'hair' && (
+              <motion.div key="hair" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-6">
+                <section>
+                  <SectionTitle right={<span className="font-hud text-[10px] uppercase tracking-widest text-gold-500/70">Locked = future unlock</span>}>
+                    Hairstyle
+                  </SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {hairOptions.map((h) => (
+                      <OptionChip
+                        key={h.value}
+                        selected={hairStyle === h.value}
+                        locked={Boolean(h.unlockLevel)}
+                        unlockLevel={h.unlockLevel}
+                        onClick={() => setHairStyle(h.value)}
+                      >
+                        {h.label}
+                      </OptionChip>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <SectionTitle>Hair Color</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {HAIR_COLORS.map((c) => (
+                      <Swatch key={c.value} selected={hairColor === c.value} onClick={() => setHairColor(c.value)} hex={c.hex} label={c.label} />
+                    ))}
+                  </div>
+                </section>
+              </motion.div>
+            )}
           </div>
-        )}
 
-        {tab === 'hair' && (
-          <div className="space-y-6">
-            <section>
-              <p className="label-text">Hairstyle</p>
-              <div className="flex flex-wrap gap-2">
-                {hairOptions.map((h) => (
-                  <OptionPill key={h.value} selected={hairStyle === h.value} onClick={() => setHairStyle(h.value)}>
-                    {h.label}
-                  </OptionPill>
-                ))}
-              </div>
-              <p className="mt-1 text-[11px] text-parchment-300/50">
-                More hairstyles unlock automatically as you level up.
-              </p>
-            </section>
-
-            <section>
-              <p className="label-text">Hair Color</p>
-              <div className="flex flex-wrap gap-2">
-                {HAIR_COLORS.map((c) => (
-                  <OptionSwatch
-                    key={c.value}
-                    selected={hairColor === c.value}
-                    onClick={() => setHairColor(c.value)}
-                    style={c.hex}
-                    label={c.label}
-                  />
-                ))}
-              </div>
-            </section>
+          {/* forge action */}
+          <div className="border-t border-dungeon-600/40 pt-4">
+            <button type="button" className="btn-primary w-full" onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'FORGING YOUR LEGEND…' : 'BEGIN YOUR JOURNEY'}
+            </button>
+            <p className="mt-2 text-center text-[11px] text-parchment-300/45">
+              Level 1 · Novice · Your equipment is earned through quests.
+            </p>
           </div>
-        )}
-
-        <button type="button" className="btn-primary w-full" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? 'Forging your legend…' : 'Begin Your Journey'}
-        </button>
+        </GlassPanel>
       </motion.div>
     </div>
   );

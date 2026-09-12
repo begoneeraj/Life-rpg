@@ -22,6 +22,12 @@ import { SpecialFxBack } from './layers/SpecialFx';
  * faster/more "alive" idle breathing loop, 50+ gets glowing mythic eyes.
  * These are derived from the character's real level, never client-set.
  */
+
+// Exported so presentation components (CharacterStage, HUD chrome) can align
+// their aura language with the avatar's own thresholds — one source of truth.
+export const ELITE_LEVEL = 25;
+export const MYTHIC_LEVEL = 50;
+
 export default function CharacterAvatar({
   gender = 'male',
   physique = 'athletic',
@@ -49,8 +55,8 @@ export default function CharacterAvatar({
   idle = true,
 }) {
   const skinHex = SKIN_TONE_HEX[skinTone] || SKIN_TONE_HEX.medium;
-  const isElite = level >= 25;
-  const isMythic = level >= 50;
+  const isElite = level >= ELITE_LEVEL;
+  const isMythic = level >= MYTHIC_LEVEL;
 
   // Rotation is a flat SVG plane rotated in CSS 3D space, pivoting around
   // its own center - which sits right on the character's spine. That
