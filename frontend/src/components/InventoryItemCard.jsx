@@ -28,7 +28,7 @@ export default function InventoryItemCard({ item, onEquip, onUnequip }) {
   }
 
   return (
-    <div className={`parchment-card flex flex-col gap-3 border p-4 ${rarity.border}`}>
+    <div className={`card-interactive parchment-card flex flex-col gap-3 border p-4 ${rarity.border}`}>
       <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900 text-4xl">
         <span aria-hidden="true">{CATEGORY_ICON[item.category] || '🎁'}</span>
       </div>

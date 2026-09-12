@@ -42,12 +42,17 @@
     @apply relative rounded-lg border border-dungeon-600/60 bg-dungeon-850/80 shadow-card backdrop-blur-sm;
   }
 
+  /* Interactive card variant: lifts on hover for clickable/row cards. */
+  .card-interactive {
+    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-lg hover:border-dungeon-500/80;
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-md border border-gold-500/60 bg-gradient-to-b from-gold-400 to-gold-600 px-4 py-2 font-display text-sm font-semibold text-dungeon-950 shadow-glow transition-transform duration-150 hover:scale-[1.03] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-dungeon-500 bg-dungeon-800 px-4 py-2 font-display text-sm font-semibold text-parchment-200 transition-colors duration-150 hover:border-mystic-500 hover:text-mystic-400 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-dungeon-500 bg-dungeon-800 px-4 py-2 font-display text-sm font-semibold text-parchment-200 transition-colors duration-150 hover:border-mystic-500 hover:text-mystic-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   .btn-danger {
@@ -61,4 +66,30 @@
   .label-text {
     @apply mb-1.5 block text-xs font-semibold uppercase tracking-widest text-parchment-300/70;
   }
+
+  /* Small uppercase pill tag (rarity/label chips). */
+  .tag-pill {
+    @apply inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest;
+  }
+}
+
+/* Respect users who prefer reduced motion: kill decorative loops, keep
+   opacity-only transitions instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .drawer-open {
+    overflow: hidden;
+  }
+}
+
+/* Body scroll lock while the mobile drawer is open (toggled by Navbar). */
+body.drawer-open {
+  overflow: hidden;
 }

@@ -49,6 +49,8 @@ export default {
         'glow-mystic': '0 0 14px rgba(139, 92, 246, 0.55)',
         'glow-xp': '0 0 10px rgba(34, 197, 94, 0.65)',
         card: '0 4px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04)',
+        // Raised state for interactive cards (hover elevation).
+        'card-lg': '0 12px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(232,200,116,0.08)',
       },
       backgroundImage: {
         'dungeon-grid':

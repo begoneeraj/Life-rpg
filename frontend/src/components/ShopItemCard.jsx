@@ -26,11 +26,11 @@ export default function ShopItemCard({ item, gold, level, onBuy }) {
     }
   }
 
-  return (
-    <div
-      className={`parchment-card flex flex-col gap-3 border p-4 ${rarity.border} ${
+  return (    <div
+      className={`card-interactive parchment-card flex flex-col gap-3 border p-4 ${rarity.border} ${
         item.owned ? 'opacity-70' : ''
-      } ${!item.owned && !isLocked ? rarity.glow : ''}`}
+      } ${!item.owned && !isLocked ? rarity.glow : ''}`
+      }
     >
       <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900 text-4xl">
         <span aria-hidden="true">{CATEGORY_ICON[item.category] || '🎁'}</span>

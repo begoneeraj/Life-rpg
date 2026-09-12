@@ -5,6 +5,8 @@ import useStore from '../store/useStore';
 import XPBar from '../components/XPBar';
 import StreakTracker from '../components/StreakTracker';
 import AttributeMiniBar from '../components/AttributeMiniBar';
+import CharacterAvatar from '../components/character/CharacterAvatar';
+import LevelUpModal from '../components/LevelUpModal';
 import { Skeleton } from '../components/Skeleton';
 
 // Mirrors backend's xpRequiredForLevel(n) = round(100 * n^1.5) so the bar
@@ -19,6 +21,8 @@ export default function Guild() {
   const quests = useStore((s) => s.quests);
   const questsStatus = useStore((s) => s.questsStatus);
   const loadQuests = useStore((s) => s.loadQuests);
+  const levelUpInfo = useStore((s) => s.levelUpInfo);
+  const clearLevelUp = useStore((s) => s.clearLevelUp);
 
   useEffect(() => {
     loadQuests();
@@ -52,11 +56,53 @@ export default function Guild() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">
-          Welcome back, adventurer
-        </h1>
-        <p className="mt-1 truncate text-sm text-parchment-300/70">{user?.email}</p>
+      {/* App-wide level-up celebration: fires here too if a quest was completed on another surface. */}
+      <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-4"
+      >
+        {character && (
+          <Link
+            to="/character"
+            aria-label="View your character"
+            className="h-16 w-12 shrink-0 overflow-hidden rounded-lg border-2 border-gold-500/60 bg-dungeon-900 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-400 hover:shadow-glow"
+          >
+            <CharacterAvatar
+              gender={character.gender}
+              physique={character.physique}
+              skinTone={character.skinTone}
+              faceType={character.faceType}
+              eyeColor={character.eyeColor}
+              hairStyle={character.hairStyle}
+              hairColor={character.hairColor}
+              facialHair={character.facialHair}
+              skinDetail={character.skinDetail}
+              equippedTop={character.equippedItems?.top}
+              equippedBottom={character.equippedItems?.bottom}
+              equippedShoes={character.equippedItems?.shoes}
+              equippedAccessory={character.equippedItems?.accessory}
+              equippedSpecial={character.equippedItems?.special}
+              topPrimaryColor={character.topPrimaryColor}
+              topAccentColor={character.topAccentColor}
+              bottomPrimaryColor={character.bottomPrimaryColor}
+              bottomAccentColor={character.bottomAccentColor}
+              shoesPrimaryColor={character.shoesPrimaryColor}
+              shoesAccentColor={character.shoesAccentColor}
+              level={character.level}
+              idle={false}
+              className="h-full w-full"
+            />
+          </Link>
+        )}
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">
+            Welcome back, adventurer
+          </h1>
+          <p className="mt-1 truncate text-sm text-parchment-300/70">{user?.email}</p>
+        </div>
       </motion.div>
 
       <div className="parchment-card grid gap-6 p-6 sm:grid-cols-[1fr_auto]">

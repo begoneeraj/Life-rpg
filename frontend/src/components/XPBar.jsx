@@ -10,9 +10,14 @@ export default function XPBar({ level, current, required, size = 'md' }) {
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-center justify-between text-xs font-semibold text-parchment-300/80">
-        <span className="font-display text-gold-400">Level {level}</span>
-        <span aria-hidden="true">
+      <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-parchment-300/80">
+        <span className="rounded-md border border-gold-500/40 bg-gold-500/10 px-2 py-0.5 font-display text-gold-400 shadow-glow">
+          Level {level}
+        </span>
+        <span
+          aria-hidden="true"
+          className="text-parchment-300/70"
+        >
           {current} / {required} XP
         </span>
       </div>
