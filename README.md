@@ -117,7 +117,7 @@ POST   /api/shop/:itemId/buy
 ## Deployment (all free tier)
 
 1. **Database — Supabase**: already set up above. Keep the connection string handy.
-2. **Backend — Render**:
+2. **Backend — Render**: use the included `render.yaml` blueprint (New → Blueprint → point at this repo), or set up manually:
    - New **Web Service** → connect this repo → root directory `backend`.
    - Build command: `npm install && npx prisma generate`
    - Start command: `npx prisma migrate deploy && npm start`

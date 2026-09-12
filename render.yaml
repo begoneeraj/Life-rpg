@@ -1,0 +1,25 @@
+# Render Blueprint for the Life RPG backend.
+# In the Render dashboard: New -> Blueprint -> point at this repo.
+# Render will read this file and provision the web service below; you still
+# need to fill in DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, and
+# CORS_ORIGIN manually (marked sync: false) since they're secrets/deploy-time
+# values this file shouldn't hardcode.
+services:
+  - type: web
+    name: life-rpg-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx prisma migrate deploy && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
