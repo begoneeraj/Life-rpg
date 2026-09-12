@@ -5,7 +5,8 @@ import useStore from '../store/useStore';
 import QuestCard from '../components/QuestCard';
 import { QuestCardSkeleton } from '../components/Skeleton';
 import LevelUpModal from '../components/LevelUpModal';
-import useAnalyzeQuest from '../hooks/useAnalyzeQuest';
+import QuestAssessmentModal from '../components/QuestAssessmentModal';
+import useQuestAssessment from '../hooks/useQuestAssessment';
 
 const CATEGORY_LABEL = {
   coding: 'Coding',
@@ -21,10 +22,12 @@ const CATEGORY_LABEL = {
 };
 
 /**
- * Quest category and difficulty are no longer picked manually - the AI
- * (POST /api/analyze-quest) classifies both, along with a time estimate that
- * drives non-linear XP (see backend xpEngine.xpForMinutes). This keeps the
- * reward tied to what the task actually is instead of a flat 3-bucket pick.
+ * Quest category and difficulty are no longer picked manually. Clicking
+ * "Start Assessment" opens a short AI-generated Q&A (useQuestAssessment +
+ * QuestAssessmentModal) that personalizes the difficulty/time estimate to
+ * the user's self-reported experience with the topic, then creates the
+ * quest with the AI's classification. XP is a non-linear function of the
+ * resulting estimatedMinutes (see backend xpEngine.xpForMinutes).
  */
 export default function Quests() {
   const quests = useStore((s) => s.quests);
@@ -38,35 +41,40 @@ export default function Quests() {
 
   const [title, setTitle] = useState('');
   const [titleError, setTitleError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [filter, setFilter] = useState('all'); // 'all' | 'pending' | 'completed'
-  const { analyze } = useAnalyzeQuest();
+  const assessment = useQuestAssessment();
 
   useEffect(() => {
     loadQuests();
   }, [loadQuests]);
 
-  async function handleSubmit(e) {
+  async function handleStartAssessment(e) {
     e.preventDefault();
     if (!title.trim()) {
-      setTitleError('Give your quest a title before adding it.');
+      setTitleError('Give your quest a topic before starting.');
       return;
     }
     setTitleError('');
-    setIsSubmitting(true);
     try {
-      const analysis = await analyze(title.trim());
-      await addQuest(title.trim(), analysis.category, analysis.difficulty, analysis.estimated_minutes);
+      await assessment.start(title.trim());
+    } catch {
+      // assessment.error is set; the modal shows it
+    }
+  }
+
+  async function handleAssessmentComplete(evaluation) {
+    try {
+      await addQuest(title.trim(), evaluation.category, evaluation.difficulty, evaluation.estimated_minutes);
       setTitle('');
+      assessment.reset();
       toast.success(
-        `Quest added — AI classified it as ${CATEGORY_LABEL[analysis.category] || analysis.category} · ${
-          analysis.difficulty
-        } · ~${analysis.estimated_minutes} min`
+        `Quest added — AI classified it as ${CATEGORY_LABEL[evaluation.category] || evaluation.category} · ${
+          evaluation.difficulty
+        } · ~${evaluation.estimated_minutes} min`
       );
     } catch (err) {
+      assessment.reset();
       toast.error(err.response?.data?.error || 'Could not add quest. Try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -83,18 +91,23 @@ export default function Quests() {
   return (
     <div className="page-container space-y-6">
       <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
+      <QuestAssessmentModal
+        assessment={assessment}
+        onComplete={handleAssessmentComplete}
+        onCancel={assessment.reset}
+      />
 
       <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">Quest Log</h1>
 
-      <form onSubmit={handleSubmit} noValidate className="parchment-card space-y-4 p-6">
+      <form onSubmit={handleStartAssessment} noValidate className="parchment-card space-y-4 p-6">
         <div>
           <label htmlFor="title" className="label-text">
-            New Quest
+            New Quest Topic
           </label>
           <input
             id="title"
             className="input-field"
-            placeholder="e.g. Finish the algorithms assignment"
+            placeholder="e.g. learn hashtables"
             value={title}
             onChange={(e) => {
               setTitle(e.target.value);
@@ -110,12 +123,12 @@ export default function Quests() {
             </p>
           )}
           <p className="mt-1.5 text-[11px] text-parchment-300/50">
-            ✨ Category, difficulty, and reward are set automatically by AI based on what you type.
+            ✨ You'll answer a couple of quick questions so the AI can personalize the difficulty and reward.
           </p>
         </div>
 
-        <button type="submit" className="btn-primary w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Analyzing & adding…' : 'Add Quest'}
+        <button type="submit" className="btn-primary w-full">
+          Start Assessment
         </button>
       </form>
 
