@@ -21,20 +21,35 @@ export default function InventoryItemCard({ item, gender, physique, onEquip, onU
   }
 
   return (
-    <div className={`card-interactive parchment-card flex flex-col gap-3 border p-4 ${rarity.border}`}>
-      <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900">
+    <div
+      className={`card-interactive group relative flex flex-col gap-3 border p-4 ${
+        item.equipped ? `${rarity.border} shadow-glow` : rarity.border
+      }`}
+    >
+      {/* Equipped slot treatment: glowing top rule (tasteful, not heavy) */}
+      {item.equipped && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-gradient-to-r from-transparent via-gold-400 to-transparent"
+        />
+      )}
+
+      {/* Recessed item slot with hover art scale */}
+      <div className="relative flex h-24 items-center justify-center overflow-hidden rounded-md border border-dungeon-600 bg-dungeon-950/60 transition-colors duration-200 group-hover:border-dungeon-500">
         <ItemArtwork
           category={item.category}
           svgKey={item.svgKey}
           gender={gender}
           physique={physique}
-          className="h-16 w-full"
+          className="h-20 w-full transition-transform duration-300 ease-out group-hover:scale-[1.06]"
         />
       </div>
+
       <div>
-        <p className="font-display text-sm font-bold text-parchment-100">{item.name}</p>
+        <p className="truncate font-display text-sm font-bold text-parchment-100">{item.name}</p>
         <p className={`text-[11px] font-bold uppercase tracking-widest ${rarity.text}`}>{rarity.label}</p>
       </div>
+
       <button
         type="button"
         onClick={handleClick}

@@ -4,14 +4,15 @@ import confetti from 'canvas-confetti';
 import useStore from '../store/useStore';
 import ShopItemCard from '../components/ShopItemCard';
 import { ShopItemSkeleton } from '../components/Skeleton';
+import Icon from '../components/ui/icons';
 
 const CATEGORIES = [
-  { value: 'all', label: 'All' },
-  { value: 'top', label: 'Outfits' },
-  { value: 'bottom', label: 'Bottoms' },
-  { value: 'shoes', label: 'Shoes' },
-  { value: 'accessory', label: 'Accessories' },
-  { value: 'special', label: 'Special' },
+  { value: 'all', label: 'All', icon: 'inventory' },
+  { value: 'top', label: 'Outfits', icon: 'character' },
+  { value: 'bottom', label: 'Bottoms', icon: 'cat_chores' },
+  { value: 'shoes', label: 'Shoes', icon: 'cat_running' },
+  { value: 'accessory', label: 'Accessories', icon: 'armory' },
+  { value: 'special', label: 'Special', icon: 'xp' },
 ];
 
 export default function Shop() {
@@ -40,16 +41,29 @@ export default function Shop() {
 
   return (
     <div className="page-container space-y-6">
-      <div className="flex flex-col gap-1 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-        <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">THE ARMORY</h1>
+      {/* ---------------- Armory header ---------------- */}
+      <header className="page-header !mb-0">
+        <div>
+          <h1 className="page-title flex items-center gap-3">
+            <Icon name="armory" className="h-6 w-6 text-gold-400" aria-hidden="true" />
+            The Armory
+          </h1>
+          <p className="page-subtitle">Upgrade your appearance. Gear is yours forever once acquired.</p>
+        </div>
         {character && (
-          <span className="mx-auto rounded-full border border-gold-600/40 bg-dungeon-800 px-3 py-1 text-sm font-semibold text-gold-400 sm:mx-0">
-            🪙 {character.gold} Gold · Level {character.level}
+          <span
+            className="hud-badge border-gold-600/40 bg-dungeon-900/80 px-3 py-1.5 text-gold-400"
+            aria-label={`${character.gold} gold available`}
+          >
+            <Icon name="coin" className="h-3.5 w-3.5" />
+            <span className="text-reward">{character.gold.toLocaleString()}</span> Gold
+            <span className="text-parchment-300/40">· Level {character.level}</span>
           </span>
         )}
-      </div>
+      </header>
 
-      <div className="flex flex-wrap justify-center gap-2 sm:justify-start" role="tablist" aria-label="Shop categories">
+      {/* ---------------- Category controls ---------------- */}
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Armory categories">
         {CATEGORIES.map((c) => (
           <button
             key={c.value}
@@ -57,39 +71,48 @@ export default function Shop() {
             role="tab"
             aria-selected={shopCategory === c.value}
             onClick={() => loadShopItems(c.value)}
-            className={`rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors ${
+            className={`flex items-center gap-1.5 rounded-md border px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest transition-all duration-150 ${
               shopCategory === c.value
-                ? 'border-gold-500 bg-gold-500/10 text-gold-400'
-                : 'border-dungeon-600 bg-dungeon-800 text-parchment-200/70 hover:border-mystic-500 hover:text-mystic-400'
+                ? 'border-gold-500/60 bg-gold-500/10 text-gold-400'
+                : 'border-dungeon-600 bg-dungeon-900/70 text-parchment-200/70 hover:border-dungeon-500 hover:text-parchment-100'
             }`}
           >
+            <Icon name={c.icon} className="h-3.5 w-3.5" aria-hidden="true" />
             {c.label}
           </button>
         ))}
       </div>
 
+      {/* ---------------- Grid states ---------------- */}
       {shopStatus === 'loading' && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+          {Array.from({ length: 10 }).map((_, i) => (
             <ShopItemSkeleton key={i} />
           ))}
         </div>
       )}
 
       {shopStatus === 'error' && (
-        <p className="parchment-card p-6 text-center text-sm text-ember-400">
-          Could not load the shop. Refresh to try again.
-        </p>
+        <div className="game-panel-quest rounded-lg p-8 text-center">
+          <p className="font-display text-sm font-bold uppercase tracking-widest text-ember-400">
+            The armory is unreachable
+          </p>
+          <p className="mt-1 text-sm text-parchment-300/60">
+            Could not load the shop. Refresh to try again.
+          </p>
+        </div>
       )}
 
       {shopStatus === 'ready' && visibleItems.length === 0 && (
-        <p className="parchment-card p-6 text-center text-sm text-parchment-300/60">
-          No items in this category yet.
-        </p>
+        <div className="game-panel flex flex-col items-center gap-3 p-10 text-center">
+          <Icon name="armory" className="h-10 w-10 text-parchment-300/25" aria-hidden="true" />
+          <p className="font-display text-base font-bold text-parchment-100">Nothing in this case yet</p>
+          <p className="text-sm text-parchment-300/60">New wares arrive as the world grows.</p>
+        </div>
       )}
 
       {shopStatus === 'ready' && visibleItems.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
           {visibleItems.map((item) => (
             <ShopItemCard
               key={item.id}
