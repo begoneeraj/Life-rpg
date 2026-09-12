@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import XPBar from '../components/XPBar';
 import displayName from '../utils/displayName';
+import routineIcon from '../utils/routineIcon';
 import StreakTracker from '../components/StreakTracker';
 import AttributeMiniBar from '../components/AttributeMiniBar';
 import CharacterAvatar from '../components/character/CharacterAvatar';
@@ -304,6 +305,11 @@ export default function Guild() {
                 >
                   <Icon name="check" className="h-3.5 w-3.5" />
                 </button>
+                <Icon
+                  name={routineIcon(task.title)}
+                  className="h-3.5 w-3.5 shrink-0 text-parchment-300/50"
+                  aria-hidden="true"
+                />
                 <span
                   className={`min-w-0 flex-1 truncate text-sm font-semibold ${
                     task.completedToday ? 'text-parchment-300/50 line-through decoration-xp-500' : 'text-parchment-100'
