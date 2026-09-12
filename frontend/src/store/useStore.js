@@ -187,8 +187,7 @@ const useStore = create((set, get) => ({
         ? data.attribute.charAt(0).toUpperCase() + data.attribute.slice(1)
         : null;
       toast.success(
-        `+${data.xpGained} XP · +${data.goldGained} Gold${attributeLabel ? ` · +${data.xpGained} ${attributeLabel}` : ''}`,
-        { icon: '⚔️' }
+        `+${data.xpGained} XP · +${data.goldGained} Gold${attributeLabel ? ` · +${data.xpGained} ${attributeLabel}` : ''}`
       );
 
       if (data.leveledUp) {
@@ -243,7 +242,7 @@ const useStore = create((set, get) => ({
 
   async buyItem(itemId) {
     const { data } = await shopApi.buyShopItem(itemId);
-    toast.success(`ITEM ACQUIRED: ${data.purchased.name} added to your inventory.`, { icon: '🛍️' });
+    toast.success(`ITEM ACQUIRED: ${data.purchased.name} added to your inventory.`);
     await Promise.all([get().loadCharacter(), get().loadShopItems()]);
   },
 

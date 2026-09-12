@@ -127,6 +127,23 @@ export default function AppShell() {
         <Icon name="xp" className="h-3 w-3 text-gold-500/90" />
         LV {character.level}
       </span>
+      {/* compact XP strip (md+): the reference HUD reads PLAYER · LV · XP · GOLD.
+          Same real XP math as XPBar, presented as a slim always-visible gauge. */}
+      <span
+        className="hidden w-28 md:block"
+        role="progressbar"
+        aria-valuenow={Math.min(100, Math.round((character.currentXP / Math.round(100 * Math.pow(character.level, 1.5))) * 100))}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Experience: ${character.currentXP} of ${Math.round(100 * Math.pow(character.level, 1.5))} XP toward level ${character.level + 1}`}
+      >
+        <span className="relative block h-2 overflow-hidden rounded-full border border-dungeon-600 bg-dungeon-950">
+          <span
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-xp-600 to-xp-400 shadow-glow-xp"
+            style={{ width: `${Math.min(100, Math.round((character.currentXP / Math.round(100 * Math.pow(character.level, 1.5))) * 100))}%` }}
+          />
+        </span>
+      </span>
       <Link
         to="/profile"
         aria-label="Open your profile"
