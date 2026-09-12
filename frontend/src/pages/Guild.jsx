@@ -1,0 +1,128 @@
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import useStore from '../store/useStore';
+import XPBar from '../components/XPBar';
+import StreakTracker from '../components/StreakTracker';
+import AttributeMiniBar from '../components/AttributeMiniBar';
+import { Skeleton } from '../components/Skeleton';
+
+// Mirrors backend's xpRequiredForLevel(n) = round(100 * n^1.5) so the bar
+// renders instantly without waiting on a round trip to /api/character.
+function xpRequiredForLevel(level) {
+  return Math.round(100 * Math.pow(level, 1.5));
+}
+
+export default function Guild() {
+  const user = useStore((s) => s.user);
+  const character = useStore((s) => s.character);
+  const quests = useStore((s) => s.quests);
+  const questsStatus = useStore((s) => s.questsStatus);
+  const loadQuests = useStore((s) => s.loadQuests);
+
+  useEffect(() => {
+    loadQuests();
+  }, [loadQuests]);
+
+  const pendingQuests = quests.filter((q) => q.status === 'pending');
+  const completedToday = quests.filter((q) => q.status === 'completed').length;
+
+  if (!character) {
+    return (
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+        <Skeleton className="h-28 w-full" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">
+          Welcome back, adventurer
+        </h1>
+        <p className="mt-1 truncate text-sm text-parchment-300/70">{user?.email}</p>
+      </motion.div>
+
+      <div className="parchment-card grid gap-6 p-6 sm:grid-cols-[1fr_auto]">
+        <div className="space-y-3">
+          <XPBar
+            level={character.level}
+            current={character.currentXP}
+            required={xpRequiredForLevel(character.level)}
+            size="lg"
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-full border border-gold-600/40 bg-dungeon-800 px-3 py-1 text-xs font-semibold text-gold-400">
+              🪙 {character.gold} Gold
+            </span>
+            <span className="rounded-full border border-mystic-600/40 bg-dungeon-800 px-3 py-1 text-xs font-semibold text-mystic-400">
+              {completedToday} quest{completedToday === 1 ? '' : 's'} completed
+            </span>
+          </div>
+        </div>
+        <StreakTracker
+          currentStreak={character.currentStreak}
+          longestStreak={character.longestStreak}
+        />
+      </div>
+
+      <div className="parchment-card p-6">
+        <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
+          Attributes
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <AttributeMiniBar attribute="intellect" value={character.intellect} />
+          <AttributeMiniBar attribute="strength" value={character.strength} />
+          <AttributeMiniBar attribute="discipline" value={character.discipline} />
+          <AttributeMiniBar attribute="creativity" value={character.creativity} />
+        </div>
+      </div>
+
+      <div className="parchment-card p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
+            Active Quests
+          </h2>
+          <Link to="/quests" className="text-xs font-semibold text-mystic-400 hover:underline">
+            View all →
+          </Link>
+        </div>
+
+        {questsStatus === 'loading' && (
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        )}
+
+        {questsStatus === 'ready' && pendingQuests.length === 0 && (
+          <p className="py-6 text-center text-sm text-parchment-300/60">
+            No active quests. Head to the Quests page to add one.
+          </p>
+        )}
+
+        {questsStatus === 'ready' && pendingQuests.length > 0 && (
+          <ul className="space-y-2">
+            {pendingQuests.slice(0, 4).map((q) => (
+              <li
+                key={q.id}
+                className="flex items-center justify-between rounded-md border border-dungeon-700 bg-dungeon-900/60 px-3 py-2 text-sm"
+              >
+                <span className="truncate text-parchment-100">{q.title}</span>
+                <span className="shrink-0 text-[11px] uppercase tracking-widest text-parchment-300/50">
+                  {q.category}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
