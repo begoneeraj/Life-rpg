@@ -5,6 +5,10 @@ import confetti from 'canvas-confetti';
 /**
  * The celebratory core-loop moment: a full-screen takeover with a confetti
  * burst whenever `info` (an object with fromLevel/toLevel) is set.
+ *
+ * R3 presentation: RPG level ceremony — gold-ringed sword emblem, rune tick
+ * divider, animated LV X → X+1 numerals. Logic (focus, Escape, confetti,
+ * dismiss) is unchanged.
  */
 export default function LevelUpModal({ info, onDismiss }) {
   const closeButtonRef = useRef(null);
@@ -47,34 +51,80 @@ export default function LevelUpModal({ info, onDismiss }) {
           onClick={onDismiss}
         >
           <motion.div
-            className="relative mx-4 flex max-w-md flex-col items-center gap-4 rounded-2xl border-2 border-gold-500/70 bg-gradient-to-b from-dungeon-850 to-dungeon-900 px-8 py-10 text-center shadow-glow"
+            className="game-panel game-panel-gold hud-frame relative mx-4 flex max-w-md flex-col items-center gap-4 px-8 py-10 text-center"
             initial={{ scale: 0.6, y: 40, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* pixel corner brackets */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 border-l-2 border-t-2 border-gold-400/80"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-2.5 right-2.5 h-3.5 w-3.5 border-b-2 border-r-2 border-gold-400/80"
+            />
+
+            {/* Emblem: gold ring + sword rune (replaces the trophy emoji) */}
             <motion.span
               aria-hidden="true"
-              className="text-6xl"
-              initial={{ rotate: -15 }}
-              animate={{ rotate: [0, -10, 10, -6, 6, 0] }}
-              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold-500/70 bg-dungeon-950/70 shadow-glow"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 16, delay: 0.1 }}
             >
-              🏆
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-9 w-9 text-gold-300"
+              >
+                <path d="M14.5 17.5 3 6V3h3l11.5 11.5" />
+                <path d="m13 19 6-6" />
+                <path d="m16 16 4 4" />
+                <path d="m19 21 2-2" />
+              </svg>
             </motion.span>
 
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-mystic-400">
-              Level Up!
+            <p className="font-hud text-[10px] uppercase tracking-[0.35em] text-mystic-400">
+              Level Up
             </p>
 
-            <h2
-              id="levelup-heading"
-              className="font-display text-3xl font-extrabold text-gold-400 sm:text-4xl"
-            >
-              Level {info?.fromLevel} <span className="text-parchment-100">→</span> Level{' '}
-              {info?.toLevel}
+            {/* LV X → X+1 with a count-up on the new level */}
+            <h2 id="levelup-heading" className="font-display text-4xl font-extrabold sm:text-5xl">
+              <motion.span
+                className="text-parchment-200/80"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.3 }}
+              >
+                LV {info?.fromLevel}
+              </motion.span>
+              <span aria-hidden="true" className="mx-3 text-gold-500">
+                →
+              </span>
+              <motion.span
+                className="inline-block text-gold-300 drop-shadow-[0_0_18px_rgb(var(--c-glow-gold)/0.55)]"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4, type: 'spring', stiffness: 320, damping: 14 }}
+              >
+                LV {info?.toLevel}
+              </motion.span>
             </h2>
+
+            {/* rune tick divider */}
+            <div className="flex items-center gap-1.5" aria-hidden="true">
+              <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold-600/70" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-gold-500/80" />
+              <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold-600/70" />
+            </div>
 
             <p className="text-sm text-parchment-200/80">
               Your legend grows. Keep completing quests to push even further.

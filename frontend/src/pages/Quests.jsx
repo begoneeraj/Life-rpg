@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
 import QuestCard from '../components/QuestCard';
@@ -28,6 +28,26 @@ const FILTERS = [
   { value: 'pending', label: 'Active', icon: 'sword' },
   { value: 'completed', label: 'Completed', icon: 'check' },
 ];
+
+// Featured-quest ranking + presentation metadata (same values as QuestCard).
+const DIFFICULTY_META = {
+  easy: { label: 'Easy', color: 'text-xp-400 border-xp-600/40' },
+  medium: { label: 'Medium', color: 'text-gold-400 border-gold-600/40' },
+  hard: { label: 'Hard', color: 'text-ember-400 border-ember-600/40' },
+};
+const DIFFICULTY_RANK = { hard: 2, medium: 1, easy: 0 };
+const CATEGORY_ICON = {
+  coding: 'cat_coding',
+  study: 'cat_study',
+  gym: 'cat_gym',
+  fitness: 'cat_gym',
+  running: 'cat_running',
+  meditation: 'cat_meditation',
+  deep_work: 'cat_deep_work',
+  chores: 'cat_chores',
+  healthy_habits: 'cat_healthy',
+  other: 'quests',
+};
 
 /**
  * Quest category and difficulty are no longer picked manually. Clicking
@@ -57,6 +77,8 @@ export default function Quests() {
   const [titleError, setTitleError] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'pending' | 'completed'
   const assessment = useQuestAssessment();
+  // Transient real-reward flash for the featured main quest completion.
+  const [flash, setFlash] = useState(null); // { xp, gold }
 
   useEffect(() => {
     loadQuests();
@@ -103,8 +125,33 @@ export default function Quests() {
     }
   }
 
-  const visibleQuests = quests.filter((q) => filter === 'all' || q.status === filter);
+  async function handleFeaturedComplete(id) {
+    try {
+      const data = await completeQuest(id);
+      if (data) {
+        setFlash({ xp: data.xpGained, gold: data.goldGained });
+        setTimeout(() => setFlash(null), 2200);
+      }
+    } catch {
+      // store already rolled back optimistic state + toasted the error
+    }
+  }
 
+  const visibleQuests = quests.filter((q) => filter === 'all' || q.status === filter);
+  const pendingQuests = quests.filter((q) => q.status === 'pending');
+  // Featured "main quest" = the hardest active quest on the board; it gets
+  // its own spotlight panel, so it's excluded from the row list below (when
+  // the current filter would show it). Pure presentation ordering only.
+  const mainQuest = pendingQuests.length
+    ? [...pendingQuests].sort(
+        (a, b) =>
+          (DIFFICULTY_RANK[b.difficulty] ?? 0) - (DIFFICULTY_RANK[a.difficulty] ?? 0)
+      )[0]
+    : null;
+  const featuredVisible = mainQuest && filter !== 'completed';
+  const listQuests = featuredVisible
+    ? visibleQuests.filter((q) => q.id !== mainQuest.id)
+    : visibleQuests;
   return (
     <div className="page-container quest-log space-y-5">
       <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
@@ -236,6 +283,86 @@ export default function Quests() {
         ))}
       </div>
 
+      {/* ---------------- Featured main quest ---------------- */}
+      {questsStatus === 'ready' && featuredVisible && (
+        <motion.article
+          layout
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="game-panel game-panel-gold relative overflow-hidden p-5"
+        >
+          {/* pixel corner brackets */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-2 top-2 h-3 w-3 border-l-2 border-t-2 border-gold-500/70"
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-2 right-2 h-3 w-3 border-b-2 border-r-2 border-gold-500/70"
+          />
+
+          <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+            <span
+              aria-hidden="true"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-gold-600/50 bg-dungeon-950/70 shadow-glow"
+            >
+              <Icon
+                name={CATEGORY_ICON[mainQuest.category] || 'quests'}
+                className="h-7 w-7 text-gold-300"
+              />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-hud text-[9px] uppercase tracking-[0.3em] text-gold-500/80">
+                Main Quest
+              </p>
+              <h3 className="truncate font-display text-xl font-bold text-parchment-100">
+                {mainQuest.title}
+              </h3>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-widest text-parchment-300/60">
+                <span className="capitalize">{mainQuest.category.replace(/_/g, ' ')}</span>
+                <span
+                  className={`tag-pill font-semibold ${
+                    (DIFFICULTY_META[mainQuest.difficulty] || DIFFICULTY_META.easy).color
+                  }`}
+                >
+                  {(DIFFICULTY_META[mainQuest.difficulty] || DIFFICULTY_META.easy).label}
+                </span>
+                {mainQuest.estimatedMinutes && (
+                  <span className="tag-pill border-mystic-600/40 bg-mystic-500/10 font-semibold text-mystic-400">
+                    ~{mainQuest.estimatedMinutes} min
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="relative ml-auto shrink-0">
+              {flash && (
+                <motion.span
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: -4 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute -top-1 right-0 whitespace-nowrap font-hud text-xs"
+                  aria-live="polite"
+                >
+                  <span className="text-reward">+{flash.xp} XP</span>{' '}
+                  <span className="flex items-center gap-0.5 text-gold-400">
+                    <Icon name="coin" className="h-3 w-3" aria-hidden="true" />+{flash.gold}
+                  </span>
+                </motion.span>
+              )}
+              <button
+                type="button"
+                onClick={() => handleFeaturedComplete(mainQuest.id)}
+                className="btn-game px-5 py-2.5"
+                aria-label={`Complete quest "${mainQuest.title}"`}
+              >
+                Complete Quest
+              </button>
+            </div>
+          </div>
+        </motion.article>
+      )}
+
       {/* ---------------- Board states ---------------- */}
       {questsStatus === 'loading' && (
         <div className="space-y-3">
@@ -256,7 +383,7 @@ export default function Quests() {
         </div>
       )}
 
-      {questsStatus === 'ready' && visibleQuests.length === 0 && (
+      {questsStatus === 'ready' && !featuredVisible && listQuests.length === 0 && (
         <div className="game-panel flex flex-col items-center gap-3 p-10 text-center">
           <Icon name="quests" className="h-10 w-10 text-parchment-300/25" aria-hidden="true" />
           <p className="font-display text-base font-bold text-parchment-100">
@@ -270,10 +397,10 @@ export default function Quests() {
         </div>
       )}
 
-      {questsStatus === 'ready' && visibleQuests.length > 0 && (
+      {questsStatus === 'ready' && listQuests.length > 0 && (
         <ul className="quest-list space-y-2.5">
           <AnimatePresence initial={false}>
-            {visibleQuests.map((quest) => (
+            {listQuests.map((quest) => (
               <QuestCard
                 key={quest.id}
                 quest={quest}

@@ -28,6 +28,23 @@ import { SpecialFxBack } from './layers/SpecialFx';
 export const ELITE_LEVEL = 25;
 export const MYTHIC_LEVEL = 50;
 
+// Stage-scoped theme wiring for the avatar's presentation effects. SVG
+// paint servers can't consume CSS vars directly, so the class hooks above
+// are themed here (light world: soft shadow + pale-gold sun rim).
+const AVATAR_STAGE_CSS = `
+  .avatar-ground-shadow { opacity: 1; }
+  .avatar-rim-flood { flood-color: #e8c874; }
+  [data-theme='light'] .avatar-ground-shadow { opacity: 0.22; }
+  [data-theme='light'] .avatar-rim-flood { flood-color: #f0dca8; }
+`;
+
+if (typeof document !== 'undefined' && !document.getElementById('avatar-stage-css')) {
+  const styleEl = document.createElement('style');
+  styleEl.id = 'avatar-stage-css';
+  styleEl.textContent = AVATAR_STAGE_CSS;
+  document.head.appendChild(styleEl);
+}
+
 export default function CharacterAvatar({
   gender = 'male',
   physique = 'athletic',
@@ -97,13 +114,37 @@ export default function CharacterAvatar({
               <stop offset="55%" stopColor="#000000" stopOpacity="0" />
               <stop offset="100%" stopColor="#000000" stopOpacity="0.85" />
             </linearGradient>
+            {/* Model-level ground contact shadow — grounds the figure without
+                touching any clothing/hair/skin path. */}
+            <radialGradient id="avatarGroundShadow">
+              <stop offset="0%" stopColor="#000000" stopOpacity="0.42" />
+              <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+            </radialGradient>
+            {/* Rim light on the key-lit side; theme resolves the flood color
+                (braziers' gold by night, sunlight by day). The flood is
+                SUBTRACTED from the source alpha (operator="out") so only the
+                offset crescent outside the silhouette is painted — tinting
+                the whole body would wash the character out. */}
+            <filter id="avatarRimLight" x="-20%" y="-20%" width="140%" height="140%">
+              <feFlood className="avatar-rim-flood" floodColor="#e8c874" floodOpacity="0.85" />
+              <feComposite in2="SourceAlpha" operator="in" />
+              <feOffset dx="2" dy="0" result="offsetRim" />
+              <feComposite in="offsetRim" in2="SourceAlpha" operator="out" result="rim" />
+              <feMerge>
+                <feMergeNode in="SourceGraphic" />
+                <feMergeNode in="rim" />
+              </feMerge>
+            </filter>
           </defs>
+          <ellipse cx="100" cy="303" rx="54" ry="7" fill="url(#avatarGroundShadow)" className="avatar-ground-shadow" />
 
           <g transform={`translate(${hairParallax},0)`}>
             <HairBack hairStyle={hairStyle} hairColor={hairColor} gender={gender} />
           </g>
 
-          <Body gender={gender} skinTone={skinTone} physique={physique} />
+          <g filter="url(#avatarRimLight)">
+            <Body gender={gender} skinTone={skinTone} physique={physique} />
+          </g>
 
           {equippedBottom && (
             <Bottom

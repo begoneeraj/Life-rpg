@@ -52,16 +52,42 @@ export default function CharacterStage({
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          background: `radial-gradient(58% 42% at 50% 26%, ${auraColor}, transparent 70%),
-            radial-gradient(120% 60% at 50% 118%, rgb(var(--c-dungeon-950) / 0.9), transparent 55%)`,
+          background: `radial-gradient(58% 42% at 50% 26%, ${auraColor}, transparent 70%)`,
         }}
       />
+      {/* Beam + ground treatment resolve through scoped selectors: the
+          light world gets a warm sun shaft with no dark overlay (a dark cone
+          on parchment reads as grime) and only a faint ground shadow. */}
+      <style>{`
+        .stage-beam {
+          background: linear-gradient(180deg,
+            rgb(var(--c-gold-400) / 0.10),
+            rgb(var(--c-mystic-500) / 0.05) 60%, transparent);
+        }
+        .stage-groundfade {
+          background: radial-gradient(120% 60% at 50% 118%,
+            rgb(var(--c-dungeon-950) / 0.9), transparent 55%);
+        }
+        .stage-groundshadow { opacity: 0.55; }
+        /* Model separation shadow: strong at night, a whisper by day (a hard
+           black halo on parchment reads as dirt). */
+        .avatar-drop { filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.55)); }
+        [data-theme='light'] .avatar-drop { filter: drop-shadow(0 8px 18px rgba(96, 74, 34, 0.22)); }
+        [data-theme='light'] .stage-beam {
+          background: linear-gradient(180deg,
+            rgb(var(--c-gold-400) / 0.16),
+            rgb(var(--c-gold-500) / 0.06) 60%, transparent);
+        }
+        [data-theme='light'] .stage-groundfade {
+          background: radial-gradient(120% 60% at 50% 118%,
+            rgb(var(--c-gold-600) / 0.10), transparent 55%);
+        }
+          [data-theme='light'] .stage-groundshadow { opacity: 0.28; }
+      `}</style>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-0 h-[72%] w-[46%] -translate-x-1/2"
+        className="stage-beam pointer-events-none absolute left-1/2 top-0 h-[72%] w-[46%] -translate-x-1/2"
         style={{
-          background:
-            'linear-gradient(180deg, rgb(var(--c-gold-400) / 0.10), rgb(var(--c-mystic-500) / 0.05) 60%, transparent)',
           clipPath: 'polygon(38% 0, 62% 0, 92% 100%, 8% 100%)',
           filter: 'blur(2px)',
         }}
@@ -73,7 +99,8 @@ export default function CharacterStage({
           <motion.span
             key={i}
             aria-hidden="true"
-            className="pointer-events-none absolute h-1 w-1 rounded-full bg-gold-300/60"
+            className="pointer-events-none absolute h-1 w-1 rounded-full"
+            style={{ background: 'rgb(var(--c-gold-400) / 0.5)' }}
             style={{ left: `${12 + i * 15}%`, bottom: '18%' }}
             animate={{ y: [0, -90 - i * 12], opacity: [0, 0.7, 0] }}
             transition={{ duration: 7 + i * 1.3, repeat: Infinity, delay: i * 1.1, ease: 'easeInOut' }}
@@ -81,6 +108,7 @@ export default function CharacterStage({
         ))}
 
       {/* character slot */}
+      <div className="stage-groundfade pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="relative z-10 flex h-full flex-col items-center justify-end">
         <motion.div
           className="relative flex w-full flex-1 items-end justify-center"
@@ -112,7 +140,7 @@ export default function CharacterStage({
             level={level}
             rotation={rotation}
             idle={idle}
-            className="h-full max-h-[640px] w-auto drop-shadow-[0_10px_28px_rgba(0,0,0,0.55)]"
+            className="avatar-drop h-full max-h-[640px] w-auto"
           />
         </motion.div>
 
@@ -134,8 +162,11 @@ export default function CharacterStage({
               return <rect key={angle} x={x - 1.5} y={y - 1.5} width="3" height="3" fill="rgb(var(--c-gold-300) / 0.55)" />;
             })}
           </svg>
+          {/* soft ground shadow — faint on the light world so it doesn't
+              read as a hole punched in parchment */}
           <div
             className="absolute inset-x-[12%] bottom-1 h-6 rounded-[50%]"
+            className="stage-groundshadow absolute inset-x-[12%] bottom-1 h-6 rounded-[50%]"
             style={{ background: 'radial-gradient(closest-side, rgba(0,0,0,0.5), transparent 75%)' }}
           />
         </div>

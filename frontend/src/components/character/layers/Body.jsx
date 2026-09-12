@@ -27,9 +27,13 @@ export default function Body({ gender, skinTone, physique = 'athletic' }) {
           <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
         </linearGradient>
         <filter id={rimId} x="-20%" y="-20%" width="140%" height="140%">
-          <feFlood floodColor="#e5c07b" floodOpacity="0.55" />
+          {/* Rim crescent = flood ∩ alpha, shifted, then SUBTRACTED by the
+              un-shifted alpha (operator="out"). Tinting the whole shape
+              washes out — especially in the light theme. */}
+          <feFlood floodColor="#e5c07b" floodOpacity="0.75" />
           <feComposite in2="SourceAlpha" operator="in" />
-          <feOffset dx="1.5" dy="0" result="rim" />
+          <feOffset dx="2" dy="0" result="offsetRim" />
+          <feComposite in="offsetRim" in2="SourceAlpha" operator="out" result="rim" />
           <feMerge>
             <feMergeNode in="SourceGraphic" />
             <feMergeNode in="rim" />
