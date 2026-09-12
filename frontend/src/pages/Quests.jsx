@@ -5,6 +5,7 @@ import useStore from '../store/useStore';
 import QuestCard from '../components/QuestCard';
 import { QuestCardSkeleton } from '../components/Skeleton';
 import LevelUpModal from '../components/LevelUpModal';
+import useAnalyzeQuest from '../hooks/useAnalyzeQuest';
 
 const CATEGORIES = [
   { value: 'coding', label: '💻 Coding (Intellect)' },
@@ -41,12 +42,29 @@ export default function Quests() {
   const [titleError, setTitleError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filter, setFilter] = useState('all'); // 'all' | 'pending' | 'completed'
+  const { analyze, result: aiResult, isLoading: isAnalyzing } = useAnalyzeQuest();
+  const [analyzedTitle, setAnalyzedTitle] = useState('');
 
   useEffect(() => {
     loadQuests();
   }, [loadQuests]);
 
   const selectedDifficulty = DIFFICULTIES.find((d) => d.value === difficulty);
+
+  async function handleAnalyze() {
+    if (!title.trim()) {
+      setTitleError('Type a quest title first, then analyze it.');
+      return;
+    }
+    setTitleError('');
+    try {
+      const data = await analyze(title.trim());
+      setDifficulty(data.difficulty);
+      setAnalyzedTitle(title.trim());
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Could not analyze that task. Try again.');
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -88,22 +106,38 @@ export default function Quests() {
           <label htmlFor="title" className="label-text">
             New Quest
           </label>
-          <input
-            id="title"
-            className="input-field"
-            placeholder="e.g. Finish the algorithms assignment"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              if (titleError) setTitleError('');
-            }}
-            maxLength={140}
-            aria-invalid={Boolean(titleError)}
-            aria-describedby={titleError ? 'title-error' : undefined}
-          />
+          <div className="flex gap-2">
+            <input
+              id="title"
+              className="input-field"
+              placeholder="e.g. Finish the algorithms assignment"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (titleError) setTitleError('');
+              }}
+              maxLength={140}
+              aria-invalid={Boolean(titleError)}
+              aria-describedby={titleError ? 'title-error' : undefined}
+            />
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={isAnalyzing || !title.trim()}
+              className="shrink-0 rounded-md border border-mystic-600 bg-mystic-500/10 px-3 text-xs font-semibold text-mystic-400 transition-colors hover:border-mystic-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isAnalyzing ? 'Analyzing…' : '✨ Analyze'}
+            </button>
+          </div>
           {titleError && (
             <p id="title-error" className="mt-1 text-xs text-ember-400">
               {titleError}
+            </p>
+          )}
+          {aiResult && analyzedTitle === title.trim() && (
+            <p className="mt-1.5 text-xs text-mystic-400/80">
+              AI suggests <span className="font-semibold capitalize">{aiResult.difficulty}</span> ·{' '}
+              ~{aiResult.estimated_minutes} min — {aiResult.reason}
             </p>
           )}
         </div>
