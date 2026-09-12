@@ -1,19 +1,23 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { RARITY_STYLES } from './character/constants';
 import ItemArtwork from './items/ItemArtwork';
 import StatusBadge from './ui/StatusBadge';
 
 export default function InventoryItemCard({ item, gender, physique, onEquip, onUnequip }) {
   const [isBusy, setIsBusy] = useState(false);
+  // Transient confirmation sweep after a REAL equip/unequip succeeds — the
+  // badge/state change below is the durable truth, this is just the tick.
+  const [flash, setFlash] = useState(false);
   const rarity = RARITY_STYLES[item.rarity] || RARITY_STYLES.common;
 
   async function handleClick() {
     setIsBusy(true);
     try {
-      if (item.equipped) {
-        await onUnequip(item.id);
-      } else {
-        await onEquip(item.id);
+      const ok = item.equipped ? await onUnequip(item.id) : await onEquip(item.id);
+      if (ok !== false) {
+        setFlash(true);
+        setTimeout(() => setFlash(false), 800);
       }
     } finally {
       setIsBusy(false);
@@ -21,11 +25,20 @@ export default function InventoryItemCard({ item, gender, physique, onEquip, onU
   }
 
   return (
-    <div
-      className={`card-interactive group relative flex flex-col gap-3 border p-4 ${
+    <div      className={`card-interactive group relative flex flex-col gap-3 border p-4 ${
         item.equipped ? `${rarity.border} shadow-glow` : rarity.border
-      }`}
-    >
+      } ${isBusy ? 'opacity-70' : ''}`}>
+      {/* equip/unequip confirmation sweep (real operation feedback) */}
+      {flash && (
+        <motion.span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-10 rounded-sm bg-xp-500/15"
+          initial={{ opacity: 0.6 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+        />
+      )}
+
       {/* Equipped slot treatment: glowing top rule (tasteful, not heavy) */}
       {item.equipped && (
         <span

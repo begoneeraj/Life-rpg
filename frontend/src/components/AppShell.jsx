@@ -114,7 +114,17 @@ export default function AppShell() {
       aria-label={`${character.gold} gold`}
     >
       <Icon name="coin" className="h-3 w-3" />
-      {character.gold.toLocaleString()}
+      {/* Keyed remount slides the numeral in whenever the REAL gold value
+          changes — a quiet "value changed" tick, not a casino effect. */}
+      <motion.span
+        key={character.gold}
+        initial={{ y: 7, opacity: 0.3 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="inline-block"
+      >
+        {character.gold.toLocaleString()}
+      </motion.span>
     </span>
   );
 

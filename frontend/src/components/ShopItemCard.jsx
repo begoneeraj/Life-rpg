@@ -33,6 +33,15 @@ export default function ShopItemCard({ item, gold, level, gender, physique, onBu
       {/* Item slot: recessed art tile that brightens toward its rarity on hover */}
       <div className="relative flex h-24 items-center justify-center overflow-hidden rounded-md border border-dungeon-600 bg-dungeon-950/60 transition-colors duration-200 group-hover:border-dungeon-500">
         <div className={`pointer-events-none absolute inset-0 border ${rarity.border} opacity-0 transition-opacity duration-200 group-hover:opacity-100`} aria-hidden="true" />
+        {/* Rarity-graded motion: epic+ earns a slow shimmer sweep; common
+            and uncommon stay perfectly still. One cheap gradient, no loops
+            per-card beyond the single animation, killed by reduced-motion. */}
+        {(item.rarity === 'epic' || item.rarity === 'legendary' || item.rarity === 'mythic') && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%]"
+          />
+        )}
         <ItemArtwork
           category={item.category}
           svgKey={item.svgKey}

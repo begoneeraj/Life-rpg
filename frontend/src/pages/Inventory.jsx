@@ -40,19 +40,25 @@ export default function Inventory() {
     loadInventory();
   }, [loadInventory]);
 
+  // Return success so the card only plays its confirmation sweep when the
+  // REAL operation succeeded — failure already surfaces via toast.
   async function handleEquip(itemId) {
     try {
       await equipItem(itemId);
+      return true;
     } catch (err) {
       toast.error(err.response?.data?.error || 'Could not equip that item.');
+      return false;
     }
   }
 
   async function handleUnequip(itemId) {
     try {
       await unequipItem(itemId);
+      return true;
     } catch (err) {
       toast.error(err.response?.data?.error || 'Could not unequip that item.');
+      return false;
     }
   }
 
