@@ -1,9 +1,10 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store/useStore';
 
 /** Gates a route behind auth. Shows nothing while the initial /auth/me check is in flight. */
 export default function ProtectedRoute({ children }) {
   const authStatus = useStore((s) => s.authStatus);
+  const location = useLocation();
 
   if (authStatus === 'loading') {
     return (
@@ -18,7 +19,7 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (authStatus === 'guest') {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   return children;
