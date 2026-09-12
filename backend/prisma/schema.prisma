@@ -1,0 +1,74 @@
+// Life RPG — Prisma schema
+// Postgres hosted on Supabase (free tier). Connection string comes from DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  character    Character?
+  quests       Quest[]
+  refreshTokens RefreshToken[]
+}
+
+model Character {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level          Int       @default(1)
+  currentXP      Int       @default(0)
+  gold           Int       @default(0)
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastActiveDate DateTime?
+  intellect      Int       @default(0)
+  strength       Int       @default(0)
+  discipline     Int       @default(0)
+  creativity     Int       @default(0)
+  ownedItems     String[]  @default([])
+  equippedTheme  String    @default("default")
+  updatedAt      DateTime  @updatedAt
+}
+
+model Quest {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  category    String // "coding" | "gym" | "study" | "creative" -> maps to attribute
+  difficulty  String // "easy" | "medium" | "hard" -> maps to base XP
+  status      String    @default("pending") // pending | completed
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model ShopItem {
+  id   String @id @default(uuid())
+  name String
+  cost Int
+  type String // "theme" | "badge" | "avatar"
+}
+
+// Refresh tokens are persisted so they can be revoked on logout / rotated safely.
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+
+  @@index([userId])
+}
