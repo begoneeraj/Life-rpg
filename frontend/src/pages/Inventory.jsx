@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
 import InventoryItemCard from '../components/InventoryItemCard';
+import SlotIcon from '../components/character/characterIcons';
 import CharacterAvatar from '../components/character/CharacterAvatar';
 import { ShopItemSkeleton } from '../components/Skeleton';
 import Icon from '../components/ui/icons';
@@ -15,6 +16,17 @@ const CATEGORY_LABEL = {
   special: 'Special Equipment',
   hair: 'Hairstyles',
 };
+
+// Loadout row: the five REAL equipment slots (the avatar has no headgear
+// slot in the data model, so no invented HEAD tile). Slot icons come from
+// the character subsystem's own icon family.
+const LOADOUT_SLOTS = [
+  { key: 'top', label: 'Body', icon: 'top' },
+  { key: 'bottom', label: 'Legs', icon: 'legs' },
+  { key: 'shoes', label: 'Shoes', icon: 'shoes' },
+  { key: 'accessory', label: 'Accessory', icon: 'accessory' },
+  { key: 'special', label: 'Weapon', icon: 'special' },
+];
 
 export default function Inventory() {
   const character = useStore((s) => s.character);
@@ -73,51 +85,79 @@ export default function Inventory() {
 
       {/* ---------------- Loadout strip (real equipped items) ---------------- */}
       {character && inventoryStatus === 'ready' && (
-        <section className="game-panel game-panel-gold flex flex-wrap items-center gap-4 p-4" aria-label="Currently equipped">
-          <Link
-            to="/character"
-            aria-label="View your character"
-            className="h-16 w-12 shrink-0 overflow-hidden rounded-md border border-gold-500/40 bg-dungeon-900 transition-transform hover:-translate-y-0.5"
-          >
-            <CharacterAvatar
-              gender={character.gender}
-              physique={character.physique}
-              skinTone={character.skinTone}
-              faceType={character.faceType}
-              eyeColor={character.eyeColor}
-              hairStyle={character.hairStyle}
-              hairColor={character.hairColor}
-              facialHair={character.facialHair}
-              skinDetail={character.skinDetail}
-              equippedTop={equipped.top}
-              equippedBottom={equipped.bottom}
-              equippedShoes={equipped.shoes}
-              equippedAccessory={equipped.accessory}
-              equippedSpecial={equipped.special}
-              level={character.level}
-              idle={false}
-              className="h-full w-full"
-            />
-          </Link>
-          {equippedSlots.length === 0 ? (
-            <p className="text-sm text-parchment-300/60">
-              Nothing equipped yet — pick something from your collection below.
-            </p>
-          ) : (
-            equippedSlots.map((slot) => (
-              <div
-                key={slot}
-                className="flex items-center gap-2 rounded-md border border-dungeon-700/70 bg-dungeon-900/70 px-2.5 py-1.5"
-              >
-                <span aria-hidden="true" className="font-hud text-[9px] uppercase tracking-[0.2em] text-parchment-300/50">
-                  {slot}
-                </span>
-                <span className="text-xs font-semibold text-parchment-100">
-                  {equipped[slot]?.name}
-                </span>
-              </div>
-            ))
-          )}
+        <section className="game-panel game-panel-gold p-4" aria-label="Currently equipped">
+          <div className="flex items-center gap-4">
+            <Link
+              to="/character"
+              aria-label="View your character"
+              className="h-16 w-12 shrink-0 overflow-hidden rounded-md border border-gold-500/40 bg-dungeon-900 transition-transform hover:-translate-y-0.5"
+            >
+              <CharacterAvatar
+                gender={character.gender}
+                physique={character.physique}
+                skinTone={character.skinTone}
+                faceType={character.faceType}
+                eyeColor={character.eyeColor}
+                hairStyle={character.hairStyle}
+                hairColor={character.hairColor}
+                facialHair={character.facialHair}
+                skinDetail={character.skinDetail}
+                equippedTop={equipped.top}
+                equippedBottom={equipped.bottom}
+                equippedShoes={equipped.shoes}
+                equippedAccessory={equipped.accessory}
+                equippedSpecial={equipped.special}
+                level={character.level}
+                idle={false}
+                className="h-full w-full"
+              />
+            </Link>
+            <div className="min-w-0">
+              <p className="font-hud text-[10px] uppercase tracking-[0.3em] text-gold-500/80">Player loadout</p>
+              <p className="mt-0.5 truncate text-sm text-parchment-300/60">
+                {equippedSlots.length === 0
+                  ? 'Nothing equipped yet — pick something from your collection below.'
+                  : `${equippedSlots.length} of ${LOADOUT_SLOTS.length} slots filled`}
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            {LOADOUT_SLOTS.map((slot) => {
+              const item = equipped[slot.key];
+              return (
+                <div
+                  key={slot.key}
+                  className={`flex min-w-0 items-center gap-2.5 rounded-md border px-2.5 py-2 ${
+                    item
+                      ? 'border-gold-500/40 bg-gold-500/5'
+                      : 'border-dashed border-dungeon-700/70 bg-dungeon-900/40'
+                  }`}
+                >
+                  <span
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded border ${
+                      item
+                        ? 'border-gold-500/50 bg-dungeon-950 text-gold-400'
+                        : 'border-dungeon-600 bg-dungeon-950/60 text-parchment-300/40'
+                    }`}
+                  >
+                    <SlotIcon name={slot.icon} className="h-3.5 w-3.5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-hud text-[8px] uppercase tracking-[0.18em] text-parchment-300/45">
+                      {slot.label}
+                    </span>
+                    <span
+                      className={`block truncate text-xs font-semibold ${
+                        item ? 'text-parchment-100' : 'text-parchment-300/35'
+                      }`}
+                    >
+                      {item?.name || 'Empty'}
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </section>
       )}
 

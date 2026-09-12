@@ -194,7 +194,7 @@ export default function CharacterCreation() {
                 CREATE YOUR HERO
               </h1>
               <p className="mt-1 text-sm text-parchment-300/70">
-                This face stays with you for the whole journey. Choose wisely.
+                Every great adventure begins with a choice.
               </p>
             </div>
             {/* forge step pips */}

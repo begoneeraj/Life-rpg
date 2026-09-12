@@ -226,7 +226,7 @@ export default function Quests() {
       <form onSubmit={handleStartAssessment} noValidate className="quest-console hud-frame space-y-3 p-4 sm:p-5">
         <div>
           <label htmlFor="title" className="label-text">
-            Input New Quest Topic
+            Forge a New Quest
           </label>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
@@ -243,7 +243,7 @@ export default function Quests() {
               aria-describedby={titleError ? 'title-error' : undefined}
             />
             <button type="submit" className="btn-primary shrink-0 sm:w-auto">
-              Begin Assessment
+              Accept New Quest
             </button>
           </div>
           {titleError && (
@@ -283,134 +283,171 @@ export default function Quests() {
         ))}
       </div>
 
-      {/* ---------------- Featured main quest ---------------- */}
-      {questsStatus === 'ready' && featuredVisible && (
-        <motion.article
-          layout
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="game-panel game-panel-gold relative overflow-hidden p-5"
-        >
-          {/* pixel corner brackets */}
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute left-2 top-2 h-3 w-3 border-l-2 border-t-2 border-gold-500/70"
-          />
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-2 right-2 h-3 w-3 border-b-2 border-r-2 border-gold-500/70"
-          />
+      {/* ---------------- Quest Log: list + featured detail ---------------- */}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.8fr)] lg:items-start">
+        {/* LEFT: the log list (featured quest excluded — it's spotlighted right) */}
+        <div className="min-w-0 space-y-3">
+          {questsStatus === 'loading' && (
+            <div className="space-y-3">
+              <QuestCardSkeleton />
+              <QuestCardSkeleton />
+              <QuestCardSkeleton />
+            </div>
+          )}
 
-          <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
-            <span
-              aria-hidden="true"
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-gold-600/50 bg-dungeon-950/70 shadow-glow"
+          {questsStatus === 'error' && (
+            <div className="game-panel-quest rounded-lg p-8 text-center">
+              <p className="font-display text-sm font-bold uppercase tracking-widest text-ember-400">
+                Quest data unavailable
+              </p>
+              <p className="mt-1 text-sm text-parchment-300/60">
+                The board could not be loaded. Refresh to try again.
+              </p>
+            </div>
+          )}
+
+          {questsStatus === 'ready' && !featuredVisible && listQuests.length === 0 && (
+            <div className="game-panel flex flex-col items-center gap-3 p-10 text-center">
+              <Icon name="quests" className="h-10 w-10 text-parchment-300/25" aria-hidden="true" />
+              <p className="font-display text-base font-bold text-parchment-100">
+                {filter === 'all'
+                  ? 'Quest board empty'
+                  : `No ${FILTERS.find((f) => f.value === filter)?.label.toLowerCase()} quests`}
+              </p>
+              <p className="text-sm text-parchment-300/60">
+                {filter === 'all'
+                  ? 'Your next adventure awaits — accept a new quest above.'
+                  : 'New adventures will appear here as you take them on.'}
+              </p>
+            </div>
+          )}
+
+          {questsStatus === 'ready' && listQuests.length > 0 && (
+            <ul className="quest-list space-y-2.5">
+              <AnimatePresence initial={false}>
+                {listQuests.map((quest) => (
+                  <QuestCard
+                    key={quest.id}
+                    quest={quest}
+                    onComplete={handleComplete}
+                    onDelete={removeQuest}
+                  />
+                ))}
+              </AnimatePresence>
+            </ul>
+          )}
+        </div>
+
+        {/* RIGHT: featured quest spotlight — sticky on desktop */}
+        <aside className="min-w-0 lg:sticky lg:top-20">
+          {questsStatus === 'ready' && featuredVisible && (
+            <motion.article
+              layout
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="game-panel game-panel-gold relative overflow-hidden p-5 sm:p-6"
             >
-              <Icon
-                name={CATEGORY_ICON[mainQuest.category] || 'quests'}
-                className="h-7 w-7 text-gold-300"
+              {/* pixel corner brackets */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute left-2 top-2 h-3 w-3 border-l-2 border-t-2 border-gold-500/70"
               />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-hud text-[9px] uppercase tracking-[0.3em] text-gold-500/80">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-2 right-2 h-3 w-3 border-b-2 border-r-2 border-gold-500/70"
+              />
+
+              <p className="relative font-hud text-[9px] uppercase tracking-[0.3em] text-gold-500/80">
                 Main Quest
               </p>
-              <h3 className="truncate font-display text-xl font-bold text-parchment-100">
-                {mainQuest.title}
-              </h3>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-widest text-parchment-300/60">
-                <span className="capitalize">{mainQuest.category.replace(/_/g, ' ')}</span>
+              <div className="relative mt-2 flex items-start gap-3">
                 <span
-                  className={`tag-pill font-semibold ${
-                    (DIFFICULTY_META[mainQuest.difficulty] || DIFFICULTY_META.easy).color
-                  }`}
+                  aria-hidden="true"
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-gold-600/50 bg-dungeon-950/70 shadow-glow"
                 >
-                  {(DIFFICULTY_META[mainQuest.difficulty] || DIFFICULTY_META.easy).label}
+                  <Icon
+                    name={CATEGORY_ICON[mainQuest.category] || 'quests'}
+                    className="h-7 w-7 text-gold-300"
+                  />
                 </span>
-                {mainQuest.estimatedMinutes && (
-                  <span className="tag-pill border-mystic-600/40 bg-mystic-500/10 font-semibold text-mystic-400">
-                    ~{mainQuest.estimatedMinutes} min
+                <div className="min-w-0">
+                  <h3 className="font-display text-xl font-bold leading-tight text-parchment-100">
+                    {mainQuest.title}
+                  </h3>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-widest text-parchment-300/60">
+                    <span className="capitalize">{mainQuest.category.replace(/_/g, ' ')}</span>
+                    <span
+                      className={`tag-pill font-semibold ${
+                        (DIFFICULTY_META[mainQuest.difficulty] || DIFFICULTY_META.easy).color
+                      }`}
+                    >
+                      {(DIFFICULTY_META[mainQuest.difficulty] || DIFFICULTY_META.easy).label}
+                    </span>
+                    {mainQuest.estimatedMinutes && (
+                      <span className="tag-pill border-mystic-600/40 bg-mystic-500/10 font-semibold text-mystic-400">
+                        ~{mainQuest.estimatedMinutes} min
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* difficulty flavor line — presentation only, no invented data */}
+              <p className="relative mt-4 border-l-2 border-gold-600/50 pl-3 text-sm italic leading-relaxed text-parchment-300/65">
+                {mainQuest.difficulty === 'hard'
+                  ? 'A trial worthy of legend — steady yourself before you begin.'
+                  : mainQuest.difficulty === 'medium'
+                    ? 'A worthy task. The guild believes you are ready.'
+                    : 'A small step, but every legend begins with one.'}
+              </p>
+
+              <div className="relative mt-5 flex items-center justify-between gap-3 border-t border-dungeon-600/40 pt-4">
+                {flash ? (
+                  <motion.span
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: -4 }}
+                    exit={{ opacity: 0 }}
+                    className="font-hud text-sm"
+                    aria-live="polite"
+                  >
+                    <span className="text-reward">+{flash.xp} XP</span>{' '}
+                    <span className="flex items-center gap-0.5 text-gold-400">
+                      <Icon name="coin" className="h-3 w-3" aria-hidden="true" />+{flash.gold}
+                    </span>
+                  </motion.span>
+                ) : (
+                  <span className="font-hud text-[10px] uppercase tracking-[0.2em] text-parchment-300/45">
+                    Rewards await completion
                   </span>
                 )}
-              </div>
-            </div>
-            <div className="relative ml-auto shrink-0">
-              {flash && (
-                <motion.span
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: -4 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute -top-1 right-0 whitespace-nowrap font-hud text-xs"
-                  aria-live="polite"
+                <button
+                  type="button"
+                  onClick={() => handleFeaturedComplete(mainQuest.id)}
+                  className="btn-game shrink-0 px-5 py-2.5"
+                  aria-label={`Complete quest "${mainQuest.title}"`}
                 >
-                  <span className="text-reward">+{flash.xp} XP</span>{' '}
-                  <span className="flex items-center gap-0.5 text-gold-400">
-                    <Icon name="coin" className="h-3 w-3" aria-hidden="true" />+{flash.gold}
-                  </span>
-                </motion.span>
-              )}
-              <button
-                type="button"
-                onClick={() => handleFeaturedComplete(mainQuest.id)}
-                className="btn-game px-5 py-2.5"
-                aria-label={`Complete quest "${mainQuest.title}"`}
-              >
-                Complete Quest
-              </button>
+                  Complete Quest
+                </button>
+              </div>
+            </motion.article>
+          )}
+
+          {questsStatus === 'ready' && !featuredVisible && (
+            <div className="game-panel p-6 text-center">
+              <Icon name="sword" className="mx-auto h-8 w-8 text-parchment-300/25" aria-hidden="true" />
+              <p className="mt-2 font-hud text-[10px] uppercase tracking-[0.2em] text-parchment-300/50">
+                No featured quest
+              </p>
+              <p className="mt-1 text-sm text-parchment-300/55">
+                {filter === 'completed'
+                  ? 'Completed quests rest in the log on the left.'
+                  : 'Accept a new quest to feature it here.'}
+              </p>
             </div>
-          </div>
-        </motion.article>
-      )}
-
-      {/* ---------------- Board states ---------------- */}
-      {questsStatus === 'loading' && (
-        <div className="space-y-3">
-          <QuestCardSkeleton />
-          <QuestCardSkeleton />
-          <QuestCardSkeleton />
-        </div>
-      )}
-
-      {questsStatus === 'error' && (
-        <div className="game-panel-quest rounded-lg p-8 text-center">
-          <p className="font-display text-sm font-bold uppercase tracking-widest text-ember-400">
-            Quest data unavailable
-          </p>
-          <p className="mt-1 text-sm text-parchment-300/60">
-            The board could not be loaded. Refresh to try again.
-          </p>
-        </div>
-      )}
-
-      {questsStatus === 'ready' && !featuredVisible && listQuests.length === 0 && (
-        <div className="game-panel flex flex-col items-center gap-3 p-10 text-center">
-          <Icon name="quests" className="h-10 w-10 text-parchment-300/25" aria-hidden="true" />
-          <p className="font-display text-base font-bold text-parchment-100">
-            {filter === 'all' ? 'Quest board empty' : `No ${FILTERS.find((f) => f.value === filter)?.label.toLowerCase()} quests`}
-          </p>
-          <p className="text-sm text-parchment-300/60">
-            {filter === 'all'
-              ? 'Your next adventure awaits — accept a new quest above.'
-              : 'New adventures will appear here as you take them on.'}
-          </p>
-        </div>
-      )}
-
-      {questsStatus === 'ready' && listQuests.length > 0 && (
-        <ul className="quest-list space-y-2.5">
-          <AnimatePresence initial={false}>
-            {listQuests.map((quest) => (
-              <QuestCard
-                key={quest.id}
-                quest={quest}
-                onComplete={handleComplete}
-                onDelete={removeQuest}
-              />
-            ))}
-          </AnimatePresence>
-        </ul>
-      )}
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
