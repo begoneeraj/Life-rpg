@@ -47,7 +47,7 @@ export default function Inventory() {
   }, {});
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
+    <div className="page-container space-y-8">
       <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">Inventory</h1>
 
       {inventoryStatus === 'loading' && (

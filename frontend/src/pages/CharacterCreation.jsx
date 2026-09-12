@@ -110,7 +110,7 @@ export default function CharacterCreation() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-8 px-4 py-10 lg:flex-row lg:items-stretch">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col items-center justify-center gap-8 px-4 py-10 lg:flex-row lg:items-stretch">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

@@ -2,23 +2,162 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================================
+   LIFE RPG — R1 THEME ARCHITECTURE
+   -------------------------------------------------------------------------
+   Every palette color is a CSS-variable channel triplet ("R G B") consumed
+   by tailwind.config.js with <alpha-value>. Two themes:
+
+   :root                      → DARK  "Dungeon" (the established world)
+   html[data-theme='light']   → LIGHT "Adventurer's Compendium" (parchment,
+                                ink, bronze — a fantasy manuscript, not a
+                                white SaaS dashboard)
+
+   Components only ever use the token classes (bg-dungeon-850, text-parchment-100…)
+   so they re-theme automatically. No literals inside components.
+   ========================================================================= */
+
 @layer base {
+  :root {
+    color-scheme: dark;
+
+    /* --- structure surfaces (page → panel → elevated → borders) --- */
+    --c-dungeon-950: 10 7 20;   /* page background            #0a0714 */
+    --c-dungeon-900: 15 10 30;  /* recessed surfaces          #0f0a1e */
+    --c-dungeon-850: 21 16 39;  /* panels                     #151027 */
+    --c-dungeon-800: 28 21 51;  /* elevated / hover surfaces  #1c1533 */
+    --c-dungeon-700: 42 33 73;  /* strong borders             #2a2149 */
+    --c-dungeon-600: 59 46 102; /* default borders            #3b2e66 */
+    --c-dungeon-500: 79 63 133; /* highlighted borders        #4f3f85 */
+
+    /* --- text ramp --- */
+    --c-parchment-100: 245 236 215; /* primary   #f5ecd7 */
+    --c-parchment-200: 233 219 184; /* secondary #e9dbb8 */
+    --c-parchment-300: 220 198 153; /* muted     #dcc699 */
+
+    /* --- accents --- */
+    --c-gold-300: 243 217 138;
+    --c-gold-400: 232 200 116;
+    --c-gold-500: 212 175 55;
+    --c-gold-600: 184 145 42;
+    --c-ember-400: 255 138 92;
+    --c-ember-500: 255 107 61;
+    --c-ember-600: 224 80 31;
+    --c-mystic-400: 167 139 250;
+    --c-mystic-500: 139 92 246;
+    --c-mystic-600: 124 58 237;
+    --c-azure-400: 56 189 248;
+    --c-azure-500: 14 165 233;
+    --c-xp-400: 74 222 128;
+    --c-xp-500: 34 197 94;
+    --c-xp-600: 22 163 74;
+
+    /* --- glow channels (shadows resolve through these) --- */
+    --c-glow-gold: 232 200 116;
+    --c-glow-mystic: 139 92 246;
+    --c-glow-xp: 34 197 94;
+
+    /* --- environment --- */
+    --c-grid-dot: 255 255 255;
+    --c-ambient-a: 245 236 215;
+    --c-ambient-b: 139 92 246;
+
+    /* --- elevation --- */
+    --shadow-panel: 0 4px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    --shadow-panel-lg: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(232, 200, 116, 0.08);
+    --focus-ring: #e8c874;
+  }
+
+  /* ---------------------------------------------------------------------
+     LIGHT — "Adventurer's Compendium": warm parchment, stone, ink, bronze.
+     --------------------------------------------------------------------- */
+  html[data-theme='light'] {
+    color-scheme: light;
+
+    --c-dungeon-950: 237 228 209; /* page background  #ede4d1 parchment */
+    --c-dungeon-900: 231 220 197; /* recessed         #e7dcc5 */
+    --c-dungeon-850: 245 239 226; /* panels (lifted)  #f5efe2 */
+    --c-dungeon-800: 235 226 205; /* elevated/hover   #ebe2cd */
+    --c-dungeon-700: 213 199 168; /* strong borders   #d5c7a8 */
+    --c-dungeon-600: 195 178 142; /* default borders  #c3b28e */
+    --c-dungeon-500: 166 146 106; /* highlight border #a6926a */
+
+    --c-parchment-100: 43 36 20;  /* primary ink  #2b2414 */
+    --c-parchment-200: 74 63 40;  /* secondary    #4a3f28 */
+    --c-parchment-300: 122 108 78; /* muted       #7a6c4e */
+
+    --c-gold-300: 185 138 42;
+    --c-gold-400: 154 111 22;   /* bronze — readable on parchment */
+    --c-gold-500: 138 96 18;
+    --c-gold-600: 120 82 14;
+    --c-ember-400: 194 65 12;
+    --c-ember-500: 178 55 8;
+    --c-ember-600: 154 46 6;
+    --c-mystic-400: 124 58 237;
+    --c-mystic-500: 109 40 217;
+    --c-mystic-600: 91 33 182;
+    --c-azure-400: 2 132 199;
+    --c-azure-500: 3 105 161;
+    --c-xp-400: 22 163 74;
+    --c-xp-500: 21 128 61;
+    --c-xp-600: 22 101 52;
+
+    --c-glow-gold: 154 111 22;
+    --c-glow-mystic: 124 58 237;
+    --c-glow-xp: 21 128 61;
+
+    --c-grid-dot: 90 70 30;
+    --c-ambient-a: 120 90 40;
+    --c-ambient-b: 124 58 237;
+
+    --shadow-panel: 0 1px 2px rgba(84, 62, 24, 0.08), 0 4px 16px rgba(84, 62, 24, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    --shadow-panel-lg: 0 4px 12px rgba(84, 62, 24, 0.10), 0 14px 34px rgba(84, 62, 24, 0.16),
+      0 0 0 1px rgba(138, 96, 18, 0.14);
+    --focus-ring: #8a6012;
+  }
+
   html {
     color-scheme: dark;
   }
 
   body {
     @apply bg-dungeon-950 text-parchment-100 font-body antialiased;
-    /* Dungeon environment: torch-glow gradient from above, a faint mystic
-       haze in the far corner, and a vignette so panels read as "lit".
-       Pure CSS — no image assets. The old dot-grid texture is kept on top. */
+    /* Dungeon environment: torch-glow from above, faint mystic corner haze,
+       vignette so panels read as "lit", and a whisper of dot texture.
+       Pure CSS — no image assets. */
     background-image:
-      radial-gradient(1200px 600px at 50% -10%, rgba(139, 92, 246, 0.10), transparent 60%),
-      radial-gradient(900px 500px at 100% 100%, rgba(212, 175, 55, 0.05), transparent 55%),
+      radial-gradient(1200px 600px at 50% -10%, rgb(var(--c-mystic-500) / 0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 100%, rgb(var(--c-gold-500) / 0.05), transparent 55%),
       radial-gradient(1400px 900px at 50% 40%, transparent 55%, rgba(5, 3, 10, 0.55) 100%),
-      radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.045) 1px, transparent 0);
+      radial-gradient(circle at 1px 1px, rgb(var(--c-grid-dot) / 0.045) 1px, transparent 0);
     background-attachment: fixed;
     background-size: auto, auto, auto, 22px 22px;
+  }
+
+  /* Light environment: warm manuscript paper — soft top light, bronze corner
+     warmth, gentle edge shading, faint ink fibre texture. */
+  html[data-theme='light'] body {
+    background-image:
+      radial-gradient(1100px 550px at 50% -8%, rgba(255, 252, 243, 0.9), transparent 60%),
+      radial-gradient(900px 500px at 100% 100%, rgb(var(--c-gold-500) / 0.08), transparent 55%),
+      radial-gradient(1400px 900px at 50% 40%, transparent 60%, rgba(96, 74, 34, 0.14) 100%),
+      radial-gradient(circle at 1px 1px, rgb(var(--c-grid-dot) / 0.05) 1px, transparent 0);
+  }
+
+  /* Short, scoped theme transition (added by the shell while switching,
+     removed right after) — 220ms on paint properties only. */
+  html.theme-anim,
+  html.theme-anim body,
+  html.theme-anim *::before,
+  html.theme-anim *::after {
+    transition:
+      background-color 220ms ease,
+      border-color 220ms ease,
+      color 220ms ease,
+      fill 220ms ease,
+      stroke 220ms ease,
+      box-shadow 220ms ease !important;
   }
 
   h1,
@@ -35,13 +174,13 @@
   select:focus-visible,
   textarea:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid #e8c874;
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
     border-radius: 4px;
   }
 
   ::selection {
-    background: rgba(139, 92, 246, 0.4);
+    background: rgb(var(--c-mystic-500) / 0.4);
   }
 }
 
@@ -60,37 +199,37 @@
     @apply relative rounded-lg border border-dungeon-600/80 bg-dungeon-850/90 shadow-card;
     /* Inner top highlight: reads as a bevelled game-window edge. */
     box-shadow:
-      inset 0 1px 0 rgba(245, 236, 215, 0.06),
-      0 4px 24px rgba(0, 0, 0, 0.45);
+      inset 0 1px 0 rgb(var(--c-parchment-100) / 0.06),
+      var(--shadow-panel);
   }
 
   .game-panel-gold {
     @apply border-gold-600/50;
     box-shadow:
-      inset 0 1px 0 rgba(232, 200, 116, 0.12),
-      0 0 24px rgba(212, 175, 55, 0.08),
-      0 4px 24px rgba(0, 0, 0, 0.45);
+      inset 0 1px 0 rgb(var(--c-gold-400) / 0.12),
+      0 0 24px rgb(var(--c-glow-gold) / 0.08),
+      var(--shadow-panel);
   }
 
   .game-panel-quest {
     @apply border-ember-600/30 bg-dungeon-850/90;
-    border-left: 3px solid rgba(224, 80, 31, 0.55);
+    border-left: 3px solid rgb(var(--c-ember-600) / 0.55);
   }
 
   .game-panel-rare {
     @apply border-azure-500/50;
     box-shadow:
-      inset 0 1px 0 rgba(56, 189, 248, 0.10),
-      0 0 20px rgba(14, 165, 233, 0.10),
-      0 4px 24px rgba(0, 0, 0, 0.45);
+      inset 0 1px 0 rgb(var(--c-azure-400) / 0.10),
+      0 0 20px rgb(var(--c-azure-500) / 0.10),
+      var(--shadow-panel);
   }
 
   .game-panel-legendary {
     @apply border-gold-500/60;
     box-shadow:
-      inset 0 1px 0 rgba(232, 200, 116, 0.16),
-      0 0 28px rgba(212, 175, 55, 0.14),
-      0 4px 24px rgba(0, 0, 0, 0.45);
+      inset 0 1px 0 rgb(var(--c-gold-400) / 0.16),
+      0 0 28px rgb(var(--c-glow-gold) / 0.14),
+      var(--shadow-panel);
   }
 
   /* Warm scroll surface for quest/list content — subtle, not literal paper. */
@@ -102,14 +241,14 @@
      as an RPG window frame, not an 8-bit box. Pair with .game-panel. */
   .hud-frame {
     background-image:
-      radial-gradient(circle, rgba(232, 200, 116, 0.55) 1px, transparent 1.5px);
+      radial-gradient(circle, rgb(var(--c-gold-400) / 0.55) 1px, transparent 1.5px);
     background-position: 6px 6px, calc(100% - 6px) 6px, 6px calc(100% - 6px),
       calc(100% - 6px) calc(100% - 6px);
     background-size: 3px 3px;
     background-repeat: no-repeat;
     box-shadow:
-      inset 0 0 0 1px rgba(232, 200, 116, 0.07),
-      inset 0 1px 0 rgba(245, 236, 215, 0.06);
+      inset 0 0 0 1px rgb(var(--c-gold-400) / 0.07),
+      inset 0 1px 0 rgb(var(--c-parchment-100) / 0.06);
   }
 
   /* ---------------------------------------------------------------------
@@ -124,8 +263,8 @@
   }
 
   .hud-badge {
-    @apply inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px];
-    box-shadow: inset 0 1px 0 rgba(245, 236, 215, 0.07);
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px];
+    box-shadow: inset 0 1px 0 rgb(var(--c-parchment-100) / 0.07);
   }
 
   .hud-badge-sm {
@@ -135,7 +274,7 @@
   /* Valuable numbers: XP/gold/level figures get weight + warmth. */
   .text-reward {
     @apply font-hud text-gold-400;
-    text-shadow: 0 0 10px rgba(232, 200, 116, 0.35);
+    text-shadow: 0 0 10px rgb(var(--c-glow-gold) / 0.35);
   }
 
   /* Interactive card variant: lifts on hover for clickable/row cards. */
@@ -149,8 +288,8 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.35),
       inset 0 -2px 0 rgba(90, 60, 10, 0.35),
-      0 0 12px rgba(232, 200, 116, 0.55),
-      0 0 2px rgba(232, 200, 116, 0.9);
+      0 0 12px rgb(var(--c-glow-gold) / 0.55),
+      0 0 2px rgb(var(--c-glow-gold) / 0.9);
   }
 
   /* Game action button (COMPLETE QUEST / EQUIP / PURCHASE…): segmented
@@ -158,7 +297,7 @@
   .btn-game {
     @apply inline-flex items-center justify-center gap-2 rounded-md border-2 border-dungeon-500 bg-dungeon-900 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-widest text-parchment-200 transition-all duration-150 hover:border-gold-500 hover:text-gold-400 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40;
     box-shadow:
-      inset 0 1px 0 rgba(245, 236, 215, 0.07),
+      inset 0 1px 0 rgb(var(--c-parchment-100) / 0.07),
       inset 0 -2px 0 rgba(0, 0, 0, 0.35);
   }
 
@@ -182,6 +321,103 @@
   .tag-pill {
     @apply inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest;
   }
+
+  /* ---------------------------------------------------------------------
+     R1 APPLICATION SHELL — desktop-first game application frame.
+     --------------------------------------------------------------------- */
+
+  /* Scrollable main column next to the sidebar (sidebar itself is fixed). */
+  .shell-main {
+    @apply min-h-screen;
+  }
+
+  /* Page frame: intentionally wide on desktop (≤1440px, centered within the
+     main column), comfortably padded, single column on mobile. */
+  .page-container {
+    @apply mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-10 lg:py-8;
+  }
+
+  /* Strong, hierarchical page headers (title + subtitle + contextual action). */
+  .page-header {
+    @apply mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3;
+  }
+
+  .page-title {
+    @apply font-display text-2xl font-extrabold tracking-wide text-parchment-100 lg:text-[28px];
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-parchment-300/70;
+  }
+
+  /* Sidebar navigation item — game menu entry with gold selection tick. */
+  .sidebar-link {
+    @apply relative flex items-center gap-3 rounded-md border border-transparent px-3 py-2 text-[13px] font-bold uppercase tracking-wider text-parchment-200/80 transition-all duration-150;
+  }
+
+  .sidebar-link:hover {
+    @apply border-dungeon-600/70 bg-dungeon-800/70 text-parchment-100;
+  }
+
+  .sidebar-link.active {
+    @apply border-dungeon-500/70 bg-dungeon-700/70 text-gold-400;
+    box-shadow:
+      inset 0 1px 0 rgb(var(--c-parchment-100) / 0.06),
+      0 0 16px rgb(var(--c-glow-gold) / 0.10);
+  }
+
+  .sidebar-link.active::before {
+    content: '';
+    @apply absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gold-400;
+    box-shadow: 0 0 8px rgb(var(--c-glow-gold) / 0.8);
+  }
+
+  .sidebar-link.active .sidebar-icon {
+    @apply text-gold-400;
+  }
+
+  .sidebar-icon {
+    @apply h-[18px] w-[18px] shrink-0 text-parchment-300/60 transition-colors duration-150;
+  }
+
+  .sidebar-link:hover .sidebar-icon {
+    @apply text-gold-400/90;
+  }
+
+  /* Group label inside the sidebar (MAIN / COLLECTION / PLAYER). */
+  .sidebar-section {
+    @apply px-3 pb-1 pt-4 font-hud text-[10px] uppercase tracking-[0.28em] text-parchment-300/40;
+  }
+
+  .sidebar-divider {
+    @apply mx-3 my-2 border-t border-dungeon-700/50;
+  }
+
+  /* Compact horizontal HUD strip (status readouts inside panels). */
+  .hud-strip {
+    @apply flex items-center gap-3 rounded-md border border-dungeon-700/70 bg-dungeon-900/70 px-3 py-2;
+  }
+
+  /* Theme toggle button in the HUD. */
+  .theme-toggle {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-md border border-dungeon-600/80 bg-dungeon-900/80 text-parchment-200/80 transition-all duration-150 hover:border-gold-500/70 hover:text-gold-400 active:translate-y-px;
+  }
+
+  /* Hide scrollbars on horizontal chip rails while keeping scrollability. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Light-theme corrections for pieces that hardcode dark-theme contrast. */
+  html[data-theme='light'] .btn-primary {
+    /* Gold key keeps dark engraved text in light mode (dungeon-950 flips to
+       a light parchment, which would erase the label). */
+    color: #3a2a08;
+  }
 }
 
 /* Respect users who prefer reduced motion: kill decorative loops, keep
@@ -200,7 +436,7 @@
   }
 }
 
-/* Body scroll lock while the mobile drawer is open (toggled by Navbar). */
+/* Body scroll lock while the mobile drawer is open (toggled by the shell). */
 body.drawer-open {
   overflow: hidden;
 }
