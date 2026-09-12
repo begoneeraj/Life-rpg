@@ -33,7 +33,7 @@ const CORNER_STYLES = [
   { bottom: '-1px', right: '-1px', borderWidth: '0 2px 2px 0' },
 ];
 
-export function PixelCorners({ color = 'rgb(var(--c-gold-400) / 0.9)', size = 9 }) {
+export function PixelCorners({ color = 'rgb(var(--c-hudline) / 0.9)', size = 9 }) {
   return (
     <span aria-hidden="true" className="pointer-events-none absolute inset-0">
       {CORNER_STYLES.map((pos, i) => (
@@ -65,8 +65,11 @@ export function GlassPanel({ children, className = '', blur = 14 }) {
           'linear-gradient(165deg, rgb(var(--c-dungeon-850) / 0.78), rgb(var(--c-dungeon-900) / 0.66))',
         backdropFilter: `blur(${blur}px)`,
         WebkitBackdropFilter: `blur(${blur}px)`,
+        /* Depth resolves through the theme's shadow tokens: soft brown
+           shadows on parchment in light mode, deep black in dark mode —
+           never a hardcoded black drop shadow on the light world. */
         boxShadow:
-          'inset 0 1px 0 rgb(var(--c-parchment-100) / 0.08), inset 0 0 0 1px rgb(var(--c-gold-400) / 0.05), 0 18px 42px rgba(0, 0, 0, 0.38)',
+          'inset 0 1px 0 rgb(var(--c-parchment-100) / 0.08), inset 0 0 0 1px rgb(var(--c-gold-400) / 0.05), var(--shadow-panel-lg)',
       }}
     >
       {children}
@@ -132,10 +135,10 @@ export function OptionChip({ selected, onClick, disabled = false, locked = false
   const base =
     'relative inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold transition-all duration-150';
   const state = locked
-    ? 'cursor-not-allowed border-dungeon-700 bg-dungeon-900/70 text-parchment-300/45'
+    ? 'cursor-not-allowed border-dashed border-dungeon-700 bg-dungeon-900/80 text-parchment-300/70'
     : selected
       ? 'border-gold-500 bg-gold-500/10 text-gold-300 shadow-glow'
-      : 'border-dungeon-600 bg-dungeon-800/80 text-parchment-200/80 hover:border-mystic-500 hover:text-mystic-300';
+      : 'border-dungeon-600 bg-dungeon-800/80 text-parchment-200/80 hover:border-mystic-500 hover:text-mystic-400';
 
   return (
     <button
@@ -150,7 +153,7 @@ export function OptionChip({ selected, onClick, disabled = false, locked = false
       {locked && <SlotIcon name="lock" className="h-3 w-3" />}
       <span className="relative">{children}</span>
       {locked && (
-        <span className="relative font-hud text-[9px] uppercase tracking-widest text-gold-500/70">
+        <span className="relative font-hud text-[9px] uppercase tracking-widest text-gold-500/90">
           LV {unlockLevel}
         </span>
       )}
@@ -179,10 +182,12 @@ export function Swatch({ selected, onClick, hex, label }) {
     >
       {selected && (
         <>
-          <PixelCorners size={6} color="rgb(var(--c-gold-200, 243 217 138) / 1)" />
+          <PixelCorners size={6} color="rgb(var(--c-gold-300) / 1)" />
+          {/* Center pixel marker: value-inverted via difference blending so
+              it reads on light AND dark swatches without a color database. */}
           <span
             aria-hidden="true"
-            className="absolute inset-0 m-auto h-1.5 w-1.5 bg-gold-200 mix-blend-difference"
+            className="absolute inset-0 m-auto h-1.5 w-1.5"
             style={{ background: '#f5ecd7', mixBlendMode: 'difference' }}
           />
         </>
