@@ -10,11 +10,15 @@
 
 const TIMEZONE = 'Asia/Kolkata';
 
-const BASE_XP_BY_DIFFICULTY = Object.freeze({
-  easy: 10,
-  medium: 25,
-  hard: 50,
-});
+// XP is a sublinear (exponent < 1) function of the AI-estimated task length,
+// not a flat lookup by difficulty tier - a 10-minute task and a 200-minute
+// task are rewarded on a curve, not bucketed into one of three fixed values.
+// Diminishing returns per minute keep a single huge estimate from dominating
+// the economy the way a flat "hard = 50 XP" bucket couldn't scale down for.
+const XP_PER_MINUTE_COEFFICIENT = 1.65;
+const XP_GROWTH_EXPONENT = 0.8;
+const MIN_XP = 5;
+const MAX_XP = 200;
 
 const CATEGORY_TO_ATTRIBUTE = Object.freeze({
   coding: 'intellect',
@@ -42,12 +46,17 @@ function xpRequiredForLevel(level) {
   return Math.round(100 * Math.pow(level, 1.5));
 }
 
-function baseXpForDifficulty(difficulty) {
-  const xp = BASE_XP_BY_DIFFICULTY[difficulty];
-  if (xp === undefined) {
-    throw new RangeError(`Unknown difficulty: ${difficulty}`);
+/**
+ * xpForMinutes(m) = clamp(round(1.65 * m^0.8), MIN_XP, MAX_XP)
+ * A 10-min task -> ~10 XP, a 30-min task -> ~25 XP, a 120-min task -> ~76 XP,
+ * a 300-min task -> ~152 XP (clamped at MAX_XP well before it could run away).
+ */
+function xpForMinutes(minutes) {
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    throw new RangeError(`xpForMinutes: minutes must be a positive number, got ${minutes}`);
   }
-  return xp;
+  const raw = XP_PER_MINUTE_COEFFICIENT * Math.pow(minutes, XP_GROWTH_EXPONENT);
+  return Math.min(MAX_XP, Math.max(MIN_XP, Math.round(raw)));
 }
 
 function goldForXp(xp) {
@@ -170,12 +179,12 @@ function computeStreak(lastActiveDate, currentStreak, longestStreak, now = new D
 }
 
 /**
- * Top-level orchestration: given a quest's difficulty/category and the
+ * Top-level orchestration: given a quest's estimatedMinutes/category and the
  * character's current state, computes every reward and the resulting
  * character state. Does not mutate its inputs.
  */
 function resolveQuestCompletion(quest, character, now = new Date()) {
-  const xpGained = baseXpForDifficulty(quest.difficulty);
+  const xpGained = xpForMinutes(quest.estimatedMinutes);
   const goldGained = goldForXp(xpGained);
   const attribute = attributeForCategory(quest.category);
 
@@ -211,10 +220,9 @@ function resolveQuestCompletion(quest, character, now = new Date()) {
 
 module.exports = {
   TIMEZONE,
-  BASE_XP_BY_DIFFICULTY,
   CATEGORY_TO_ATTRIBUTE,
   xpRequiredForLevel,
-  baseXpForDifficulty,
+  xpForMinutes,
   goldForXp,
   attributeForCategory,
   applyXp,

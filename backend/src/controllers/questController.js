@@ -2,22 +2,16 @@
 
 const prisma = require('../services/prisma');
 const { ApiError } = require('../middleware/errorHandler');
-const { resolveQuestCompletion, BASE_XP_BY_DIFFICULTY } = require('../services/xpEngine');
+const { resolveQuestCompletion } = require('../services/xpEngine');
 const { grantFreeLevelUnlocks } = require('../services/itemGrants');
+const { VALID_CATEGORIES } = require('../services/categories');
 
-const VALID_DIFFICULTIES = Object.keys(BASE_XP_BY_DIFFICULTY);
-const VALID_CATEGORIES = [
-  'coding',
-  'study',
-  'gym',
-  'fitness',
-  'running',
-  'meditation',
-  'deep_work',
-  'chores',
-  'healthy_habits',
-  'other',
-];
+// Difficulty is now an AI-assigned descriptive label (see groq.js) rather
+// than something the player picks - it no longer drives XP math directly
+// (see xpEngine.xpForMinutes), but we still validate it's one of these.
+const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
+const MIN_ESTIMATED_MINUTES = 1;
+const MAX_ESTIMATED_MINUTES = 600; // 10 hours - a sane ceiling regardless of what a client claims
 
 async function listQuests(req, res) {
   const quests = await prisma.quest.findMany({
@@ -28,7 +22,7 @@ async function listQuests(req, res) {
 }
 
 async function createQuest(req, res) {
-  const { title, category, difficulty } = req.body || {};
+  const { title, category, difficulty, estimatedMinutes } = req.body || {};
 
   if (!title || typeof title !== 'string' || !title.trim()) {
     throw new ApiError(400, 'Quest title is required');
@@ -43,6 +37,16 @@ async function createQuest(req, res) {
   if (!VALID_CATEGORIES.includes(normalizedCategory)) {
     throw new ApiError(400, `category must be one of: ${VALID_CATEGORIES.join(', ')}`);
   }
+  if (
+    !Number.isInteger(estimatedMinutes) ||
+    estimatedMinutes < MIN_ESTIMATED_MINUTES ||
+    estimatedMinutes > MAX_ESTIMATED_MINUTES
+  ) {
+    throw new ApiError(
+      400,
+      `estimatedMinutes must be an integer between ${MIN_ESTIMATED_MINUTES} and ${MAX_ESTIMATED_MINUTES}`
+    );
+  }
 
   const quest = await prisma.quest.create({
     data: {
@@ -50,6 +54,7 @@ async function createQuest(req, res) {
       title: title.trim(),
       category: normalizedCategory,
       difficulty,
+      estimatedMinutes,
     },
   });
 

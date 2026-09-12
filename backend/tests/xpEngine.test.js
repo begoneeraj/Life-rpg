@@ -7,7 +7,7 @@ const {
   applyXp,
   computeStreak,
   resolveQuestCompletion,
-  baseXpForDifficulty,
+  xpForMinutes,
   goldForXp,
   attributeForCategory,
 } = require('../src/services/xpEngine');
@@ -23,11 +23,24 @@ test('xpRequiredForLevel rejects invalid levels', () => {
   assert.throws(() => xpRequiredForLevel(-1));
 });
 
-test('baseXpForDifficulty / goldForXp map correctly', () => {
-  assert.equal(baseXpForDifficulty('easy'), 10);
-  assert.equal(baseXpForDifficulty('medium'), 25);
-  assert.equal(baseXpForDifficulty('hard'), 50);
-  assert.throws(() => baseXpForDifficulty('impossible'));
+test('xpForMinutes grows sublinearly with task length and clamps at both ends', () => {
+  assert.equal(xpForMinutes(1), 5); // clamped up to MIN_XP
+  assert.equal(xpForMinutes(10), 10);
+  assert.equal(xpForMinutes(30), 25);
+  assert.equal(xpForMinutes(60), 44);
+  assert.equal(xpForMinutes(120), 76);
+  assert.equal(xpForMinutes(1000), 200); // clamped down to MAX_XP
+  assert.throws(() => xpForMinutes(0));
+  assert.throws(() => xpForMinutes(-5));
+});
+
+test('xpForMinutes does not scale linearly: doubling minutes does not double XP', () => {
+  const xp30 = xpForMinutes(30);
+  const xp60 = xpForMinutes(60);
+  assert.ok(xp60 < xp30 * 2, 'sublinear growth: 60min should earn less than 2x the 30min reward');
+});
+
+test('goldForXp floors half of XP', () => {
   assert.equal(goldForXp(50), 25);
   assert.equal(goldForXp(11), 5); // floors
 });
@@ -120,8 +133,8 @@ test('computeStreak is timezone-safe around the IST boundary (UTC date differs f
   assert.equal(result.currentStreak, 2, 'should treat this as the next IST calendar day');
 });
 
-test('resolveQuestCompletion: full happy path for a medium coding quest', () => {
-  const quest = { difficulty: 'medium', category: 'coding' };
+test('resolveQuestCompletion: full happy path for a 30-minute coding quest', () => {
+  const quest = { difficulty: 'medium', category: 'coding', estimatedMinutes: 30 };
   const character = {
     level: 1,
     currentXP: 90,
@@ -133,7 +146,7 @@ test('resolveQuestCompletion: full happy path for a medium coding quest', () => 
   const now = new Date('2026-01-10T12:00:00Z');
   const result = resolveQuestCompletion(quest, character, now);
 
-  assert.equal(result.xpGained, 25);
+  assert.equal(result.xpGained, 25); // xpForMinutes(30)
   assert.equal(result.goldGained, 12);
   assert.equal(result.attribute, 'intellect');
   assert.equal(result.level, 2); // 90 + 25 = 115 >= 100

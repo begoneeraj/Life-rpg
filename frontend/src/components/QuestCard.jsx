@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// XP is no longer a flat per-difficulty value - it's computed server-side
+// from the AI's estimatedMinutes (see backend xpEngine.xpForMinutes), so the
+// card shows the AI's difficulty label + time estimate, not a promised XP
+// amount. The actual reward is only known (and shown) at completion time.
 const DIFFICULTY_META = {
-  easy: { label: 'Easy', xp: 10, color: 'text-xp-400 border-xp-600/40' },
-  medium: { label: 'Medium', xp: 25, color: 'text-gold-400 border-gold-600/40' },
-  hard: { label: 'Hard', xp: 50, color: 'text-ember-400 border-ember-600/40' },
+  easy: { label: 'Easy', color: 'text-xp-400 border-xp-600/40' },
+  medium: { label: 'Medium', color: 'text-gold-400 border-gold-600/40' },
+  hard: { label: 'Hard', color: 'text-ember-400 border-ember-600/40' },
 };
 
 const CATEGORY_ICON = {
@@ -71,12 +75,11 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
           >
             {difficulty.label}
           </span>
-          <span
-            className="tag-pill border-gold-600/40 bg-gold-500/10 font-bold text-gold-400"
-            aria-label={`Reward: ${difficulty.xp} XP`}
-          >
-            +{difficulty.xp} XP
-          </span>
+          {quest.estimatedMinutes && (
+            <span className="tag-pill border-mystic-600/40 bg-mystic-500/10 font-semibold text-mystic-400">
+              ~{quest.estimatedMinutes} min
+            </span>
+          )}
         </div>
       </div>
 

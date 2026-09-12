@@ -101,8 +101,9 @@ model Quest {
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
-  category    String // "coding" | "gym" | "study" | "creative" -> maps to attribute
-  difficulty  String // "easy" | "medium" | "hard" -> maps to base XP
+  category    String // "coding" | "gym" | "study" | "creative" -> maps to attribute; AI-classified, not user-picked
+  difficulty  String // "easy" | "medium" | "hard" -> AI-assigned descriptive label, no longer drives XP directly
+  estimatedMinutes Int @default(15) // AI-estimated task length; xpEngine.xpForMinutes() computes XP from this
   status      String    @default("pending") // pending | completed
   completedAt DateTime?
   createdAt   DateTime  @default(now())

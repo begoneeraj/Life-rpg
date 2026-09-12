@@ -113,8 +113,8 @@ const useStore = create((set, get) => ({
     }
   },
 
-  async addQuest(title, category, difficulty) {
-    const { data } = await questsApi.createQuest(title, category, difficulty);
+  async addQuest(title, category, difficulty, estimatedMinutes) {
+    const { data } = await questsApi.createQuest(title, category, difficulty, estimatedMinutes);
     set((state) => ({ quests: [data.quest, ...state.quests] }));
   },
 
