@@ -29,8 +29,20 @@ export default function Bottom({ svgKey, gender, physique = 'athletic', primaryC
 
   return (
     <g transform={`translate(100,0) scale(${metrics.hip},1) translate(-100,0)`}>
+      <defs>
+        {/* same cloth-form light as Top.jsx — one light source across the outfit */}
+        <linearGradient id="clothFormBottom" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.13" />
+          <stop offset="45%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0.24" />
+        </linearGradient>
+      </defs>
       <path d={`M${70 - hipWidth / 2},200 L${98 - hipWidth / 2},200 L96,296 L74,296 Z`} fill={style.fill} />
+      <path d={`M${70 - hipWidth / 2},200 L${98 - hipWidth / 2},200 L96,296 L74,296 Z`} fill="url(#clothFormBottom)" />
       <path d={`M${102 + hipWidth / 2},200 L${130 + hipWidth / 2},200 L126,296 L104,296 Z`} fill={style.fill} />
+      <path d={`M${102 + hipWidth / 2},200 L${130 + hipWidth / 2},200 L126,296 L104,296 Z`} fill="url(#clothFormBottom)" />
+      {/* inner-leg contact shadow between the thighs */}
+      <path d="M100,206 L100,292" stroke="rgba(0,0,0,0.16)" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
       <path d="M74,200 L126,200 L124,214 L76,214 Z" fill={style.accent} />
       {style.pockets && (
         <>

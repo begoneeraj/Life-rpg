@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import XPBar from '../components/XPBar';
+import displayName from '../utils/displayName';
 import StreakTracker from '../components/StreakTracker';
 import AttributeMiniBar from '../components/AttributeMiniBar';
 import CharacterAvatar from '../components/character/CharacterAvatar';
@@ -135,7 +136,7 @@ export default function Guild() {
             Guild · {today}
           </p>
           <h1 className="mt-1 font-display text-3xl font-extrabold text-parchment-100 lg:text-4xl">
-            Welcome back{user?.email ? '' : ', adventurer'}
+            Welcome back, {displayName(user)}
           </h1>
           <p className="mt-0.5 truncate text-sm text-parchment-300/60">
             The board holds {pendingQuests.length} quest{pendingQuests.length === 1 ? '' : 's'} for you

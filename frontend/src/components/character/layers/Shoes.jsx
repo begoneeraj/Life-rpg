@@ -25,8 +25,18 @@ export default function Shoes({ svgKey, physique = 'athletic', primaryColor, acc
 
   return (
     <g transform={`translate(100,0) scale(${metrics.hip},1) translate(-100,0)`}>
+      <defs>
+        <linearGradient id="clothFormShoes" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
+          <stop offset="45%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0.28" />
+        </linearGradient>
+      </defs>
+      {/* toe caps: forward volume so shoes read as worn, not painted on */}
       <path d={`M72,${300 - h} L98,${300 - h} L100,304 L68,304 Z`} fill={style.fill} />
+      <path d={`M72,${300 - h} L98,${300 - h} L100,304 L68,304 Z`} fill="url(#clothFormShoes)" />
       <path d={`M102,${300 - h} L128,${300 - h} L132,304 L100,304 Z`} fill={style.fill} />
+      <path d={`M102,${300 - h} L128,${300 - h} L132,304 L100,304 Z`} fill="url(#clothFormShoes)" />
       <path d="M68,304 L100,304 L100,300 L72,300 Z" fill={style.accent} opacity="0.7" />
       <path d="M100,304 L132,304 L128,300 L100,300 Z" fill={style.accent} opacity="0.7" />
       {style.glow && (

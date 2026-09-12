@@ -8,7 +8,7 @@ import { QuestCardSkeleton } from '../components/Skeleton';
 import LevelUpModal from '../components/LevelUpModal';
 import QuestAssessmentModal from '../components/QuestAssessmentModal';
 import useQuestAssessment from '../hooks/useQuestAssessment';
-import Icon from '../components/ui/icons';
+import Icon, { CATEGORY_ICON } from '../components/ui/icons';
 
 const CATEGORY_LABEL = {
   coding: 'Coding',
@@ -36,26 +36,18 @@ const DIFFICULTY_META = {
   hard: { label: 'Hard', color: 'text-ember-400 border-ember-600/40' },
 };
 const DIFFICULTY_RANK = { hard: 2, medium: 1, easy: 0 };
-const CATEGORY_ICON = {
-  coding: 'cat_coding',
-  study: 'cat_study',
-  gym: 'cat_gym',
-  fitness: 'cat_gym',
-  running: 'cat_running',
-  meditation: 'cat_meditation',
-  deep_work: 'cat_deep_work',
-  chores: 'cat_chores',
-  healthy_habits: 'cat_healthy',
-  other: 'quests',
-};
+// Deterministic category → glyph mapping lives in ui/icons.jsx (shared with
+// QuestCard) so every quest renders the same sigil for the same category.
 
 /**
- * Quest category and difficulty are no longer picked manually. Clicking
- * "Accept a New Quest" opens a short AI-generated Q&A (useQuestAssessment +
- * QuestAssessmentModal) that personalizes the difficulty/time estimate to
- * the user's self-reported experience with the topic, then creates the
- * quest with the AI's classification. XP is a non-linear function of the
- * resulting estimatedMinutes (see backend xpEngine.xpForMinutes).
+ * Quests — the QUEST LOG.
+ *
+ * Creating a quest is DIRECT: the player enters a title, picks category,
+ * difficulty, and time, and the quest is forged immediately ("Forge a Quest").
+ * An optional "Refine with AI" step (useQuestAssessment + QuestAssessmentModal)
+ * can fill those same fields from a short Q&A — it's offered, never required.
+ * The former "Start Assessment" gate is gone. XP remains a non-linear
+ * function of estimatedMinutes (see backend xpEngine.xpForMinutes).
  */
 export default function Quests() {
   const quests = useStore((s) => s.quests);
@@ -76,7 +68,10 @@ export default function Quests() {
   const [title, setTitle] = useState('');
   const [titleError, setTitleError] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'pending' | 'completed'
-  const assessment = useQuestAssessment();
+  const [assessmentOpen, setAssessmentOpen] = useState(false); // optional AI refine step
+  const assessmentState = useQuestAssessment();
+  const [draft, setDraft] = useState(null); // { category, difficulty, estimatedMinutes }
+  const [creating, setCreating] = useState(false);
   // Transient real-reward flash for the featured main quest completion.
   const [flash, setFlash] = useState(null); // { xp, gold }
 
@@ -87,34 +82,51 @@ export default function Quests() {
 
   const todaysRoutineTasks = weeklyTasks.filter((t) => t.dayOfWeek === todayDayOfWeek);
 
-  async function handleStartAssessment(e) {
+  /**
+   * Direct quest creation: title + the player's own category/difficulty/minutes
+   * picks go straight to the backend (same createQuest contract the AI flow
+   * feeds). "Refine with AI" opens the same assessment Q&A as an optional
+   * step that fills these fields — creation itself never requires it.
+   */
+  async function handleCreateQuest(e) {
     e.preventDefault();
+    if (creating) return;
     if (!title.trim()) {
-      setTitleError('Give your quest a topic before starting.');
+      setTitleError('Give your quest a name before forging it.');
+      return;
+    }
+    if (!draft) {
+      setTitleError('Choose a category and difficulty for your quest.');
       return;
     }
     setTitleError('');
+    setCreating(true);
     try {
-      await assessment.start(title.trim());
-    } catch {
-      // assessment.error is set; the modal shows it
+      await addQuest(title.trim(), draft.category, draft.difficulty, draft.estimatedMinutes);
+      setTitle('');
+      setDraft(null);
+      toast.success(
+        `Quest forged — ${CATEGORY_LABEL[draft.category] || draft.category} · ${draft.difficulty} · ~${draft.estimatedMinutes} min`
+      );
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Could not forge quest. Try again.');
+    } finally {
+      setCreating(false);
     }
   }
 
+  /** Optional AI refine: same assessment flow as before, prefilled from the draft. */
   async function handleAssessmentComplete(evaluation) {
-    try {
-      await addQuest(title.trim(), evaluation.category, evaluation.difficulty, evaluation.estimated_minutes);
-      setTitle('');
-      assessment.reset();
-      toast.success(
-        `Quest added — AI classified it as ${CATEGORY_LABEL[evaluation.category] || evaluation.category} · ${
-          evaluation.difficulty
-        } · ~${evaluation.estimated_minutes} min`
-      );
-    } catch (err) {
-      assessment.reset();
-      toast.error(err.response?.data?.error || 'Could not add quest. Try again.');
-    }
+    setDraft({
+      category: evaluation.category,
+      difficulty: evaluation.difficulty,
+      estimatedMinutes: evaluation.estimated_minutes,
+    });
+    setAssessmentOpen(false);
+    assessmentState.reset();
+    toast.success(
+      `AI refined your quest — ${CATEGORY_LABEL[evaluation.category] || evaluation.category} · ${evaluation.difficulty} · ~${evaluation.estimated_minutes} min`
+    );
   }
 
   async function handleComplete(id) {
@@ -156,9 +168,13 @@ export default function Quests() {
     <div className="page-container quest-log space-y-5">
       <LevelUpModal info={levelUpInfo} onDismiss={clearLevelUp} />
       <QuestAssessmentModal
-        assessment={assessment}
+        assessment={assessmentState}
+        open={assessmentOpen}
         onComplete={handleAssessmentComplete}
-        onCancel={assessment.reset}
+        onCancel={() => {
+          setAssessmentOpen(false);
+          assessmentState.reset();
+        }}
       />
 
       {/* ---------------- Quest board header ---------------- */}
@@ -222,8 +238,8 @@ export default function Quests() {
         )}
       </div>
 
-      {/* ---------------- Accept a new quest ---------------- */}
-      <form onSubmit={handleStartAssessment} noValidate className="quest-console hud-frame space-y-3 p-4 sm:p-5">
+      {/* ---------------- Forge a new quest (direct creation) ---------------- */}
+      <form onSubmit={handleCreateQuest} noValidate className="quest-console hud-frame space-y-3 p-4 sm:p-5">
         <div>
           <label htmlFor="title" className="label-text">
             Forge a New Quest
@@ -242,27 +258,103 @@ export default function Quests() {
               aria-invalid={Boolean(titleError)}
               aria-describedby={titleError ? 'title-error' : undefined}
             />
-            <button type="submit" className="btn-primary shrink-0 sm:w-auto">
-              Accept New Quest
+            <button type="submit" disabled={creating} className="btn-primary shrink-0 sm:w-auto disabled:cursor-not-allowed disabled:opacity-40">
+              {creating ? 'Forging…' : '+ Forge Quest'}
             </button>
           </div>
+        </div>
+
+        {/* category / difficulty / time — the real createQuest contract fields */}
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <label htmlFor="quest-category" className="label-text text-[10px] uppercase tracking-widest">
+              Category
+            </label>
+            <select
+              id="quest-category"
+              className="input-field mt-1"
+              value={draft?.category ?? ''}
+              onChange={(e) => {
+                if (titleError) setTitleError('');
+                const category = e.target.value || undefined;
+                setDraft((d) => (category ? { ...(d || {}), category } : null));
+              }}
+            >
+              <option value="">Choose…</option>
+              {Object.entries(CATEGORY_LABEL).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="quest-difficulty" className="label-text text-[10px] uppercase tracking-widest">
+              Difficulty
+            </label>
+            <select
+              id="quest-difficulty"
+              className="input-field mt-1"
+              value={draft?.difficulty ?? ''}
+              onChange={(e) => {
+                if (titleError) setTitleError('');
+                const difficulty = e.target.value || undefined;
+                setDraft((d) => (difficulty ? { ...(d || {}), difficulty } : null));
+              }}
+            >
+              <option value="">Choose…</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="quest-minutes" className="label-text text-[10px] uppercase tracking-widest">
+              Time
+            </label>
+            <select
+              id="quest-minutes"
+              className="input-field mt-1"
+              value={draft?.estimatedMinutes ?? ''}
+              onChange={(e) => {
+                if (titleError) setTitleError('');
+                const v = e.target.value ? Number(e.target.value) : undefined;
+                setDraft((d) => (v ? { ...(d || {}), estimatedMinutes: v } : null));
+              }}
+            >
+              <option value="">Estimate…</option>
+              {[10, 15, 20, 30, 45, 60, 90, 120].map((m) => (
+                <option key={m} value={m}>
+                  ~{m} min
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (!title.trim()) {
+                setTitleError('Give your quest a name before refining it.');
+                return;
+              }
+              setTitleError('');
+              setAssessmentOpen(true);
+              assessmentState.start(title.trim()).catch(() => {
+                // assessmentState.error is set; the modal shows it
+              });
+            }}
+            className="text-[11px] font-semibold uppercase tracking-widest text-mystic-400 transition-colors hover:text-mystic-300"
+          >
+            ✦ Refine with AI (optional)
+          </button>
           {titleError && (
-            <p id="title-error" className="mt-1 text-xs text-ember-400" role="alert">
+            <p id="title-error" className="text-xs text-ember-400" role="alert">
               {titleError}
             </p>
           )}
-          <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-parchment-300/50">
-            <Icon name="xp" className="h-3 w-3 text-mystic-400/70" aria-hidden="true" />
-            You&apos;ll answer a couple of quick questions so the AI can personalize the difficulty and reward.
-          </p>
-        </div>
-
-        <div className="quest-console-action">
-          <span aria-hidden="true" />
-          <button type="submit" className="btn-primary quest-assessment-button">
-            Start Assessment
-          </button>
-          <span aria-hidden="true" />
         </div>
       </form>
 

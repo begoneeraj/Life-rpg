@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { AnimatePresence, motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import useTheme from '../hooks/useTheme';
+import displayName from '../utils/displayName';
 import Icon from './ui/icons';
 import ThemeToggle from './ui/ThemeToggle';
 import CharacterAvatar from './character/CharacterAvatar';
@@ -320,7 +321,7 @@ export default function AppShell() {
                   <div className="min-w-0">
                     <p className="font-hud text-sm text-gold-400">LV {character.level} Adventurer</p>
                     <p className="font-hud text-xs text-parchment-300/70">
-                      {user?.email}
+                      {displayName(user)}
                     </p>
                   </div>
                 </div>

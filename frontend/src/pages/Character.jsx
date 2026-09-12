@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
+import displayName from '../utils/displayName';
 import XPBar from '../components/XPBar';
 import AttributeMiniBar from '../components/AttributeMiniBar';
 import LevelUpModal from '../components/LevelUpModal';
@@ -307,7 +308,8 @@ export default function Character() {
                 <p className="font-hud text-[11px] uppercase tracking-[0.2em] text-gold-400">
                   {levelTierLabel(character.level)}
                 </p>
-                <p className="truncate text-[11px] text-parchment-300/60">{user?.email || 'Adventurer'}</p>
+                <p className="truncate text-[11px] font-semibold text-parchment-100/90">{displayName(user)}</p>
+                <p className="truncate font-hud text-[9px] uppercase tracking-[0.16em] text-parchment-300/45">{user?.email}</p>
                 <div className="mt-2.5">
                   <XPBar level={character.level} current={character.currentXP} required={xpRequired} />
                 </div>

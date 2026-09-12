@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Icon from './ui/icons';
 
 /**
- * Drives the "Start Assessment" flow's UI on top of useQuestAssessment's
+ * The optional "Refine with AI" step's UI on top of useQuestAssessment's
  * state machine: a loading state while questions generate, the multiple-
  * choice Q&A itself, a loading state while the AI evaluates, and an error
  * state with retry. `onComplete` fires with the final
  * { category, difficulty, estimated_minutes, reason } once evaluation
- * succeeds; `onCancel` closes the modal at any point without creating a quest.
+ * succeeds; `onCancel` closes the modal at any point without creating a
+ * quest. `open` lets the parent (Quests) control visibility so the modal
+ * can also be closed without touching the assessment state machine.
  */
-export default function QuestAssessmentModal({ assessment, onComplete, onCancel }) {
+export default function QuestAssessmentModal({ assessment, open, onComplete, onCancel }) {
   const { state, topic, questions, error, submitAnswers } = assessment;
   const [selected, setSelected] = useState({}); // { [questionIndex]: optionIndex }
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isOpen = state !== 'idle';
+  const isOpen = open !== undefined ? open && state !== 'idle' : state !== 'idle';
   const allAnswered = questions.length > 0 && questions.every((_, i) => selected[i] !== undefined);
 
   async function handleSubmit() {
@@ -49,8 +52,9 @@ export default function QuestAssessmentModal({ assessment, onComplete, onCancel 
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 280, damping: 24 }}
           >
-            <h2 id="assessment-heading" className="font-display text-lg font-bold text-mystic-400">
-              ✨ Quest Assessment
+            <h2 id="assessment-heading" className="flex items-center gap-2 font-display text-lg font-bold text-mystic-400">
+              <Icon name="xp" className="h-4 w-4" aria-hidden="true" />
+              Refine with AI
             </h2>
             <p className="truncate text-sm text-parchment-300/70">"{topic}"</p>
 
@@ -110,7 +114,7 @@ export default function QuestAssessmentModal({ assessment, onComplete, onCancel 
                     disabled={!allAnswered || isSubmitting}
                     className="btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {isSubmitting ? 'Evaluating…' : 'Generate Quest'}
+                    {isSubmitting ? 'Evaluating…' : 'Fill Quest Fields'}
                   </button>
                 </div>
               </div>
@@ -127,11 +131,11 @@ function LoadingState({ label }) {
     <div className="flex flex-col items-center gap-3 py-8">
       <motion.span
         aria-hidden="true"
-        className="text-3xl"
+        className="text-mystic-400"
         animate={{ rotate: 360 }}
         transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
       >
-        ⚙️
+        <Icon name="attr_focus" className="h-7 w-7" />
       </motion.span>
       <p className="text-sm text-parchment-300/70">{label}</p>
     </div>
