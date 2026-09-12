@@ -10,10 +10,12 @@ export default function XPBar({ level, current, required, size = 'md' }) {
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-center justify-between text-xs font-semibold text-parchment-300/80">
-        <span className="font-display text-gold-400">Level {level}</span>
-        <span aria-hidden="true">
-          {current} / {required} XP
+      <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-parchment-300/80">
+        <span className="hud-badge font-hud border-gold-500/40 bg-gold-500/10 text-gold-400 shadow-glow">
+          Level {level}
+        </span>
+        <span aria-hidden="true" className="font-hud text-parchment-300/70">
+          {current.toLocaleString()} / {required.toLocaleString()} XP
         </span>
       </div>
       <div
@@ -29,6 +31,22 @@ export default function XPBar({ level, current, required, size = 'md' }) {
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
+        />
+        {/* Segment ticks: pure CSS, gives the bar its game-HUD rhythm. */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(90deg, transparent 0, transparent 14px, rgba(10, 7, 20, 0.55) 14px, rgba(10, 7, 20, 0.55) 16px)',
+          }}
+        />
+        {/* Bevel: light top edge inside the trough, dark inner bottom. */}
+        <div
+          className="pointer-events-none absolute inset-0 rounded-full"
+          style={{
+            boxShadow:
+              'inset 0 1px 0 rgba(245, 236, 215, 0.10), inset 0 -2px 3px rgba(0, 0, 0, 0.45)',
+          }}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%] animate-shimmer" />
       </div>

@@ -52,8 +52,8 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
       animate={{ opacity: isDeleting ? 0 : 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
-      className={`parchment-card flex items-center justify-between gap-4 p-4 transition-opacity ${
-        isDone ? 'opacity-60' : ''
+      className={`card-interactive parchment-card flex items-center justify-between gap-4 p-4 transition-opacity ${
+        isDone ? 'border-xp-600/30 bg-xp-500/[0.04] opacity-70' : ''
       }`}
     >
       <div className="min-w-0 flex-1">
@@ -64,11 +64,18 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
         >
           <span aria-hidden="true">{CATEGORY_ICON[quest.category] || '📜'}</span> {quest.title}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-widest text-parchment-300/60">
+        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-widest text-parchment-300/60">
           <span className="capitalize">{quest.category.replace(/_/g, ' ')}</span>
-          <span aria-hidden="true">·</span>
-          <span className={`rounded border px-1.5 py-0.5 font-semibold ${difficulty.color}`}>
-            {difficulty.label} · {difficulty.xp} XP
+          <span
+            className={`tag-pill font-semibold ${difficulty.color}`}
+          >
+            {difficulty.label}
+          </span>
+          <span
+            className="tag-pill border-gold-600/40 bg-gold-500/10 font-bold text-gold-400"
+            aria-label={`Reward: ${difficulty.xp} XP`}
+          >
+            +{difficulty.xp} XP
           </span>
         </div>
       </div>
@@ -92,7 +99,7 @@ export default function QuestCard({ quest, onComplete, onDelete }) {
               type="button"
               onClick={handleComplete}
               disabled={isCompleting}
-              className="btn-primary px-3 py-1.5 text-xs"
+              className="btn-primary px-3.5 py-2 text-xs"
               aria-label={`Mark quest "${quest.title}" as complete`}
             >
               {isCompleting ? 'Completing…' : 'Complete'}

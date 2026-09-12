@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import useStore from './store/useStore';
+import ErrorBoundary from './components/ui/ErrorBoundary';
+import AmbientBackdrop from './components/ui/AmbientBackdrop';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
@@ -33,7 +35,10 @@ export default function App() {
   }, [bootstrap]);
 
   return (
-    <BrowserRouter>
+    <ErrorBoundary>
+      {/* Ambient dungeon atmosphere behind every screen. */}
+      <AmbientBackdrop />
+      <BrowserRouter>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -76,5 +81,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/guild" replace />} />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }

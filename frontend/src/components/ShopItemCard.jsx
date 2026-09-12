@@ -1,16 +1,8 @@
 import { useState } from 'react';
 import { RARITY_STYLES } from './character/constants';
+import ItemArtwork from './items/ItemArtwork';
 
-const CATEGORY_ICON = {
-  top: '👕',
-  bottom: '👖',
-  shoes: '👟',
-  accessory: '💍',
-  special: '✨',
-  hair: '💇',
-};
-
-export default function ShopItemCard({ item, gold, level, onBuy }) {
+export default function ShopItemCard({ item, gold, level, gender, physique, onBuy }) {
   const [isBuying, setIsBuying] = useState(false);
   const rarity = RARITY_STYLES[item.rarity] || RARITY_STYLES.common;
   const canAfford = gold >= item.price;
@@ -26,14 +18,20 @@ export default function ShopItemCard({ item, gold, level, onBuy }) {
     }
   }
 
-  return (
-    <div
-      className={`parchment-card flex flex-col gap-3 border p-4 ${rarity.border} ${
+  return (    <div
+      className={`card-interactive parchment-card flex flex-col gap-3 border p-4 ${rarity.border} ${
         item.owned ? 'opacity-70' : ''
-      } ${!item.owned && !isLocked ? rarity.glow : ''}`}
+      } ${!item.owned && !isLocked ? rarity.glow : ''}`
+      }
     >
-      <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900 text-4xl">
-        <span aria-hidden="true">{CATEGORY_ICON[item.category] || '🎁'}</span>
+      <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900">
+        <ItemArtwork
+          category={item.category}
+          svgKey={item.svgKey}
+          gender={gender}
+          physique={physique}
+          className="h-16 w-full"
+        />
       </div>
       <div>
         <p className="font-display text-sm font-bold text-parchment-100">{item.name}</p>

@@ -96,6 +96,8 @@ export default function Shop() {
               item={item}
               gold={character?.gold ?? 0}
               level={character?.level ?? 1}
+              gender={character?.gender}
+              physique={character?.physique}
               onBuy={handleBuy}
             />
           ))}

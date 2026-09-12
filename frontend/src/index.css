@@ -9,8 +9,16 @@
 
   body {
     @apply bg-dungeon-950 text-parchment-100 font-body antialiased;
-    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.045) 1px, transparent 0);
-    background-size: 22px 22px;
+    /* Dungeon environment: torch-glow gradient from above, a faint mystic
+       haze in the far corner, and a vignette so panels read as "lit".
+       Pure CSS — no image assets. The old dot-grid texture is kept on top. */
+    background-image:
+      radial-gradient(1200px 600px at 50% -10%, rgba(139, 92, 246, 0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 100%, rgba(212, 175, 55, 0.05), transparent 55%),
+      radial-gradient(1400px 900px at 50% 40%, transparent 55%, rgba(5, 3, 10, 0.55) 100%),
+      radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.045) 1px, transparent 0);
+    background-attachment: fixed;
+    background-size: auto, auto, auto, 22px 22px;
   }
 
   h1,
@@ -42,12 +50,120 @@
     @apply relative rounded-lg border border-dungeon-600/60 bg-dungeon-850/80 shadow-card backdrop-blur-sm;
   }
 
+  /* ---------------------------------------------------------------------
+     GAME PANEL SYSTEM — "RPG UI window" surfaces. Layered on top of the
+     same geometry as parchment-card so existing pages can adopt them one
+     class at a time without layout shifts.
+     --------------------------------------------------------------------- */
+
+  .game-panel {
+    @apply relative rounded-lg border border-dungeon-600/80 bg-dungeon-850/90 shadow-card;
+    /* Inner top highlight: reads as a bevelled game-window edge. */
+    box-shadow:
+      inset 0 1px 0 rgba(245, 236, 215, 0.06),
+      0 4px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .game-panel-gold {
+    @apply border-gold-600/50;
+    box-shadow:
+      inset 0 1px 0 rgba(232, 200, 116, 0.12),
+      0 0 24px rgba(212, 175, 55, 0.08),
+      0 4px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .game-panel-quest {
+    @apply border-ember-600/30 bg-dungeon-850/90;
+    border-left: 3px solid rgba(224, 80, 31, 0.55);
+  }
+
+  .game-panel-rare {
+    @apply border-azure-500/50;
+    box-shadow:
+      inset 0 1px 0 rgba(56, 189, 248, 0.10),
+      0 0 20px rgba(14, 165, 233, 0.10),
+      0 4px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .game-panel-legendary {
+    @apply border-gold-500/60;
+    box-shadow:
+      inset 0 1px 0 rgba(232, 200, 116, 0.16),
+      0 0 28px rgba(212, 175, 55, 0.14),
+      0 4px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Warm scroll surface for quest/list content — subtle, not literal paper. */
+  .parchment-panel {
+    @apply relative rounded-lg border border-gold-600/25 bg-parchment-100/[0.04] shadow-card;
+  }
+
+  /* Pixel-style corner ornaments + inner hairline. Subtle by design: reads
+     as an RPG window frame, not an 8-bit box. Pair with .game-panel. */
+  .hud-frame {
+    background-image:
+      radial-gradient(circle, rgba(232, 200, 116, 0.55) 1px, transparent 1.5px);
+    background-position: 6px 6px, calc(100% - 6px) 6px, 6px calc(100% - 6px),
+      calc(100% - 6px) calc(100% - 6px);
+    background-size: 3px 3px;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 0 0 1px rgba(232, 200, 116, 0.07),
+      inset 0 1px 0 rgba(245, 236, 215, 0.06);
+  }
+
+  /* ---------------------------------------------------------------------
+     HUD LANGUAGE — level/xp/coin/stat/streak displays as game HUD data.
+     --------------------------------------------------------------------- */
+
+  .font-hud {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hud-badge {
+    @apply inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px];
+    box-shadow: inset 0 1px 0 rgba(245, 236, 215, 0.07);
+  }
+
+  .hud-badge-sm {
+    @apply px-1.5 py-0.5 text-[10px];
+  }
+
+  /* Valuable numbers: XP/gold/level figures get weight + warmth. */
+  .text-reward {
+    @apply font-hud text-gold-400;
+    text-shadow: 0 0 10px rgba(232, 200, 116, 0.35);
+  }
+
+  /* Interactive card variant: lifts on hover for clickable/row cards. */
+  .card-interactive {
+    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-lg hover:border-dungeon-500/80;
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-md border border-gold-500/60 bg-gradient-to-b from-gold-400 to-gold-600 px-4 py-2 font-display text-sm font-semibold text-dungeon-950 shadow-glow transition-transform duration-150 hover:scale-[1.03] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100;
+    /* Bevel: light top edge, dark bottom edge — reads as a physical game key. */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -2px 0 rgba(90, 60, 10, 0.35),
+      0 0 12px rgba(232, 200, 116, 0.55),
+      0 0 2px rgba(232, 200, 116, 0.9);
+  }
+
+  /* Game action button (COMPLETE QUEST / EQUIP / PURCHASE…): segmented
+     dungeon-metal frame with gold hover, distinct from the gold primary. */
+  .btn-game {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border-2 border-dungeon-500 bg-dungeon-900 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-widest text-parchment-200 transition-all duration-150 hover:border-gold-500 hover:text-gold-400 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40;
+    box-shadow:
+      inset 0 1px 0 rgba(245, 236, 215, 0.07),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.35);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-dungeon-500 bg-dungeon-800 px-4 py-2 font-display text-sm font-semibold text-parchment-200 transition-colors duration-150 hover:border-mystic-500 hover:text-mystic-400 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-dungeon-500 bg-dungeon-800 px-4 py-2 font-display text-sm font-semibold text-parchment-200 transition-colors duration-150 hover:border-mystic-500 hover:text-mystic-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   .btn-danger {
@@ -61,4 +177,30 @@
   .label-text {
     @apply mb-1.5 block text-xs font-semibold uppercase tracking-widest text-parchment-300/70;
   }
+
+  /* Small uppercase pill tag (rarity/label chips). */
+  .tag-pill {
+    @apply inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest;
+  }
+}
+
+/* Respect users who prefer reduced motion: kill decorative loops, keep
+   opacity-only transitions instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .drawer-open {
+    overflow: hidden;
+  }
+}
+
+/* Body scroll lock while the mobile drawer is open (toggled by Navbar). */
+body.drawer-open {
+  overflow: hidden;
 }

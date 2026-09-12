@@ -14,6 +14,7 @@ const CATEGORY_LABEL = {
 };
 
 export default function Inventory() {
+  const character = useStore((s) => s.character);
   const inventoryItems = useStore((s) => s.inventoryItems);
   const inventoryStatus = useStore((s) => s.inventoryStatus);
   const loadInventory = useStore((s) => s.loadInventory);
@@ -80,6 +81,8 @@ export default function Inventory() {
                 <InventoryItemCard
                   key={item.id}
                   item={item}
+                  gender={character?.gender}
+                  physique={character?.physique}
                   onEquip={handleEquip}
                   onUnequip={handleUnequip}
                 />

@@ -1,16 +1,9 @@
 import { useState } from 'react';
 import { RARITY_STYLES } from './character/constants';
+import ItemArtwork from './items/ItemArtwork';
+import StatusBadge from './ui/StatusBadge';
 
-const CATEGORY_ICON = {
-  top: '👕',
-  bottom: '👖',
-  shoes: '👟',
-  accessory: '💍',
-  special: '✨',
-  hair: '💇',
-};
-
-export default function InventoryItemCard({ item, onEquip, onUnequip }) {
+export default function InventoryItemCard({ item, gender, physique, onEquip, onUnequip }) {
   const [isBusy, setIsBusy] = useState(false);
   const rarity = RARITY_STYLES[item.rarity] || RARITY_STYLES.common;
 
@@ -28,9 +21,15 @@ export default function InventoryItemCard({ item, onEquip, onUnequip }) {
   }
 
   return (
-    <div className={`parchment-card flex flex-col gap-3 border p-4 ${rarity.border}`}>
-      <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900 text-4xl">
-        <span aria-hidden="true">{CATEGORY_ICON[item.category] || '🎁'}</span>
+    <div className={`card-interactive parchment-card flex flex-col gap-3 border p-4 ${rarity.border}`}>
+      <div className="flex h-20 items-center justify-center rounded-lg border border-dungeon-600 bg-dungeon-900">
+        <ItemArtwork
+          category={item.category}
+          svgKey={item.svgKey}
+          gender={gender}
+          physique={physique}
+          className="h-16 w-full"
+        />
       </div>
       <div>
         <p className="font-display text-sm font-bold text-parchment-100">{item.name}</p>
@@ -40,12 +39,14 @@ export default function InventoryItemCard({ item, onEquip, onUnequip }) {
         type="button"
         onClick={handleClick}
         disabled={isBusy}
-        className={item.equipped ? 'btn-danger w-full text-xs' : 'btn-primary w-full text-xs'}
+        className={item.equipped ? 'btn-danger w-full text-xs' : 'btn-game w-full'}
       >
         {isBusy ? 'Updating…' : item.equipped ? 'UNEQUIP' : 'EQUIP'}
       </button>
       {item.equipped && (
-        <p className="text-center text-[11px] font-semibold text-xp-400">✓ Equipped</p>
+        <p className="text-center">
+          <StatusBadge variant="equipped" size="sm" />
+        </p>
       )}
     </div>
   );
