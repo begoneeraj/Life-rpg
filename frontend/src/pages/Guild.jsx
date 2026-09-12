@@ -118,8 +118,9 @@ export default function Guild() {
         className="flex flex-wrap items-end justify-between gap-3"
       >
         <div>
-          <p className="font-hud text-[10px] uppercase tracking-[0.35em] text-gold-500/80">
-            ⚔ Guild · {today}
+          <p className="flex items-center gap-2 font-hud text-[10px] uppercase tracking-[0.35em] text-gold-500/80">
+            <Icon name="sword" className="h-3 w-3" aria-hidden="true" />
+            Guild · {today}
           </p>
           <h1 className="mt-1 font-display text-3xl font-extrabold text-parchment-100 lg:text-4xl">
             Welcome back{user?.email ? '' : ', adventurer'}

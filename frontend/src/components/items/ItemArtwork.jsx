@@ -68,15 +68,23 @@ const VIEW_BOX_BY_CATEGORY = {
   },
 };
 
-const FALLBACK_ICON = {
-  top: '👕',
-  bottom: '👖',
-  shoes: '👟',
-  accessory: '💍',
-  special: '✨',
-  hair: '💇',
-  facial_hair: '🧔',
-};
+// Unknown/future svgKeys render a neutral game-style placeholder tile
+// (silhouette frame + "?" rune) instead of an emoji — nothing misleading
+// is ever drawn for artwork the layers don't implement.
+function FallbackTile({ category, className }) {
+  return (
+    <span
+      className={`flex items-center justify-center rounded-sm border border-dashed border-dungeon-600/70 bg-dungeon-900/50 font-hud text-parchment-300/40 ${className}`}
+      role="img"
+      aria-label={`${category} item (artwork pending)`}
+    >
+      <svg viewBox="0 0 24 24" className="h-1/2 w-1/2" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <path d="M9 9a3 3 0 1 1 4.2 2.8c-.9.4-1.2 1-1.2 2.2" strokeLinecap="round" />
+        <circle cx="12" cy="17.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    </span>
+  );
+}
 
 export default function ItemArtwork({
   category,
@@ -89,13 +97,9 @@ export default function ItemArtwork({
 }) {
   if (!svgKey || !KNOWN_KEYS.has(svgKey)) {
     if (import.meta.env.DEV && svgKey) {
-      console.warn(`[ItemArtwork] No artwork for svgKey "${svgKey}" — using emoji fallback.`);
+      console.warn(`[ItemArtwork] No artwork for svgKey "${svgKey}" — using placeholder tile.`);
     }
-    return (
-      <span className={className} role="img" aria-label={category}>
-        {FALLBACK_ICON[category] || '🎁'}
-      </span>
-    );
+    return <FallbackTile category={category} className={className} />;
   }
 
   const vbByCat = VIEW_BOX_BY_CATEGORY[category];

@@ -1,17 +1,22 @@
+import { Link } from 'react-router-dom';
 import useStore from '../store/useStore';
 import AttributeRadar from '../components/AttributeRadar';
 import XPBar from '../components/XPBar';
 import { Skeleton } from '../components/Skeleton';
 import CharacterAvatar from '../components/character/CharacterAvatar';
+import { PixelCorners } from '../components/character/characterUI';
+import Icon from '../components/ui/icons';
 
 function xpRequiredForLevel(level) {
   return Math.round(100 * Math.pow(level, 1.5));
 }
 
+// Streak badges: real thresholds checked against the REAL longest streak.
+// Icons come from the project's own icon family — no emoji.
 const BADGES = [
-  { threshold: 3, label: 'Streak Starter', icon: '🔥' },
-  { threshold: 7, label: 'Week Warrior', icon: '⚔️' },
-  { threshold: 30, label: 'Monthly Legend', icon: '👑' },
+  { threshold: 3, label: 'Streak Starter', icon: 'flame', caption: '3-day streak' },
+  { threshold: 7, label: 'Week Warrior', icon: 'sword', caption: '7-day streak' },
+  { threshold: 30, label: 'Monthly Legend', icon: 'xp', caption: '30-day streak' },
 ];
 
 export default function Profile() {
@@ -27,104 +32,163 @@ export default function Profile() {
     );
   }
 
-  const earnedBadges = BADGES.filter((b) => character.longestStreak >= b.threshold);
+  const equipped = character.equippedItems || {};
+  const itemsOwned = character.inventory?.length ?? 0;
+
+  const stats = [
+    { label: 'Gold', value: character.gold.toLocaleString(), icon: 'coin', accent: 'text-gold-400' },
+    { label: 'Current Streak', value: character.currentStreak, icon: 'flame', accent: 'text-ember-400' },
+    { label: 'Longest Streak', value: character.longestStreak, icon: 'xp', accent: 'text-xp-400' },
+    { label: 'Items Owned', value: itemsOwned, icon: 'inventory', accent: 'text-mystic-400' },
+  ];
 
   return (
     <div className="page-container space-y-6">
-      <h1 className="font-display text-2xl font-bold text-gold-400 sm:text-3xl">
-        Character Profile
-      </h1>
-
-      <div className="parchment-card space-y-4 p-6">
-        <div className="flex items-center gap-4">
-          <div
-            className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border-2 border-gold-500 bg-dungeon-900"
-            aria-hidden="true"
-          >
-            <CharacterAvatar
-              gender={character.gender}
-              physique={character.physique}
-              skinTone={character.skinTone}
-              faceType={character.faceType}
-              eyeColor={character.eyeColor}
-              hairStyle={character.hairStyle}
-              hairColor={character.hairColor}
-              facialHair={character.facialHair}
-              skinDetail={character.skinDetail}
-              equippedTop={character.equippedItems?.top}
-              equippedBottom={character.equippedItems?.bottom}
-              equippedShoes={character.equippedItems?.shoes}
-              equippedAccessory={character.equippedItems?.accessory}
-              equippedSpecial={character.equippedItems?.special}
-              topPrimaryColor={character.topPrimaryColor}
-              topAccentColor={character.topAccentColor}
-              bottomPrimaryColor={character.bottomPrimaryColor}
-              bottomAccentColor={character.bottomAccentColor}
-              shoesPrimaryColor={character.shoesPrimaryColor}
-              shoesAccentColor={character.shoesAccentColor}
-              level={character.level}
-              idle={false}
-              className="h-full w-full"
-            />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate font-display text-lg font-bold text-parchment-100">
-              {user?.email}
-            </p>
-            <p className="text-xs uppercase tracking-widest text-parchment-300/60">
-              Level {character.level} Adventurer
-            </p>
-          </div>
+      {/* ---------------- page header ---------------- */}
+      <header className="page-header">
+        <div>
+          <p className="flex items-center gap-2 font-hud text-[10px] uppercase tracking-[0.3em] text-gold-500/80">
+            <span aria-hidden="true" className="flex flex-col gap-[2px]">
+              <span className="h-[3px] w-[3px] bg-gold-400/80" />
+              <span className="h-[3px] w-[3px] bg-gold-400/40" />
+            </span>
+            Adventurer profile
+          </p>
+          <h1 className="page-title mt-1">Profile</h1>
+          <p className="page-subtitle">The legend of your journey so far.</p>
         </div>
-        <XPBar
-          level={character.level}
-          current={character.currentXP}
-          required={xpRequiredForLevel(character.level)}
-        />
+        <Link to="/character" className="btn-secondary shrink-0">
+          Open character sheet
+        </Link>
+      </header>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)] xl:items-start">
+        {/* ---------------- adventurer card ---------------- */}
+        <section className="game-panel game-panel-gold hud-frame p-6">
+          <PixelCorners size={11} />
+          <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+            <Link
+              to="/character"
+              aria-label="View your character"
+              className="mx-auto h-40 w-32 shrink-0 overflow-hidden rounded-lg border-2 border-gold-500/60 bg-dungeon-900 shadow-glow transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-400 sm:mx-0"
+            >
+              <CharacterAvatar
+                gender={character.gender}
+                physique={character.physique}
+                skinTone={character.skinTone}
+                faceType={character.faceType}
+                eyeColor={character.eyeColor}
+                hairStyle={character.hairStyle}
+                hairColor={character.hairColor}
+                facialHair={character.facialHair}
+                skinDetail={character.skinDetail}
+                equippedTop={equipped.top}
+                equippedBottom={equipped.bottom}
+                equippedShoes={equipped.shoes}
+                equippedAccessory={equipped.accessory}
+                equippedSpecial={equipped.special}
+                topPrimaryColor={character.topPrimaryColor}
+                topAccentColor={character.topAccentColor}
+                bottomPrimaryColor={character.bottomPrimaryColor}
+                bottomAccentColor={character.bottomAccentColor}
+                shoesPrimaryColor={character.shoesPrimaryColor}
+                shoesAccentColor={character.shoesAccentColor}
+                level={character.level}
+                idle={false}
+                className="h-full w-full"
+              />
+            </Link>
+
+            <div className="min-w-0 flex-1">
+              <p className="font-hud text-[10px] uppercase tracking-[0.3em] text-gold-500/80">
+                Level {character.level} Adventurer
+              </p>
+              <p className="mt-0.5 truncate font-display text-xl font-bold text-parchment-100">
+                {user?.email || 'Adventurer'}
+              </p>
+              <div className="mt-3">
+                <XPBar
+                  level={character.level}
+                  current={character.currentXP}
+                  required={xpRequiredForLevel(character.level)}
+                  size="lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* real stat band */}
+          <div className="relative mt-6 grid grid-cols-2 gap-2.5 border-t border-dungeon-600/40 pt-5 sm:grid-cols-4">
+            {stats.map((s) => (
+              <div
+                key={s.label}
+                className="flex items-center gap-2.5 rounded-md border border-dungeon-600/60 bg-dungeon-900/50 px-3 py-2.5"
+              >
+                <Icon name={s.icon} className={`h-4 w-4 shrink-0 ${s.accent}`} />
+                <span className="min-w-0">
+                  <span className="block font-hud text-base leading-none text-parchment-100">{s.value}</span>
+                  <span className="mt-1 block truncate text-[9px] uppercase tracking-[0.16em] text-parchment-300/50">
+                    {s.label}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ---------------- attributes ---------------- */}
+        <section className="game-panel p-6">
+          <h2 className="mb-4 flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
+            <Icon name="profile" className="h-4 w-4 text-gold-500/80" aria-hidden="true" /> Attributes
+          </h2>
+          <AttributeRadar character={character} />
+        </section>
       </div>
 
-      <AttributeRadar character={character} />
-
-      <div className="parchment-card p-6">
-        <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
-          Badges
+      {/* ---------------- badges ---------------- */}
+      <section className="game-panel p-6">
+        <h2 className="mb-4 flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-widest text-parchment-300/70">
+          <Icon name="armory" className="h-4 w-4 text-gold-500/80" aria-hidden="true" /> Badges
         </h2>
-        {earnedBadges.length === 0 ? (
-          <p className="text-sm text-parchment-300/60">
-            No badges yet — build a streak to earn your first one.
-          </p>
-        ) : (
-          <ul className="flex flex-wrap gap-3">
-            {earnedBadges.map((b) => (
+        <ul className="grid gap-3 sm:grid-cols-3">
+          {BADGES.map((b) => {
+            const earned = character.longestStreak >= b.threshold;
+            return (
               <li
                 key={b.label}
-                className="flex items-center gap-2 rounded-full border border-gold-600/40 bg-dungeon-800 px-3 py-1.5 text-xs font-semibold text-gold-400"
+                className={`flex items-center gap-3 rounded-md border p-3.5 transition-colors ${
+                  earned
+                    ? 'border-gold-600/50 bg-gold-500/5'
+                    : 'border-dashed border-dungeon-700/70 bg-dungeon-900/40'
+                }`}
               >
-                <span aria-hidden="true">{b.icon}</span> {b.label}
+                <span
+                  aria-hidden="true"
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 ${
+                    earned
+                      ? 'border-gold-400/80 bg-dungeon-900 text-gold-300 shadow-glow'
+                      : 'border-dungeon-600 bg-dungeon-900 text-parchment-300/30'
+                  }`}
+                >
+                  <Icon name={earned ? b.icon : 'lock'} className="h-5 w-5" />
+                </span>
+                <span className="min-w-0">
+                  <span
+                    className={`block truncate font-display text-sm font-bold ${
+                      earned ? 'text-parchment-100' : 'text-parchment-300/50'
+                    }`}
+                  >
+                    {b.label}
+                  </span>
+                  <span className="block font-hud text-[9px] uppercase tracking-[0.16em] text-parchment-300/45">
+                    {earned ? 'Earned' : b.caption}
+                  </span>
+                </span>
               </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="parchment-card grid grid-cols-2 gap-4 p-6 sm:grid-cols-4">
-        <Stat label="Gold" value={character.gold} icon="🪙" />
-        <Stat label="Current Streak" value={character.currentStreak} icon="🔥" />
-        <Stat label="Longest Streak" value={character.longestStreak} icon="🏅" />
-        <Stat label="Items Owned" value={character.inventory?.length ?? 0} icon="🎒" />
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, icon }) {
-  return (
-    <div className="text-center">
-      <p className="text-2xl" aria-hidden="true">
-        {icon}
-      </p>
-      <p className="font-display text-xl font-bold text-parchment-100">{value}</p>
-      <p className="text-[11px] uppercase tracking-widest text-parchment-300/60">{label}</p>
+            );
+          })}
+        </ul>
+      </section>
     </div>
   );
 }
