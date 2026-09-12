@@ -30,6 +30,7 @@ export default function CharacterStage({
   children,
   blur = 18,
   idle = true,
+  motto = '',
 }) {
   const isElite = level >= ELITE_LEVEL;
   const isMythic = level >= MYTHIC_LEVEL;
@@ -55,10 +56,42 @@ export default function CharacterStage({
           background: `radial-gradient(58% 42% at 50% 26%, ${auraColor}, transparent 70%)`,
         }}
       />
+      {/* Architectural framing: a stone back-wall gradient + flanking
+          column silhouettes give the chamber depth without any image asset.
+          Purely decorative, pointer-events off, resolved through theme vars
+          so the light world renders parchment stone instead of cave black. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `
+            linear-gradient(90deg, rgb(var(--c-dungeon-950) / 0.55) 0%, transparent 14%, transparent 86%, rgb(var(--c-dungeon-950) / 0.55) 100%),
+            radial-gradient(90% 60% at 50% 30%, transparent 40%, rgb(var(--c-dungeon-950) / 0.35) 100%)`,
+        }}
+      />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-[6%] hidden w-3 sm:block">
+        <span className="stage-pillar absolute inset-0" />
+        <span className="absolute inset-x-0 top-[12%] h-[3px] bg-gold-400/25" />
+        <span className="absolute inset-x-0 bottom-[22%] h-[3px] bg-gold-400/25" />
+      </div>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-[6%] hidden w-3 sm:block">
+        <span className="stage-pillar absolute inset-0" />
+        <span className="absolute inset-x-0 top-[12%] h-[3px] bg-gold-400/25" />
+        <span className="absolute inset-x-0 bottom-[22%] h-[3px] bg-gold-400/25" />
+      </div>
       {/* Beam + ground treatment resolve through scoped selectors: the
           light world gets a warm sun shaft with no dark overlay (a dark cone
           on parchment reads as grime) and only a faint ground shadow. */}
       <style>{`
+        .stage-pillar {
+          background: linear-gradient(180deg,
+            rgb(var(--c-dungeon-800) / 0.85), rgb(var(--c-dungeon-900) / 0.55));
+          border-inline: 1px solid rgb(var(--c-gold-400) / 0.14);
+        }
+        [data-theme='light'] .stage-pillar {
+          background: linear-gradient(180deg,
+            rgb(var(--c-gold-600) / 0.16), rgb(var(--c-dungeon-700) / 0.10));
+        }
         .stage-beam {
           background: linear-gradient(180deg,
             rgb(var(--c-gold-400) / 0.10),
@@ -100,13 +133,31 @@ export default function CharacterStage({
             key={i}
             aria-hidden="true"
             className="pointer-events-none absolute h-1 w-1 rounded-full"
-            style={{ background: 'rgb(var(--c-gold-400) / 0.5)' }}
-            style={{ left: `${12 + i * 15}%`, bottom: '18%' }}
+            style={{
+              left: `${12 + i * 15}%`,
+              bottom: '18%',
+              background: 'rgb(var(--c-gold-400) / 0.5)',
+            }}
             animate={{ y: [0, -90 - i * 12], opacity: [0, 0.7, 0] }}
             transition={{ duration: 7 + i * 1.3, repeat: Infinity, delay: i * 1.1, ease: 'easeInOut' }}
           />
         ))}
 
+      {/* motto inscription — a vertical serif line beside the model, the
+          chamber's quiet words (reference-style flourish, decorative). */}
+      {motto && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-3 top-1/2 hidden -translate-y-1/2 md:block"
+        >
+          <p
+            className="font-display text-[11px] italic tracking-wide text-parchment-300/50"
+            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+          >
+            “{motto}”
+          </p>
+        </div>
+      )}
       {/* character slot */}
       <div className="stage-groundfade pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="relative z-10 flex h-full flex-col items-center justify-end">
@@ -140,7 +191,7 @@ export default function CharacterStage({
             level={level}
             rotation={rotation}
             idle={idle}
-            className="avatar-drop h-full max-h-[640px] w-auto"
+            className="avatar-drop h-full max-h-[760px] w-auto"
           />
         </motion.div>
 
@@ -165,7 +216,6 @@ export default function CharacterStage({
           {/* soft ground shadow — faint on the light world so it doesn't
               read as a hole punched in parchment */}
           <div
-            className="absolute inset-x-[12%] bottom-1 h-6 rounded-[50%]"
             className="stage-groundshadow absolute inset-x-[12%] bottom-1 h-6 rounded-[50%]"
             style={{ background: 'radial-gradient(closest-side, rgba(0,0,0,0.5), transparent 75%)' }}
           />

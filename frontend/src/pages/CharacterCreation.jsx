@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
 import CharacterStage from '../components/character/CharacterStage';
+import CharacterAvatar from '../components/character/CharacterAvatar';
 import SlotIcon from '../components/character/characterIcons';
 import {
   GENDERS,
@@ -40,6 +41,10 @@ const TABS = [
   { id: 'face', label: 'Head & Face', icon: 'character' },
   { id: 'hair', label: 'Hair', icon: 'spark' },
 ];
+
+// Face thumbnails frame the head of the avatar's fixed 200x320 stage —
+// they ARE the real rendered character face for that preset, not drawn art.
+const FACE_THUMB_VIEWBOX = '58 20 84 84';
 
 // The shared ui icon set is nav-oriented; map tab icons to SlotIcon fallbacks.
 const TAB_ICONS = { identity: 'head', face: 'head', hair: 'spark' };
@@ -92,6 +97,23 @@ export default function CharacterCreation() {
     setPhysique(PHYSIQUE_BY_GENDER[next][1].value);
     setFaceType(FACE_TYPES_BY_GENDER[next][0].value);
     setHairStyle(HAIR_STYLES_BY_GENDER[next][0].value);
+  }
+
+  // Randomize rolls ONLY existing enum values (locked hairstyles excluded
+  // — it never invents unlocks). Cheap, deterministic contract with the
+  // same state the chips/swatches edit.
+  function handleRandomize() {
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)].value;
+    const g = pick(GENDERS);
+    setGender(g);
+    setPhysique(pick(PHYSIQUE_BY_GENDER[g]));
+    setSkinTone(pick(SKIN_TONES));
+    setFaceType(pick(FACE_TYPES_BY_GENDER[g]));
+    setEyeColor(pick(EYE_COLORS));
+    setHairStyle(pick(HAIR_STYLES_BY_GENDER[g].filter((h) => !h.unlockLevel)));
+    setHairColor(pick(HAIR_COLORS));
+    setFacialHair(pick(FACIAL_HAIR_OPTIONS));
+    setSkinDetail(pick(SKIN_DETAILS));
   }
 
   async function handleSubmit() {
@@ -187,8 +209,13 @@ export default function CharacterCreation() {
             </span>
           </div>
 
-          {/* category tabs */}
-          <div role="tablist" aria-label="Customization categories" className="grid grid-cols-3 gap-2">
+          {/* category tabs — vertical icon rail on desktop, row on mobile,
+              mirroring the reference creator's tabbed customization bar */}
+          <div
+            role="tablist"
+            aria-label="Customization categories"
+            className="flex gap-2 sm:flex-col"
+          >
             {TABS.map((t) => {
               const active = tab === t.id;
               return (
@@ -198,14 +225,14 @@ export default function CharacterCreation() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setTab(t.id)}
-                  className={`relative flex items-center justify-center gap-2 rounded-md border px-3 py-2.5 font-hud text-[11px] uppercase tracking-[0.18em] transition-all duration-150 ${
+                  className={`relative flex flex-1 flex-col items-center gap-1.5 rounded-md border px-3 py-3 font-hud text-[10px] uppercase tracking-[0.16em] transition-all duration-150 sm:flex-row sm:gap-2.5 sm:text-[11px] sm:tracking-[0.18em] ${
                     active
                       ? 'border-gold-500 bg-gold-500/10 text-gold-300 shadow-glow'
                       : 'border-dungeon-600 bg-dungeon-900/70 text-parchment-300/60 hover:border-mystic-500/70 hover:text-parchment-200'
                   }`}
                 >
                   {active && <PixelCorners size={7} />}
-                  <SlotIcon name={TAB_ICONS[t.id]} className="h-4 w-4" />
+                  <SlotIcon name={TAB_ICONS[t.id]} className="h-5 w-5 sm:h-4 sm:w-4" />
                   {t.label}
                 </button>
               );
@@ -252,13 +279,48 @@ export default function CharacterCreation() {
             {tab === 'face' && (
               <motion.div key="face" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-6">
                 <section>
-                  <SectionTitle>Face</SectionTitle>
-                  <div className="flex flex-wrap gap-2">
-                    {faceOptions.map((f) => (
-                      <OptionChip key={f.value} selected={faceType === f.value} onClick={() => setFaceType(f.value)}>
-                        {f.label}
-                      </OptionChip>
-                    ))}
+                  <SectionTitle>Face Type</SectionTitle>
+                  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+                    {faceOptions.map((f) => {
+                      const selected = faceType === f.value;
+                      return (
+                        <button
+                          key={f.value}
+                          type="button"
+                          onClick={() => setFaceType(f.value)}
+                          aria-pressed={selected}
+                          className={`group relative flex flex-col items-center gap-1.5 rounded-md border p-2 transition-all duration-150 hover:-translate-y-0.5 ${
+                            selected
+                              ? 'border-gold-500 bg-gold-500/10 shadow-glow'
+                              : 'border-dungeon-600 bg-dungeon-900/60 hover:border-mystic-500'
+                          }`}
+                        >
+                          {selected && <PixelCorners size={7} />}
+                          <CharacterAvatar
+                            gender={gender}
+                            physique={physique}
+                            skinTone={skinTone}
+                            faceType={f.value}
+                            eyeColor={eyeColor}
+                            hairStyle={hairStyle}
+                            hairColor={hairColor}
+                            facialHair={gender === 'male' ? facialHair : 'clean_shaven'}
+                            skinDetail={skinDetail}
+                            level={1}
+                            idle={false}
+                            viewBox={FACE_THUMB_VIEWBOX}
+                            className="h-16 w-16"
+                          />
+                          <span
+                            className={`font-hud text-[9px] uppercase tracking-[0.14em] ${
+                              selected ? 'text-gold-300' : 'text-parchment-300/60'
+                            }`}
+                          >
+                            {f.label}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </section>
 
@@ -330,11 +392,21 @@ export default function CharacterCreation() {
             )}
           </div>
 
-          {/* forge action */}
+          {/* forge action: secondary randomize + primary game-confirm CTA */}
           <div className="border-t border-dungeon-600/40 pt-4">
-            <button type="button" className="btn-primary w-full" onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? 'FORGING YOUR LEGEND…' : 'BEGIN YOUR JOURNEY'}
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={handleRandomize}
+                className="btn-secondary inline-flex items-center justify-center gap-2"
+              >
+                <SlotIcon name="spark" className="h-4 w-4" />
+                Randomize
+              </button>
+              <button type="button" className="btn-primary flex-1" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? 'FORGING YOUR LEGEND…' : 'SAVE APPEARANCE →'}
+              </button>
+            </div>
             <p className="mt-2 text-center text-[11px] text-parchment-300/45">
               Level 1 · Novice · Your equipment is earned through quests.
             </p>
