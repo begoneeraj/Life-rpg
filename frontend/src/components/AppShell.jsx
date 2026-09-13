@@ -228,7 +228,7 @@ export default function AppShell() {
   return (
     <div className="min-h-screen">
       {/* ---------------- top HUD (all sizes) ---------------- */}
-      <header className="sticky top-0 z-40 border-b border-dungeon-700/60 bg-dungeon-950/90 backdrop-blur">
+      <header className="rpg-topbar sticky top-0 z-40">
         <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
           <button
             type="button"
@@ -257,6 +257,16 @@ export default function AppShell() {
             className="mx-1 hidden h-6 border-l border-dungeon-600/60 sm:block"
           />
 
+          <Link
+            to="/quests"
+            className="rpg-command hidden min-w-0 flex-1 items-center gap-2 md:flex"
+            aria-label="Create a new quest"
+          >
+            <Icon name="quests" className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">Create your next quest</span>
+            <span className="ml-auto font-hud text-[10px] text-gold-500">+</span>
+          </Link>
+
           {/* HUD readouts */}
           <div className="ml-auto flex items-center gap-2">
             {goldBadge}
@@ -268,7 +278,7 @@ export default function AppShell() {
 
       {/* ---------------- sidebar (desktop) ---------------- */}
       <aside
-        className="fixed inset-y-14 left-0 z-30 hidden w-[240px] flex-col border-r border-dungeon-700/50 bg-dungeon-900/60 backdrop-blur-sm lg:flex xl:w-[260px]"
+        className="rpg-sidebar fixed inset-y-14 left-0 z-30 hidden w-[210px] flex-col lg:flex"
         aria-label="Game menu"
       >
         {sidebarNav}
@@ -346,7 +356,7 @@ export default function AppShell() {
       </AnimatePresence>
 
       {/* ---------------- main content ---------------- */}
-      <main className="shell-main lg:pl-[240px] xl:pl-[260px]">
+      <main className="shell-main lg:pl-[210px]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}

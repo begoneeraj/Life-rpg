@@ -45,11 +45,13 @@ export default function Bottom({ svgKey, gender, physique = 'athletic', primaryC
         </linearGradient>
       </defs>
 
-      {/* legs */}
-      <path d={`M${leftTop},200 L${leftInner},200 L96,296 L74,296 Z`} fill={style.fill} />
-      <path d={`M${leftTop},200 L${leftInner},200 L96,296 L74,296 Z`} fill="url(#clothFormBottom)" />
-      <path d={`M${rightTop},200 L${rightOuter},200 L126,296 L104,296 Z`} fill={style.fill} />
-      <path d={`M${rightTop},200 L${rightOuter},200 L126,296 L104,296 Z`} fill="url(#clothFormBottom)" />
+      {/* legs — outer edge curves in slightly at mid-thigh/calf to clear the
+          Body leg's own outward taper (a straight hem-to-waistband chord
+          sits inside that curve and lets skin show through at the calf) */}
+      <path d={`M${leftTop},200 L${leftInner},200 L96,296 L74,296 Q${leftTop - 6},248 ${leftTop},200 Z`} fill={style.fill} />
+      <path d={`M${leftTop},200 L${leftInner},200 L96,296 L74,296 Q${leftTop - 6},248 ${leftTop},200 Z`} fill="url(#clothFormBottom)" />
+      <path d={`M${rightTop},200 L${rightOuter},200 Q${rightOuter + 6},248 126,296 L104,296 Z`} fill={style.fill} />
+      <path d={`M${rightTop},200 L${rightOuter},200 Q${rightOuter + 6},248 126,296 L104,296 Z`} fill="url(#clothFormBottom)" />
 
       {/* inseam contact shadow between the thighs */}
       <path d="M100,206 L100,290" stroke="rgba(0,0,0,0.16)" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
@@ -63,9 +65,12 @@ export default function Bottom({ svgKey, gender, physique = 'athletic', primaryC
       {/* ankle hem: pants end exactly at the shoe line */}
       <path d="M74,293 L96,293 M104,293 L126,293" stroke="rgba(0,0,0,0.20)" strokeWidth="1.6" strokeLinecap="round" />
 
-      {/* waistband: a distinct band seated at the natural waist */}
-      <path d={`M${leftTop},200 L${rightOuter},200 L${rightOuter - 2},214 L${leftTop + 2},214 Z`} fill={style.accent} />
-      <path d={`M${leftTop + 2},213 L${rightOuter - 2},213`} stroke="rgba(255,255,255,0.10)" strokeWidth="1" />
+      {/* waistband: a slim seated band, blended into the leg fabric with a
+          gradient rather than a flat contrasting block, so it reads as a
+          seam in the same garment instead of a belt cut across it */}
+      <path d={`M${leftTop},200 L${rightOuter},200 L${rightOuter - 1.5},209 L${leftTop + 1.5},209 Z`} fill={style.accent} opacity="0.75" />
+      <path d={`M${leftTop},200 L${rightOuter},200 L${rightOuter - 1.5},209 L${leftTop + 1.5},209 Z`} fill="url(#clothFormBottom)" />
+      <path d={`M${leftTop + 1.5},200.6 L${rightOuter - 1.5},200.6`} stroke="rgba(255,255,255,0.14)" strokeWidth="0.9" />
 
       {style.pockets && (
         <>

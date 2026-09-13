@@ -18,7 +18,8 @@ const DEMO_CHARACTER = {
   gender: 'male', physique: 'athletic', skinTone: 'brown', faceType: 'friendly', eyeColor: 'hazel_amber',
   hairStyle: 'short_textured', hairColor: '#20150f', facialHair: 'none', skinDetail: 'none',
   topPrimaryColor: '#29445b', topAccentColor: '#d9b856', bottomPrimaryColor: '#253247',
-  bottomAccentColor: '#6b89a5', shoesPrimaryColor: '#3e2d25', shoesAccentColor: '#ba9851', equippedItems: {},
+  bottomAccentColor: '#6b89a5', shoesPrimaryColor: '#3e2d25', shoesAccentColor: '#ba9851',
+  equippedItems: { top: { svgKey: 'top_basic_tee' }, bottom: { svgKey: 'bottom_basic_pants' }, shoes: { svgKey: 'shoes_basic' } },
 };
 const DEMO_QUESTS = [
   { id: 'demo-1', title: 'Learn Hash Tables', category: 'study', difficulty: 'medium', estimatedMinutes: 45, status: 'pending' },

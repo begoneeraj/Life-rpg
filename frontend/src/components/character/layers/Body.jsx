@@ -5,18 +5,19 @@ import { SKIN_TONE_HEX, PHYSIQUE_METRICS } from '../constants';
  * character's skin tone. Clothing layers render on top and cover most of
  * this; it exists so nothing is ever "missing" if a slot is unequipped.
  *
- * Cel-shaded with a top-left key light and bottom-right ambient occlusion,
- * plus a thin gold rim light on the right edge to visually tie the model to
- * the UI's gold accents. Shoulder/hip width comes from the physique metric
- * (lean/athletic/heavy for male, slender/athletic/curvy for female) applied
- * as a horizontal scale on the torso and hip/leg groups so we don't need a
- * separate hand-authored path per physique.
+ * Cel-shaded with a top-left key light and bottom-right ambient occlusion.
+ * The gold rim light lives one level up, in CharacterAvatar's shared
+ * `avatarRimLight` filter, which wraps the body AND every clothing layer
+ * together so the highlight traces the character's true outer silhouette
+ * instead of double-applying here too. Shoulder/hip width comes from the
+ * physique metric (lean/athletic/heavy for male, slender/athletic/curvy for
+ * female) applied as a horizontal scale on the torso and hip/leg groups so
+ * we don't need a separate hand-authored path per physique.
  */
 export default function Body({ gender, skinTone, physique = 'athletic' }) {
   const skin = SKIN_TONE_HEX[skinTone] || SKIN_TONE_HEX.medium;
   const metrics = PHYSIQUE_METRICS[physique] || PHYSIQUE_METRICS.athletic;
   const gradId = `skinGrad-${skinTone}`;
-  const rimId = 'goldRim';
 
   return (
     <g>
@@ -26,31 +27,20 @@ export default function Body({ gender, skinTone, physique = 'athletic' }) {
           <stop offset="45%" stopColor={skin} stopOpacity="0" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
         </linearGradient>
-        <filter id={rimId} x="-20%" y="-20%" width="140%" height="140%">
-          {/* Rim crescent = flood ∩ alpha, shifted, then SUBTRACTED by the
-              un-shifted alpha (operator="out"). Tinting the whole shape
-              washes out — especially in the light theme. */}
-          <feFlood floodColor="#e5c07b" floodOpacity="0.75" />
-          <feComposite in2="SourceAlpha" operator="in" />
-          <feOffset dx="2" dy="0" result="offsetRim" />
-          <feComposite in="offsetRim" in2="SourceAlpha" operator="out" result="rim" />
-          <feMerge>
-            <feMergeNode in="SourceGraphic" />
-            <feMergeNode in="rim" />
-          </feMerge>
-        </filter>
       </defs>
 
       {/* legs + hips: contrapposto weight shift, tapered thigh/knee/calf */}
-      <g transform={`translate(100,200) scale(${metrics.hip},1) translate(-100,-200)`} filter={`url(#${rimId})`}>
+      <g transform={`translate(100,200) scale(${metrics.hip},1) translate(-100,-200)`}>
         <path
           d="M72,198 Q69,230 73,258 Q74,278 71,300 L91,300 Q92,276 90,256 Q93,228 92,198 Z"
           fill={skin}
         />
+        {/* mirrors the left leg exactly (no independent rotation) so
+            Bottom.jsx/Shoes.jsx — which don't know about this path — stay
+            pixel-aligned with it at every physique scale. */}
         <path
           d="M108,198 Q106,226 109,254 L107,300 L129,300 Q131,276 127,254 Q130,226 128,198 Z"
           fill={skin}
-          transform="rotate(3 118 250)"
         />
         <path d="M72,198 Q69,230 73,258 Q74,278 71,300 L91,300 Q92,276 90,256 Q93,228 92,198 Z" fill={`url(#${gradId})`} />
       </g>

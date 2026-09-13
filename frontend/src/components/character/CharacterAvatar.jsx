@@ -128,12 +128,17 @@ export default function CharacterAvatar({
                 (braziers' gold by night, sunlight by day). The flood is
                 SUBTRACTED from the source alpha (operator="out") so only the
                 offset crescent outside the silhouette is painted — tinting
-                the whole body would wash the character out. */}
+                the whole body would wash the character out. Kept thin, soft
+                and low-opacity: this is meant to read as ambient stage
+                light grazing the figure, not an outline stroke around every
+                garment edge (a bright hard-edged version reads as a flat
+                sticker cutout instead of a lit 3D form). */}
             <filter id="avatarRimLight" x="-20%" y="-20%" width="140%" height="140%">
-              <feFlood className="avatar-rim-flood" floodColor="#e8c874" floodOpacity="0.85" />
+              <feFlood className="avatar-rim-flood" floodColor="#e8c874" floodOpacity="0.5" />
               <feComposite in2="SourceAlpha" operator="in" />
-              <feOffset dx="2" dy="0" result="offsetRim" />
-              <feComposite in="offsetRim" in2="SourceAlpha" operator="out" result="rim" />
+              <feOffset dx="1" dy="0.5" result="offsetRim" />
+              <feGaussianBlur in="offsetRim" stdDeviation="0.6" result="softRim" />
+              <feComposite in="softRim" in2="SourceAlpha" operator="out" result="rim" />
               <feMerge>
                 <feMergeNode in="SourceGraphic" />
                 <feMergeNode in="rim" />
@@ -146,36 +151,41 @@ export default function CharacterAvatar({
             <HairBack hairStyle={hairStyle} hairColor={hairColor} gender={gender} />
           </g>
 
+          {/* Rim light wraps the body AND every clothing layer together so the
+              gold highlight traces the character's true outer silhouette
+              (garment edge where equipped, skin edge where bare) instead of
+              always tracing the bare body's edge — which used to shine
+              through as a gold outline anywhere a sleeve/pant leg didn't
+              cover the body underneath by a wide margin. */}
           <g filter="url(#avatarRimLight)">
             <Body gender={gender} skinTone={skinTone} physique={physique} />
+            {equippedBottom && (
+              <Bottom
+                svgKey={equippedBottom.svgKey}
+                gender={gender}
+                physique={physique}
+                primaryColor={bottomPrimaryColor}
+                accentColor={bottomAccentColor}
+              />
+            )}
+            {equippedShoes && (
+              <Shoes
+                svgKey={equippedShoes.svgKey}
+                physique={physique}
+                primaryColor={shoesPrimaryColor}
+                accentColor={shoesAccentColor}
+              />
+            )}
+            {equippedTop && (
+              <Top
+                svgKey={equippedTop.svgKey}
+                gender={gender}
+                physique={physique}
+                primaryColor={topPrimaryColor}
+                accentColor={topAccentColor}
+              />
+            )}
           </g>
-
-          {equippedBottom && (
-            <Bottom
-              svgKey={equippedBottom.svgKey}
-              gender={gender}
-              physique={physique}
-              primaryColor={bottomPrimaryColor}
-              accentColor={bottomAccentColor}
-            />
-          )}
-          {equippedShoes && (
-            <Shoes
-              svgKey={equippedShoes.svgKey}
-              physique={physique}
-              primaryColor={shoesPrimaryColor}
-              accentColor={shoesAccentColor}
-            />
-          )}
-          {equippedTop && (
-            <Top
-              svgKey={equippedTop.svgKey}
-              gender={gender}
-              physique={physique}
-              primaryColor={topPrimaryColor}
-              accentColor={topAccentColor}
-            />
-          )}
 
           {gender === 'male' && <FacialHair style={facialHair} hairColor={hairColor} />}
           <Face faceType={faceType} skinToneHex={skinHex} eyeColor={eyeColor} eyesGlow={isMythic} />

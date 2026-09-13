@@ -47,11 +47,16 @@ export default function Top({ svgKey, gender, physique = 'athletic', primaryColo
         </linearGradient>
       </defs>
 
-      {/* ---- sleeves: form-shaded cylinders with shoulder seam + cuff ---- */}
-      <path d="M48,116 L64,111 L58,206 L43,204 Z" fill={style.fill} />
-      <path d="M48,116 L64,111 L58,206 L43,204 Z" fill="url(#clothFormTop)" />
-      <path d="M152,116 L136,111 L142,206 L157,204 Z" fill={style.fill} />
-      <path d="M152,116 L136,111 L142,206 L157,204 Z" fill="url(#clothFormTop)" />
+      {/* ---- sleeves: form-shaded cylinders with shoulder seam + cuff ----
+          Outer edge is a curve (not a straight chord) so it clears the
+          Body arm's own elbow-outward bulge along its whole length instead
+          of cutting a straight line across it — a straight chord sits
+          inside that curve at the elbow and lets bare skin (and its rim
+          light) show through the "seam". */}
+      <path d="M48,116 L64,111 L58,206 L43,204 Q34,166 48,116 Z" fill={style.fill} />
+      <path d="M48,116 L64,111 L58,206 L43,204 Q34,166 48,116 Z" fill="url(#clothFormTop)" />
+      <path d="M152,116 L136,111 L142,206 L157,204 Q166,166 152,116 Z" fill={style.fill} />
+      <path d="M152,116 L136,111 L142,206 L157,204 Q166,166 152,116 Z" fill="url(#clothFormTop)" />
       {/* shoulder seams: fabric panels meeting at the shoulder point */}
       <path d="M49,117 Q56,113 63,112 M151,117 Q144,113 137,112" stroke="rgba(0,0,0,0.22)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
       {/* elbow tension folds */}
