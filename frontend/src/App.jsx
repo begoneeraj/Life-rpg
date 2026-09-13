@@ -1,22 +1,37 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import useStore from './store/useStore';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppShell from './components/AppShell';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Guild from './pages/Guild';
-import Quests from './pages/Quests';
-import Shop from './pages/Shop';
-import Profile from './pages/Profile';
-import Character from './pages/Character';
-import CharacterCreation from './pages/CharacterCreation';
-import Inventory from './pages/Inventory';
-import Routine from './pages/Routine';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
+import { Skeleton } from './components/Skeleton';
+
+// Every route used to be bundled into one ~900KB JS file loaded up front,
+// even just to show the login screen. Lazy-loading each page means the
+// initial load only pays for the route actually being visited (plus
+// AppShell/vendor code, split out below in vite.config.js) — the rest
+// downloads on demand when the user navigates there.
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const Guild = lazy(() => import('./pages/Guild'));
+const Quests = lazy(() => import('./pages/Quests'));
+const Shop = lazy(() => import('./pages/Shop'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Character = lazy(() => import('./pages/Character'));
+const CharacterCreation = lazy(() => import('./pages/CharacterCreation'));
+const Inventory = lazy(() => import('./pages/Inventory'));
+const Routine = lazy(() => import('./pages/Routine'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+
+function RouteFallback() {
+  return (
+    <div className="page-container">
+      <Skeleton className="h-[70vh] w-full" />
+    </div>
+  );
+}
 
 function AppLayout() {
   return <AppShell />;
@@ -38,6 +53,7 @@ export default function App() {
           className: 'liferpg-toast',
         }}
       />
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -74,6 +90,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/guild" replace />} />
         <Route path="*" element={<Navigate to="/guild" replace />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
     </ErrorBoundary>
   );

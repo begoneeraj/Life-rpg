@@ -3,6 +3,21 @@ command = "npm run build"
 publish = "dist"
 base = "frontend"
 
+# Vite fingerprints every file under assets/ with a content hash, so it's
+# safe (and a real load-time win) to tell browsers/the CDN to cache them
+# forever — a new deploy ships new filenames, never stale content under an
+# old one. index.html must stay revalidated on every load so it always
+# points at the current hashed asset names.
+[[headers]]
+for = "/assets/*"
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/index.html"
+[headers.values]
+Cache-Control = "public, max-age=0, must-revalidate"
+
 [[redirects]]
 from = "/*"
 to = "/index.html"
