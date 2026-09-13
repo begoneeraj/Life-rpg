@@ -59,6 +59,19 @@ function xpForMinutes(minutes) {
   return Math.min(MAX_XP, Math.max(MIN_XP, Math.round(raw)));
 }
 
+/**
+ * Total lifetime XP a character has earned, for ranking players across
+ * different levels on a single scale (currentXP alone isn't comparable -
+ * it resets every level-up).
+ */
+function totalXpEarned(level, currentXP) {
+  let total = currentXP;
+  for (let l = 1; l < level; l += 1) {
+    total += xpRequiredForLevel(l);
+  }
+  return total;
+}
+
 function goldForXp(xp) {
   return Math.floor(xp / 2);
 }
@@ -236,6 +249,7 @@ module.exports = {
   CATEGORY_TO_ATTRIBUTE,
   xpRequiredForLevel,
   xpForMinutes,
+  totalXpEarned,
   goldForXp,
   attributeForCategory,
   applyXp,

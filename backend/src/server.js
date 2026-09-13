@@ -15,6 +15,9 @@ const questAnalysisRoutes = require('./routes/questAnalysis');
 const questAssessmentRoutes = require('./routes/questAssessment');
 const adminAuthRoutes = require('./routes/adminAuth');
 const weeklyTaskRoutes = require('./routes/weeklyTasks');
+const usersRoutes = require('./routes/users');
+const friendsRoutes = require('./routes/friends');
+const battleRoutes = require('./routes/battle');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -45,6 +48,9 @@ app.use('/api/analyze-quest', questAnalysisRoutes);
 app.use('/api/quest-assessment', questAssessmentRoutes);
 app.use('/api/admin', adminAuthRoutes);
 app.use('/api/weekly-tasks', weeklyTaskRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/friends', friendsRoutes);
+app.use('/api/battle', battleRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

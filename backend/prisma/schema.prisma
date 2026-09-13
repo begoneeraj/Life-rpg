@@ -14,11 +14,65 @@ model User {
   id           String     @id @default(uuid())
   email        String     @unique
   passwordHash String
+  // Nullable so existing accounts (created before the friends/battle system)
+  // aren't broken by the migration; set at signup for new accounts, or via
+  // PATCH /api/users/username to backfill an old one. Only usernamed users
+  // are searchable/challengeable.
+  username     String?    @unique
   createdAt    DateTime   @default(now())
   character    Character?
   quests       Quest[]
   weeklyTasks  WeeklyTask[]
   refreshTokens RefreshToken[]
+
+  sentFriendRequests     Friendship[] @relation("FriendshipRequester")
+  receivedFriendRequests Friendship[] @relation("FriendshipReceiver")
+  battlesChallenged      Battle[]     @relation("BattleChallenger")
+  battlesOpposed         Battle[]     @relation("BattleOpponent")
+}
+
+model Friendship {
+  id          String   @id @default(uuid())
+  requesterId String
+  requester   User     @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("FriendshipReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  status      String   @default("pending") // pending | accepted | rejected
+  createdAt   DateTime @default(now())
+
+  @@unique([requesterId, receiverId])
+  @@index([receiverId])
+}
+
+// A 1v1 productivity duel between two friends over a shared task list.
+model Battle {
+  id               String       @id @default(uuid())
+  challengerId     String
+  challenger       User         @relation("BattleChallenger", fields: [challengerId], references: [id], onDelete: Cascade)
+  opponentId       String
+  opponent         User         @relation("BattleOpponent", fields: [opponentId], references: [id], onDelete: Cascade)
+  status           String       @default("pending") // pending | active | completed | declined
+  timeLimitMinutes Int
+  startedAt        DateTime?
+  endedAt          DateTime?
+  winnerId         String? // null while pending/active, or on a tie once completed
+  createdAt        DateTime     @default(now())
+  tasks            BattleTask[]
+
+  @@index([challengerId])
+  @@index([opponentId])
+}
+
+model BattleTask {
+  id                    String    @id @default(uuid())
+  battleId              String
+  battle                Battle    @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  round                 Int       @default(1) // 1 | 2 | 3 - every battle is best-of-3 rounds
+  taskText              String
+  challengerCompletedAt DateTime?
+  opponentCompletedAt   DateTime?
+
+  @@index([battleId])
 }
 
 model Character {
