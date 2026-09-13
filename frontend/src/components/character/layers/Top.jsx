@@ -47,27 +47,34 @@ export default function Top({ svgKey, gender, physique = 'athletic', primaryColo
         </linearGradient>
       </defs>
 
-      {/* ---- sleeves: form-shaded cylinders with shoulder seam + cuff ----
-          Outer edge is a curve (not a straight chord) so it clears the
-          Body arm's own elbow-outward bulge along its whole length instead
-          of cutting a straight line across it — a straight chord sits
-          inside that curve at the elbow and lets bare skin (and its rim
-          light) show through the "seam". */}
-      <path d="M48,116 L64,111 L58,206 L43,204 Q34,166 48,116 Z" fill={style.fill} />
-      <path d="M48,116 L64,111 L58,206 L43,204 Q34,166 48,116 Z" fill="url(#clothFormTop)" />
-      <path d="M152,116 L136,111 L142,206 L157,204 Q166,166 152,116 Z" fill={style.fill} />
-      <path d="M152,116 L136,111 L142,206 L157,204 Q166,166 152,116 Z" fill="url(#clothFormTop)" />
+      {/* ---- torso ---- drawn BEFORE the sleeves: the torso's straight top
+          corners (55,112)/(145,112) sit further out than the sleeve's own
+          inner-top point (64,111)/(136,111), so if torso painted over the
+          sleeve, its straight edge cut diagonally across the sleeve near
+          the shoulder — a visible seam/patch instead of a smooth shoulder.
+          Sleeves now paint last and fully cover that corner. */}
+      <path d={torso} fill={style.fill} />
+      <path d={torso} fill="url(#clothFormTop)" />
+
+      {/* ---- sleeves: form-shaded cylinders with a ROUNDED shoulder cap ----
+          The original shape met the outer edge and top edge at a sharp
+          corner right at the shoulder point — the outer curve arrived
+          nearly vertical while the top edge left nearly horizontal, so the
+          corner between them stuck up like a spike/epaulette instead of a
+          rounded human shoulder. Now the whole cap (outer curve for elbow
+          clearance + shoulder rounding) is ONE continuous curve back to the
+          inner-top point, with no hard corner anywhere along it. */}
+      <path d="M64,114 L58,206 L43,204 Q34,166 42,124 Q46,108 64,114 Z" fill={style.fill} />
+      <path d="M64,114 L58,206 L43,204 Q34,166 42,124 Q46,108 64,114 Z" fill="url(#clothFormTop)" />
+      <path d="M136,114 L142,206 L157,204 Q166,166 158,124 Q154,108 136,114 Z" fill={style.fill} />
+      <path d="M136,114 L142,206 L157,204 Q166,166 158,124 Q154,108 136,114 Z" fill="url(#clothFormTop)" />
       {/* shoulder seams: fabric panels meeting at the shoulder point */}
-      <path d="M49,117 Q56,113 63,112 M151,117 Q144,113 137,112" stroke="rgba(0,0,0,0.22)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+      <path d="M49,120 Q52,110 63,113 M151,120 Q148,110 137,113" stroke="rgba(0,0,0,0.22)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
       {/* elbow tension folds */}
       <path d="M49,156 q5,3 9,1 M151,156 q-5,3 -9,1" stroke="rgba(0,0,0,0.12)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
       {/* cuffs: end right at the wrist so sleeves meet the hands naturally */}
       <path d="M43.5,200 L58,202 L57.5,206 L43,204 Z" fill={style.accent} />
       <path d="M156.5,200 L142,202 L142.5,206 L157,204 Z" fill={style.accent} />
-
-      {/* ---- torso ---- */}
-      <path d={torso} fill={style.fill} />
-      <path d={torso} fill="url(#clothFormTop)" />
 
       {/* neckline: collar band + cast shadow under it (head occludes light) */}
       <path d="M85,112 Q100,120 115,112 L112,118 Q100,124 88,118 Z" fill={style.accent} />
