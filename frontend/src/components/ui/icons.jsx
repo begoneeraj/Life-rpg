@@ -227,6 +227,37 @@ const PATHS = {
       <path d="M7 14h2M11 14h2M15 14h2M7 17.5h2M11 17.5h2" />
     </>
   ),
+
+  // --- social / battle ---
+  friends: (
+    // Two adventurers, side by side
+    <>
+      <circle cx="8.5" cy="8" r="2.8" />
+      <path d="M3 20c.5-3.2 2.6-5 5.5-5s5 1.8 5.5 5" />
+      <circle cx="17" cy="7" r="2.2" />
+      <path d="M14.5 12.3c2.3.4 3.7 1.9 4.1 4.2" />
+    </>
+  ),
+  battle: (
+    // Crossed swords
+    <>
+      <path d="M4 20l6-6M14 10l6-6M17 3l3 1-1 3-3-1z" />
+      <path d="M7 3l-3 1 1 3 3-1z" />
+      <path d="M20 20l-6-6M10 14L4 8" />
+    </>
+  ),
+  crown: (
+    <>
+      <path d="M4 18h16l-1.4-8-3.8 3-2.8-5-2.8 5-3.8-3z" />
+      <path d="M4 20h16" />
+    </>
+  ),
+  timer: (
+    <>
+      <circle cx="12" cy="13" r="7.5" />
+      <path d="M12 9v4l2.5 2.5M10 2h4" />
+    </>
+  ),
 };
 
 /**

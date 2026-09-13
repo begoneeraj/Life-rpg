@@ -296,4 +296,49 @@ async function end(req, res) {
   res.json(buildStatusPayload(battle, req.userId));
 }
 
-module.exports = { challenge, respond, completeTask, getStatus, end };
+/**
+ * Battles the caller has been challenged to and hasn't responded to yet.
+ * The frontend polls this to render a "you've been challenged" notification
+ * (no WebSockets - same polling approach as battle status).
+ */
+async function listIncoming(req, res) {
+  const battles = await prisma.battle.findMany({
+    where: { opponentId: req.userId, status: 'pending' },
+    include: { challenger: true, tasks: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  res.json({
+    battles: battles.map((b) => ({
+      battle_id: b.id,
+      from_username: b.challenger.username,
+      time_limit_minutes: b.timeLimitMinutes,
+      task_count: b.tasks.length,
+      created_at: b.createdAt,
+    })),
+  });
+}
+
+/** The caller's battles that are still pending or active. */
+async function listMine(req, res) {
+  const battles = await prisma.battle.findMany({
+    where: {
+      status: { in: ['pending', 'active'] },
+      OR: [{ challengerId: req.userId }, { opponentId: req.userId }],
+    },
+    include: { challenger: true, opponent: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  res.json({
+    battles: battles.map((b) => ({
+      battle_id: b.id,
+      status: b.status,
+      opponent_username: b.challengerId === req.userId ? b.opponent.username : b.challenger.username,
+      is_challenger: b.challengerId === req.userId,
+      time_limit_minutes: b.timeLimitMinutes,
+    })),
+  });
+}
+
+module.exports = { challenge, respond, completeTask, getStatus, end, listIncoming, listMine };

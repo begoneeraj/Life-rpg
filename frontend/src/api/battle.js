@@ -13,3 +13,5 @@ export const completeBattleTask = (battleId, taskId) =>
   api.post('/battle/task/complete', { battle_id: battleId, task_id: taskId });
 export const fetchBattleStatus = (battleId) => api.get(`/battle/${battleId}/status`);
 export const endBattle = (battleId) => api.post('/battle/end', { battle_id: battleId });
+export const fetchIncomingBattles = () => api.get('/battle/incoming');
+export const fetchMyBattles = () => api.get('/battle/mine');

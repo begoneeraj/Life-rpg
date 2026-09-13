@@ -27,7 +27,10 @@ const NAV_SECTIONS = [
   },
   {
     title: 'Player',
-    items: [{ to: '/profile', label: 'Profile', icon: 'profile' }],
+    items: [
+      { to: '/profile', label: 'Profile', icon: 'profile' },
+      { to: '/friends', label: 'Friends', icon: 'friends' },
+    ],
   },
 ];
 

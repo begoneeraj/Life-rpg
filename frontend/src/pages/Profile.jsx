@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useStore from '../store/useStore';
 import AttributeRadar from '../components/AttributeRadar';
@@ -19,6 +20,67 @@ const BADGES = [
   { threshold: 7, label: 'Week Warrior', icon: 'sword', caption: '7-day streak' },
   { threshold: 30, label: 'Monthly Legend', icon: 'xp', caption: '30-day streak' },
 ];
+
+function UsernameField({ user }) {
+  const setUsername = useStore((s) => s.setUsername);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(user?.username || '');
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    const trimmed = draft.trim();
+    if (!trimmed || isSaving) return;
+    setIsSaving(true);
+    try {
+      await setUsername(trimmed);
+      setIsEditing(false);
+    } catch {
+      // toasted by the store
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <form onSubmit={handleSave} className="mt-1 flex items-center gap-1.5">
+        <input
+          autoFocus
+          className="input-field w-40 py-1 text-xs"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          maxLength={20}
+          placeholder="battletag"
+        />
+        <button type="submit" className="btn-game px-2 py-1 text-[10px]" disabled={isSaving}>
+          {isSaving ? '…' : 'Save'}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setDraft(user?.username || '');
+            setIsEditing(false);
+          }}
+          className="text-[10px] uppercase tracking-widest text-parchment-300/40 hover:text-parchment-300/70"
+        >
+          Cancel
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setIsEditing(true)}
+      className="mt-0.5 flex items-center gap-1.5 font-hud text-[10px] uppercase tracking-[0.18em] text-mystic-400/80 hover:text-mystic-300"
+      title="Click to change your battle tag"
+    >
+      {user?.username ? `@${user.username}` : 'Set a username to add friends →'}
+    </button>
+  );
+}
 
 export default function Profile() {
   const user = useStore((s) => s.user);
@@ -112,6 +174,7 @@ export default function Profile() {
               <p className="truncate font-hud text-[10px] uppercase tracking-[0.18em] text-parchment-300/45">
                 {user?.email}
               </p>
+              <UsernameField user={user} />
               <div className="mt-3">
                 <XPBar
                   level={character.level}

@@ -22,6 +22,8 @@ const Character = lazy(() => import('./pages/Character'));
 const CharacterCreation = lazy(() => import('./pages/CharacterCreation'));
 const Inventory = lazy(() => import('./pages/Inventory'));
 const Routine = lazy(() => import('./pages/Routine'));
+const Friends = lazy(() => import('./pages/Friends'));
+const Battle = lazy(() => import('./pages/Battle'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
@@ -85,6 +87,8 @@ export default function App() {
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/routine" element={<Routine />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/friends" element={<Friends />} />
+          <Route path="/battle/:battleId" element={<Battle />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/guild" replace />} />

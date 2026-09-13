@@ -72,7 +72,7 @@ async function signup(req, res) {
   await issueSession(res, user.id);
 
   res.status(201).json({
-    user: { id: user.id, email: user.email },
+    user: { id: user.id, email: user.email, username: user.username },
     character: user.character,
   });
 }
@@ -96,7 +96,7 @@ async function login(req, res) {
   await issueSession(res, user.id);
 
   res.json({
-    user: { id: user.id, email: user.email },
+    user: { id: user.id, email: user.email, username: user.username },
     character: user.character,
   });
 }
@@ -147,7 +147,7 @@ async function me(req, res) {
     throw new ApiError(401, 'User no longer exists');
   }
   res.json({
-    user: { id: user.id, email: user.email },
+    user: { id: user.id, email: user.email, username: user.username },
     character: user.character,
   });
 }

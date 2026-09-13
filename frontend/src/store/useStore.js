@@ -6,6 +6,9 @@ import * as shopApi from '../api/shop';
 import * as characterApi from '../api/character';
 import * as inventoryApi from '../api/inventory';
 import * as weeklyTasksApi from '../api/weeklyTasks';
+import * as friendsApi from '../api/friends';
+import * as battleApi from '../api/battle';
+import * as usersApi from '../api/users';
 import { setOnAuthExpired } from '../api/axios';
 
 // Local visual-review mode. Enabled only through the ignored frontend/.env,
@@ -53,6 +56,18 @@ const useStore = create((set, get) => ({
 
   // --- level-up celebration ---
   levelUpInfo: null, // { fromLevel, toLevel } | null
+
+  // --- friends & battles ---
+  friends: [],
+  friendsStatus: 'idle',
+  incomingFriendRequests: [],
+  incomingFriendRequestsStatus: 'idle',
+  leaderboard: [],
+  leaderboardStatus: 'idle',
+  incomingBattles: [],
+  incomingBattlesStatus: 'idle',
+  myBattles: [],
+  myBattlesStatus: 'idle',
 
   // ---------------------------------------------------------------------
   // Auth
@@ -127,6 +142,16 @@ const useStore = create((set, get) => ({
         questsStatus: 'idle',
         shopStatus: 'idle',
         inventoryStatus: 'idle',
+        friends: [],
+        friendsStatus: 'idle',
+        incomingFriendRequests: [],
+        incomingFriendRequestsStatus: 'idle',
+        leaderboard: [],
+        leaderboardStatus: 'idle',
+        incomingBattles: [],
+        incomingBattlesStatus: 'idle',
+        myBattles: [],
+        myBattlesStatus: 'idle',
       });
     }
   },
@@ -320,6 +345,131 @@ const useStore = create((set, get) => ({
     } catch {
       set({ weeklyTasks: previous });
       toast.error('Could not update that task. Try again.');
+    }
+  },
+
+  async setUsername(username) {
+    try {
+      const { data } = await usersApi.setUsername(username);
+      set((state) => ({ user: { ...state.user, username: data.username } }));
+      toast.success('Username set.');
+    } catch (err) {
+      const message = err.response?.data?.error || 'Could not set that username.';
+      toast.error(message);
+      throw err;
+    }
+  },
+
+  // ---------------------------------------------------------------------
+  // Friends & battles
+  // ---------------------------------------------------------------------
+  async loadFriends() {
+    set({ friendsStatus: 'loading' });
+    try {
+      const { data } = await friendsApi.fetchFriends();
+      set({ friends: data.friends, friendsStatus: 'ready' });
+    } catch {
+      set({ friendsStatus: 'error' });
+    }
+  },
+
+  async loadIncomingFriendRequests() {
+    set({ incomingFriendRequestsStatus: 'loading' });
+    try {
+      const { data } = await friendsApi.fetchIncomingFriendRequests();
+      set({ incomingFriendRequests: data.requests, incomingFriendRequestsStatus: 'ready' });
+    } catch {
+      set({ incomingFriendRequestsStatus: 'error' });
+    }
+  },
+
+  async loadLeaderboard() {
+    set({ leaderboardStatus: 'loading' });
+    try {
+      const { data } = await friendsApi.fetchFriendLeaderboard();
+      set({ leaderboard: data.leaderboard, leaderboardStatus: 'ready' });
+    } catch {
+      set({ leaderboardStatus: 'error' });
+    }
+  },
+
+  async sendFriendRequest(username) {
+    try {
+      await friendsApi.sendFriendRequest(username);
+      toast.success(`Friend request sent to ${username}.`);
+    } catch (err) {
+      const message = err.response?.data?.error || 'Could not send that friend request.';
+      toast.error(message);
+      throw err;
+    }
+  },
+
+  async respondFriendRequest(requestId, action) {
+    try {
+      await friendsApi.respondToFriendRequest(requestId, action);
+      toast.success(action === 'accept' ? 'Friend request accepted.' : 'Friend request declined.');
+      await Promise.all([
+        get().loadIncomingFriendRequests(),
+        action === 'accept' ? get().loadFriends() : Promise.resolve(),
+      ]);
+    } catch {
+      toast.error('Could not update that request. Try again.');
+    }
+  },
+
+  async loadIncomingBattles() {
+    set({ incomingBattlesStatus: 'loading' });
+    try {
+      const { data } = await battleApi.fetchIncomingBattles();
+      set({ incomingBattles: data.battles, incomingBattlesStatus: 'ready' });
+    } catch {
+      set({ incomingBattlesStatus: 'error' });
+    }
+  },
+
+  async loadMyBattles() {
+    set({ myBattlesStatus: 'loading' });
+    try {
+      const { data } = await battleApi.fetchMyBattles();
+      set({ myBattles: data.battles, myBattlesStatus: 'ready' });
+    } catch {
+      set({ myBattlesStatus: 'error' });
+    }
+  },
+
+  async challengeFriend(opponentUsername, rounds, timeLimitMinutes) {
+    try {
+      const { data } = await battleApi.challengeFriend(opponentUsername, rounds, timeLimitMinutes);
+      toast.success(`Challenge sent to ${opponentUsername}.`);
+      await get().loadMyBattles();
+      return data.battle;
+    } catch (err) {
+      const message = err.response?.data?.error || 'Could not send that challenge.';
+      toast.error(message);
+      throw err;
+    }
+  },
+
+  async completeBattleTask(battleId, taskId) {
+    try {
+      await battleApi.completeBattleTask(battleId, taskId);
+    } catch (err) {
+      const message = err.response?.data?.error || 'Could not mark that task done.';
+      toast.error(message);
+      throw err;
+    }
+  },
+
+  async respondBattle(battleId, action) {
+    try {
+      const { data } = await battleApi.respondToBattle(battleId, action);
+      toast.success(action === 'accept' ? 'Battle accepted — go!' : 'Battle declined.');
+      await Promise.all([get().loadIncomingBattles(), get().loadMyBattles()]);
+      return data.battle;
+    } catch (err) {
+      const message = err.response?.data?.error || 'Could not respond to that battle.';
+      toast.error(message);
+      throw err;
     }
   },
 }));
