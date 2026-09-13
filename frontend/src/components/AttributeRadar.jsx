@@ -13,7 +13,11 @@ export default function AttributeRadar({ character }) {
     attribute: label,
     value: character?.[key] ?? 0,
   }));
-  const max = Math.max(20, ...data.map((d) => d.value));
+  const rawMax = Math.max(20, ...data.map((d) => d.value));
+  // Round up to a "nice" step so the grid rings land on round numbers
+  // instead of whatever the highest stat happens to be.
+  const step = rawMax <= 50 ? 10 : rawMax <= 100 ? 20 : 50;
+  const max = Math.ceil(rawMax / step) * step;
 
   return (
     <div className="radar-theme parchment-card p-4">
@@ -27,7 +31,13 @@ export default function AttributeRadar({ character }) {
                 in index.css (SVG presentation attrs can't use CSS vars). */}
             <PolarGrid stroke="#3f4354" />
             <PolarAngleAxis dataKey="attribute" tick={{ fontSize: 12 }} />
-            <PolarRadiusAxis angle={30} domain={[0, max]} tick={{ fontSize: 10 }} />
+            <PolarRadiusAxis
+              angle={90}
+              domain={[0, max]}
+              tickCount={5}
+              axisLine={false}
+              tick={{ fontSize: 9, fill: '#8a8fa3' }}
+            />
             <Radar
               name="Attributes"
               dataKey="value"
