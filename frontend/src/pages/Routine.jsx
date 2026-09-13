@@ -56,7 +56,7 @@ function RoutineCard({ task, isToday, highlight, onToggle, onEdit, onDelete }) {
             : 'border-dungeon-700 bg-dungeon-900/60'
       }`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-2">
         {/* completion toggle (today only — completion is per calendar day) */}
         {isToday ? (
           <button
@@ -65,7 +65,7 @@ function RoutineCard({ task, isToday, highlight, onToggle, onEdit, onDelete }) {
             aria-checked={done}
             aria-label={`Mark "${task.title}" ${done ? 'not ' : ''}done for today`}
             onClick={() => onToggle(task.id)}
-            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all duration-150 ${
+            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all duration-150 ${
               done
                 ? 'border-xp-500 bg-xp-500/25 text-xp-300 shadow-glow-xp'
                 : 'border-dungeon-500 text-transparent hover:border-gold-400'
@@ -88,7 +88,7 @@ function RoutineCard({ task, isToday, highlight, onToggle, onEdit, onDelete }) {
         ) : (
           <span
             aria-hidden="true"
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-dashed border-dungeon-600"
+            className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-dashed border-dungeon-600"
           >
             <Icon name={routineIcon(task.title)} className="h-3 w-3 text-parchment-300/50" />
           </span>
@@ -114,7 +114,7 @@ function RoutineCard({ task, isToday, highlight, onToggle, onEdit, onDelete }) {
           <button
             type="button"
             onClick={() => setIsEditingTitle(true)}
-            className={`min-w-0 flex-1 truncate text-left text-sm font-medium transition-colors hover:text-gold-400 ${
+            className={`min-w-0 flex-1 break-words text-left text-sm font-medium leading-snug transition-colors hover:text-gold-400 ${
               done ? 'text-parchment-300/45 line-through decoration-xp-500' : 'text-parchment-100'
             }`}
             title="Click to rename"
@@ -123,26 +123,28 @@ function RoutineCard({ task, isToday, highlight, onToggle, onEdit, onDelete }) {
           </button>
         )}
 
-        <select
-          value={task.dayOfWeek}
-          onChange={(e) => moveTask(Number(e.target.value))}
-          className="shrink-0 rounded border border-dungeon-600 bg-dungeon-800 px-1 py-0.5 text-[10px] text-parchment-300/60 opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100"
-          aria-label={`Move "${task.title}" to a different day`}
-        >
-          {DAYS.map((d) => (
-            <option key={d.value} value={d.value}>
-              {d.short}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={() => onDelete(task.id)}
-          className="shrink-0 rounded px-1 text-xs text-parchment-300/30 transition-colors hover:text-ember-400"
-          aria-label={`Delete "${task.title}"`}
-        >
-          ✕
-        </button>
+        <div className="hidden shrink-0 items-center gap-1 group-hover:flex group-focus-within:flex">
+          <select
+            value={task.dayOfWeek}
+            onChange={(e) => moveTask(Number(e.target.value))}
+            className="rounded border border-dungeon-600 bg-dungeon-800 px-1 py-0.5 text-[10px] text-parchment-300/60"
+            aria-label={`Move "${task.title}" to a different day`}
+          >
+            {DAYS.map((d) => (
+              <option key={d.value} value={d.value}>
+                {d.short}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => onDelete(task.id)}
+            className="rounded px-1 text-xs text-parchment-300/30 transition-colors hover:text-ember-400"
+            aria-label={`Delete "${task.title}"`}
+          >
+            ✕
+          </button>
+        </div>
       </div>
     </motion.li>
   );
@@ -304,7 +306,7 @@ export default function Routine() {
                 <section
                   key={day.value}
                   aria-label={`${day.label} schedule`}
-                  className={`game-panel flex min-h-[120px] flex-col gap-2 p-3 transition-colors duration-500 ${
+                  className={`game-panel flex min-h-[140px] flex-col gap-2 p-3 transition-colors duration-500 ${
                     isToday ? 'border-gold-500/70 bg-gold-500/[0.03]' : ''
                   } ${justAddedDay === day.value ? 'border-gold-400 bg-gold-500/[0.07]' : ''}`}
                 >
