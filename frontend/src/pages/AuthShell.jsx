@@ -1,16 +1,13 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import CharacterAvatar from '../components/character/CharacterAvatar';
+import loginBg from '../assets/login-bg.png';
 
 /**
  * AuthShell — the shared "game entrance" frame for /login and /signup.
  *
  * Composition, top to bottom:
  *   1. Title-screen brand: ⚔ LIFE RPG + tagline, gold display treatment.
- *   2. Decorative default-gear adventurer beside the panel (desktop only,
- *      aria-hidden — it previews the character creator, it is NOT the
- *      player's avatar, which doesn't exist before login).
- *   3. The page's form rendered inside a gold game-panel with pixel
+ *   2. The page's form rendered inside a gold game-panel with pixel
  *      corner ornaments and a rune divider.
  *
  * Staged entrance (brand → avatar → panel) is quick (~0.45s total) and
@@ -23,12 +20,27 @@ import CharacterAvatar from '../components/character/CharacterAvatar';
 // Staggered entrance choreography (fast, professional, no bouncing).
 const ease = [0.22, 1, 0.36, 1];
 const brandMotion = { initial: { opacity: 0, y: -14 }, animate: { opacity: 1, y: 0 } };
-const avatarMotion = { initial: { opacity: 0, y: 24 }, animate: { opacity: 1, y: 0 } };
 const panelMotion = { initial: { opacity: 0, y: 18, scale: 0.985 }, animate: { opacity: 1, y: 0, scale: 1 } };
 
 export default function AuthShell({ icon, title, subtitle, children, footer }) {
   return (
-    <div className="auth-force-dark relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10">
+    <div className="auth-force-dark relative z-0 flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10">
+      {/* --- Title-screen backdrop: the game world behind the entrance --- */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-cover bg-center"
+        style={{ backgroundImage: `url(${loginBg})` }}
+      />
+      {/* Dark scrim so the gold text/panel stay readable over any part of the art */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-dungeon-950/70"
+        style={{
+          backgroundImage:
+            'radial-gradient(ellipse at center, rgba(7,12,25,0.35) 0%, rgba(7,12,25,0.82) 72%, rgba(7,12,25,0.94) 100%)',
+        }}
+      />
+
       {/* --- Title screen brand --- */}
       <motion.div
         {...brandMotion}
@@ -53,43 +65,8 @@ export default function AuthShell({ icon, title, subtitle, children, footer }) {
         </div>
       </motion.div>
 
-      {/* --- Panel + decorative adventurer row --- */}
+      {/* --- Panel row --- */}
       <div className="relative flex w-full max-w-md items-stretch justify-center gap-6">
-        {/* Decorative avatar (desktop only): a default-gear adventurer that
-            hints at the character creator. Purely decorative — aria-hidden,
-            non-focusable, absolutely positioned so it never affects form
-            layout or pushes the panel on any screen size. */}
-        <motion.div
-          {...avatarMotion}
-          transition={{ duration: 0.5, delay: 0.12, ease }}
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-40 bottom-0 hidden w-32 select-none opacity-90 lg:block"
-        >
-          <div className="relative">
-            <div
-              className="absolute inset-x-2 bottom-0 h-40 rounded-full bg-mystic-500/10 blur-2xl"
-              aria-hidden="true"
-            />
-            <CharacterAvatar
-              gender="female"
-              physique="athletic"
-              skinTone="tan"
-              faceType="confident"
-              eyeColor="glacial_blue"
-              hairStyle="ponytail"
-              hairColor="dark_brown"
-              facialHair="clean_shaven"
-              skinDetail="none"
-              equippedTop={{ svgKey: 'top_leather_jacket' }}
-              equippedBottom={{ svgKey: 'bottom_cargo_pants' }}
-              equippedShoes={{ svgKey: 'shoes_combat_boots' }}
-              level={12}
-              idle
-              className="h-80 w-auto"
-            />
-          </div>
-        </motion.div>
-
         {/* --- The game panel --- */}
         <motion.div
           {...panelMotion}
