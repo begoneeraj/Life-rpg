@@ -1,4 +1,13 @@
+<p align="center"><img src="./docs/readme/hero.svg" width="100%" alt="Life RPG — Your next level starts today." /></p>
+
 # Life RPG
+
+**Your next level starts today.**
+
+[Setup](#local-setup) · [Stack](#stack) · [API](#api-reference)
+
+<table><tr><td width="33%" valign="top"><h3>Make progress visible</h3><p>Turn real tasks into quests, XP, and gold.</p></td><td width="33%" valign="top"><h3>Build your character</h3><p>Grow attributes and unlock shop cosmetics.</p></td><td width="33%" valign="top"><h3>Keep rewards consistent</h3><p>Server-side progression and guarded reward claims.</p></td></tr></table>
+
 
 Turn real-life tasks into an RPG progression system. Create **Quests**, complete them to earn **XP** and **Gold**, level up your character, build daily **Streaks**, and grow four **Attributes** (Intellect, Strength, Discipline, Creativity) tied to quest categories. Spend Gold on cosmetics in the **Shop**.
 
